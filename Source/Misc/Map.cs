@@ -111,8 +111,8 @@ namespace squad_dma
             {
                 var coords = this.GetPoint(9 * UIScale, spacing);
 
-                canvas.DrawText(line, coords, Extensions.GetTextOutlinePaint());
-                canvas.DrawText(line, coords, text);
+                //canvas.DrawText(line, coords, Extensions.GetTextOutlinePaint());
+                //canvas.DrawText(line, coords, text);
                 spacing += 12 * UIScale;
             }
         }
