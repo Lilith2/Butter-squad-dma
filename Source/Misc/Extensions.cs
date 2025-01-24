@@ -12,22 +12,22 @@ namespace squad_dma
         private static Dictionary<Team, SKPaint> teamEntityPaints = [];
         private static Dictionary<Team, SKPaint> teamTextPaints = [];
         private static readonly Dictionary<Team, SKColor> TeamColors = new(){
-            {Team.RU, new SKColor(0, 255, 0)},
-            {Team.US, new SKColor(255, 0, 0)},
-            {Team.AU, new SKColor(255, 205, 0)},
-            {Team.UK, new SKColor(200, 16, 46)},
-            {Team.CA, new SKColor(255, 0, 0)},
-            {Team.CN, new SKColor(0, 51, 102)},
-            {Team.ME, new SKColor(30, 155, 227)},
-            {Team.TR, new SKColor(64, 224, 208)},
-            {Team.INS, new SKColor(173, 115, 0)},
-            {Team.IMF, new SKColor(0, 64, 79)},
-            {Team.WPMC, new SKColor(128, 128, 128)},
-            {Team.Unknown, new SKColor(255, 255, 255)},
-            {Team.GE_Wagner, new SKColor(128, 128, 128)},
-            {Team.GE_UA, new SKColor(255, 255, 0)},
-            {Team.GE_FI, new SKColor(0, 47, 108)},
-            {Team.GE_IS, new SKColor(0, 56, 184)},
+            {Team.RU, new SKColor(34, 139, 34)},           // Forest Green, brighter to stand out
+            {Team.US, new SKColor(255, 0, 0)},             // Bright Red for USA
+            {Team.AU, new SKColor(255, 215, 0)},           // Bright Gold for Australia
+            {Team.UK, new SKColor(204, 0, 51)},            // Deep Red with brightness for UK
+            {Team.CA, new SKColor(255, 69, 0)},            // Orange Red for Canada to contrast with green
+            {Team.CN, new SKColor(0, 0, 205)},             // Medium Blue for China
+            {Team.ME, new SKColor(0, 191, 255)},           // Bright Sky Blue for Middle East
+            {Team.TR, new SKColor(64, 224, 208)},          // Turquoise for Turkey
+            {Team.INS, new SKColor(255, 116, 0 )},          // Bright Orange for INS
+            {Team.IMF, new SKColor(0, 128, 0)},            // Green with high contrast for IMF
+            {Team.WPMC, new SKColor(153, 50, 204)},        // Dark Orchid for WPMC
+            {Team.Unknown, new SKColor(233, 0, 255 )},    // Hot Pink for Unknown to stand out
+            {Team.GE_Wagner, new SKColor(203, 203, 203)},  // Dim Gray for GE_Wagner, still visible
+            {Team.GE_UA, new SKColor(255, 223, 0)},        // Golden Yellow for GE_UA
+            {Team.GE_FI, new SKColor(70, 130, 180)},       // Steel Blue for GE_FI
+            {Team.GE_IS, new SKColor(75, 0, 130)},         // Indigo for GE_IS
         };
         #region Generic Extensions
         /// <summary>
