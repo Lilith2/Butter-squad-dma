@@ -159,7 +159,7 @@ namespace squad_dma
         {
             if (tabControlMain.SelectedIndex == 0) // Main Radar Tab should be open
             {
-                var zoomSens = (double)_config.ZoomSensitivity / 100;
+                var zoomSens = (double)_config.ZoomSensitivity / 175;
                 int zoomDelta = -(int)(e.Delta * zoomSens);
 
                 if (zoomDelta < 0)
@@ -409,11 +409,11 @@ namespace squad_dma
                     var fps = _fps;
                     var memTicks = Memory.Ticks;
 
-                    if (lblRadarFPSValue.Text != fps.ToString())
-                        lblRadarFPSValue.Text = $"{fps}";
+                   // if (lblRadarFPSValue.Text != fps.ToString())
+                   //     lblRadarFPSValue.Text = $"{fps}";
 
-                    if (lblRadarMemSValue.Text != memTicks.ToString())
-                        lblRadarMemSValue.Text = $"{memTicks}";
+                  //  if (lblRadarMemSValue.Text != memTicks.ToString())
+                  //      lblRadarMemSValue.Text = $"{memTicks}";
                     #endregion
 
                     _fpsWatch.Restart();
@@ -650,15 +650,15 @@ namespace squad_dma
 
                 var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
 
-                // if (dist < 2) {
-                //     return;
-                // }
+                if (dist < 2) {
+                    return;
+                }
 
                 
-                lines = new string[1] { $"{(int)Math.Round(height / 100)},{(int)Math.Round(dist / 100)}" };
+                lines = new string[1] { $"{(int)Math.Round(dist / 100)}" }; //{ $"{(int)Math.Round(height / 100)},{(int)Math.Round(dist / 100)}"
 
-                if (actor.ActorType != ActorType.RallyPoint)
-                    lines[0] += $" ({(int) actor.Health})";
+               // if (actor.ActorType != ActorType.RallyPoint)
+                //    lines[0] += $" ({(int) actor.Health})";
                 if (actor.ErrorCount > 10)
                     lines[0] = "ERROR"; // In case POS stops updating, let us know!
 

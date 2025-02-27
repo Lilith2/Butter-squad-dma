@@ -49,11 +49,11 @@ namespace squad_dma
             lblUIScale = new Label();
             grpRadar = new GroupBox();
             tabRadar = new TabPage();
-            grpStats = new GroupBox();
-            lblMems = new Label();
-            lblFPS = new Label();
-            lblMemSTitle = new Label();
-            lblFPSTitle = new Label();
+            //grpStats = new GroupBox();
+            //lblMems = new Label();
+           // lblFPS = new Label();
+           // lblMemSTitle = new Label();
+           // lblFPSTitle = new Label();
             grpMapSetup = new GroupBox();
             btnApplyMapScale = new Button();
             chkMapFree = new CheckBox();
@@ -72,7 +72,7 @@ namespace squad_dma
             grpUserInterface.SuspendLayout();
             grpRadar.SuspendLayout();
             tabRadar.SuspendLayout();
-            grpStats.SuspendLayout();
+            //grpStats.SuspendLayout();
             grpMapSetup.SuspendLayout();
             tabControl.SuspendLayout();
             SuspendLayout();
@@ -270,7 +270,7 @@ namespace squad_dma
             // 
             // tabRadar
             // 
-            tabRadar.Controls.Add(grpStats);
+           // tabRadar.Controls.Add(grpStats);
             tabRadar.Controls.Add(grpMapSetup);
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
@@ -282,7 +282,7 @@ namespace squad_dma
             // 
             // grpStats
             // 
-            grpStats.Controls.Add(lblMems);
+            /*grpStats.Controls.Add(lblMems);
             grpStats.Controls.Add(lblFPS);
             grpStats.Controls.Add(lblMemSTitle);
             grpStats.Controls.Add(lblFPSTitle);
@@ -330,7 +330,7 @@ namespace squad_dma
             lblFPSTitle.Name = "lblFPSTitle";
             lblFPSTitle.Size = new Size(29, 15);
             lblFPSTitle.TabIndex = 10;
-            lblFPSTitle.Text = "FPS:";
+            lblFPSTitle.Text = "FPS:";*/
             // 
             // grpMapSetup
             // 
@@ -452,8 +452,8 @@ namespace squad_dma
             grpRadar.ResumeLayout(false);
             grpRadar.PerformLayout();
             tabRadar.ResumeLayout(false);
-            grpStats.ResumeLayout(false);
-            grpStats.PerformLayout();
+            //grpStats.ResumeLayout(false);
+            //grpStats.PerformLayout();
             grpMapSetup.ResumeLayout(false);
             grpMapSetup.PerformLayout();
             tabControl.ResumeLayout(false);
@@ -489,10 +489,10 @@ namespace squad_dma
         private TabControl tabControl;
         private TrackBar trkZoomSensivity;
         private Label lblZoomSensivity;
-        private GroupBox grpStats;
-        private Label lblMemSTitle;
-        private Label lblFPSTitle;
-        private Label lblMems;
-        private Label lblFPS;
+        //private GroupBox grpStats;
+        //private Label lblMemSTitle;
+        //private Label lblFPSTitle;
+       // private Label lblMems;
+        //private Label lblFPS;
     }
 }

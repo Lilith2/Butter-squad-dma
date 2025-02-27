@@ -36,7 +36,7 @@ namespace squad_dma {
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(true);                    
                     Application.Run(new frmMainOld());
-                    // Application.Run(new MultiFormContext(new OverlayForm()));
+                    //Application.Run(new MultiFormContext(new OverlayForm()));
                 }
             }
             catch (Exception ex)

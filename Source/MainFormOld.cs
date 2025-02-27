@@ -30,7 +30,7 @@ namespace squad_dma
         private SKBitmap[] _loadedBitmaps;
         private MapPosition _mapPanPosition = new();
 
-        private const int ZOOM_INTERVAL = 10;
+        private const int ZOOM_INTERVAL = 2;
         private int targetZoomValue = 0;
         private System.Windows.Forms.Timer zoomTimer;
 
@@ -164,7 +164,7 @@ namespace squad_dma
         {
             if (tabControl.SelectedIndex == 0) // Main Radar Tab should be open
             {
-                var zoomSens = (double)_config.ZoomSensitivity / 100;
+                var zoomSens = (double)_config.ZoomSensitivity / 175;
                 int zoomDelta = -(int)(e.Delta * zoomSens);
 
                 if (zoomDelta < 0)
@@ -398,11 +398,11 @@ namespace squad_dma
                     var fps = _fps;
                     var memTicks = Memory.Ticks;
 
-                    if (lblFPS.Text != fps.ToString())
-                        lblFPS.Text = $"{fps}";
+                   // if (lblFPS.Text != fps.ToString())
+                   //    lblFPS.Text = $"{fps}";
 
-                    if (lblMems.Text != memTicks.ToString())
-                        lblMems.Text = $"{memTicks}";
+                  //  if (lblMems.Text != memTicks.ToString())
+                   //     lblMems.Text = $"{memTicks}";
                     #endregion
 
                     _fpsWatch.Restart();
@@ -637,29 +637,6 @@ namespace squad_dma
                 string[] lines = null;
                 var height = actorZoomedPos.Height - localPlayerMapPos.Height;
 
-                var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
-
-                // if (dist < 2) {
-                //     return;
-                // }
-
-
-                lines = new string[1] { $"{(int)Math.Round(height / 100)},{(int)Math.Round(dist / 100)}" };
-
-                if (actor.ActorType != ActorType.RallyPoint)
-                    lines[0] += $" ({(int)actor.Health})";
-                if (actor.ErrorCount > 10)
-                    lines[0] = "ERROR"; // In case POS stops updating, let us know!
-
-                if (actor.ActorType != ActorType.Projectile)
-                {
-                    actorZoomedPos.DrawActorText(
-                        canvas,
-                        actor,
-                        lines
-                    );
-                }
-
                 if (actor.ActorType == ActorType.Player)
                 {
                     actorZoomedPos.DrawPlayerMarker(
@@ -674,10 +651,31 @@ namespace squad_dma
                 }
                 else
                 {
+                    // This block is for Tech/Vehicles - Calculate distance here
+                    var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
+
+                    // Only show distance if > 2m to avoid clutter
+                    if (dist >= 20)
+                    {
+                        lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
+
+                        if (actor.ErrorCount > 10)
+                            lines[0] = "ERROR";
+
+                        actorZoomedPos.DrawActorText(
+                            canvas,
+                            actor,
+                            lines
+                        );
+                    }
+
+                    // Draw the vehicle/tech marker
                     actorZoomedPos.DrawTechMarker(canvas, actor);
                 }
             }
         }
+
+
         private void DrawToolTips(SKCanvas canvas)
         {
             var localPlayer = this.LocalPlayer;
