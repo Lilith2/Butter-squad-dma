@@ -174,6 +174,26 @@ namespace squad_dma
                 y -= textSpacing;
             }
         }
+
+        /// <summary>
+        /// Draws the tool tip for players/hostiles with distance
+        /// </summary>
+        public void DrawToolTip(SKCanvas canvas, UActor actor, string distanceText)
+        {
+            if (!actor.IsAlive)
+            {
+                //DrawCorpseTooltip(canvas, player);
+                return;
+            }
+
+            var lines = new List<string>();
+
+            // Add the player name and distance to the tooltip
+            lines.Insert(0, actor.Name);
+            lines.Insert(1, $"Distance: {distanceText}");
+
+            DrawToolTip(canvas, string.Join("\n", lines));
+        }
     }
 
     /// <summary>

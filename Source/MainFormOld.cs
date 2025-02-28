@@ -651,24 +651,52 @@ namespace squad_dma
                 }
                 else
                 {
-                    // This block is for Tech/Vehicles - Calculate distance here
-                    var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
-
-                    // Only show distance if > 2m to avoid clutter
-                    if (dist >= 20)
+                    // Define vehicle types that should show distance
+                    var vehicleTypes = new HashSet<ActorType>
                     {
-                        lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
+                        ActorType.TruckTransport,
+                        ActorType.TruckLogistics,
+                        ActorType.TruckAntiAir,
+                        ActorType.TruckArtillery,
+                        ActorType.TruckTransportArmed,
+                        ActorType.JeepTransport,
+                        ActorType.JeepLogistics,
+                        ActorType.JeepTurret,
+                        ActorType.JeepArtillery,
+                        ActorType.JeepAntitank,
+                        ActorType.JeepRWSTurret,
+                        ActorType.APC,
+                        ActorType.IFV,
+                        ActorType.TrackedAPC,
+                        ActorType.TrackedIFV,
+                        ActorType.TrackedJeep,
+                        ActorType.Tank,
+                        ActorType.TankMGS,
+                        ActorType.TransportHelicopter,
+                        ActorType.AttackHelicopter,
+                        ActorType.Boat,
+                        ActorType.Motorcycle
+                    };
 
-                        if (actor.ErrorCount > 10)
-                            lines[0] = "ERROR";
+                    // Only calculate/show distance for vehicles
+                    if (vehicleTypes.Contains(actor.ActorType))
+                    {
+                        var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
 
-                        actorZoomedPos.DrawActorText(
-                            canvas,
-                            actor,
-                            lines
-                        );
+                        if (dist >= 2)
+                        {
+                            lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
+
+                            if (actor.ErrorCount > 10)
+                                lines[0] = "ERROR";
+
+                            actorZoomedPos.DrawActorText(
+                                canvas,
+                                actor,
+                                lines
+                            );
+                        }
                     }
-
                     // Draw the vehicle/tech marker
                     actorZoomedPos.DrawTechMarker(canvas, actor);
                 }
@@ -685,11 +713,22 @@ namespace squad_dma
             {
                 if (_closestPlayerToMouse is not null)
                 {
+                    // Calculate the distance between the local player and the hovered player
+                    var localPlayerPos = localPlayer.Position + AbsoluteLocation;
+                    var hoveredPlayerPos = _closestPlayerToMouse.Position + AbsoluteLocation;
+                    var distance = Vector3.Distance(localPlayerPos, hoveredPlayerPos);
+
+                    // Format the distance as a string (e.g., "123m")
+                    var distanceText = $"{(int)Math.Round(distance / 100)}m";
+
+                    // Get the zoomed position of the hovered player
                     var playerZoomedPos = (_closestPlayerToMouse
                         .Position + AbsoluteLocation)
                         .ToMapPos(_selectedMap)
                         .ToZoomedPos(mapParams);
-                    playerZoomedPos.DrawToolTip(canvas, _closestPlayerToMouse);
+
+                    // Draw the tooltip with the distance included
+                    playerZoomedPos.DrawToolTip(canvas, _closestPlayerToMouse, distanceText);
                 }
             }
         }
