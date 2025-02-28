@@ -440,8 +440,8 @@ namespace squad_dma
             ClientSize = new Size(1600, 900);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
-            Name = "frmMainOld";
-            Text = "Squad old";
+            Name = "I Love Squad";
+            Text = "I Love Squad";
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkZoomSensivity).EndInit();

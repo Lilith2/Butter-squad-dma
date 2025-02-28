@@ -118,16 +118,27 @@ namespace squad_dma
         /// </summary>
         public void DrawActorText(SKCanvas canvas, UActor actor, string[] lines)
         {
-            SKPaint text = actor.GetTextPaint();
+            if (lines == null || lines.Length == 0)
+                return;
 
-            float spacing = 3 * UIScale;
+            SKPaint textPaint = actor.GetTextPaint();
+            SKPaint outlinePaint = Extensions.GetTextOutlinePaint();
+            SKPoint iconPosition = this.GetPoint(0, 0); 
+
+            float horizontalOffset = 15 * UIScale; // Adjust this value for horizontal separation
+            float verticalOffset = 5 * UIScale;   // Adjust this value for vertical separation
+
+            SKPoint textPosition = new SKPoint(iconPosition.X + horizontalOffset, iconPosition.Y + verticalOffset);
+
             foreach (var line in lines)
             {
-                var coords = this.GetPoint(9 * UIScale, spacing);
+                if (string.IsNullOrEmpty(line?.Trim()))
+                    continue;
 
-                canvas.DrawText(line, coords, Extensions.GetTextOutlinePaint());
-                canvas.DrawText(line, coords, text);
-                spacing += 12 * UIScale;
+                canvas.DrawText(line, textPosition, outlinePaint);
+                canvas.DrawText(line, textPosition, textPaint);
+
+                textPosition.Y += 12 * UIScale;
             }
         }
         /// <summary>

@@ -117,18 +117,26 @@ namespace squad_dma
         }
 
         /// <summary>
-        /// Determines the text outline color.
-        /// </summary>
         public static SKPaint GetTextOutlinePaint()
         {
-            if (textOutlinePaint != null) {
+            if (textOutlinePaint != null)
                 return textOutlinePaint;
-            }
-            SKPaint paintToUse = SKPaints.TextBaseOutline.Clone();
-            paintToUse.Color = new SKColor(0, 0, 0);
-            textOutlinePaint = paintToUse;
-            return paintToUse;
+
+            // Create and cache the outline paint
+            textOutlinePaint = new SKPaint
+            {
+                Color = SKColors.Black, // Outline color
+                TextSize = SKPaints.TextBase.TextSize, // Match the text size
+                IsStroke = true,
+                StrokeWidth = 3, // Thicker outline for better visibility
+                IsAntialias = true,
+                Style = SKPaintStyle.Stroke,
+                Typeface = SKPaints.TextBase.Typeface // Use the same font
+            };
+
+            return textOutlinePaint;
         }
+
         #endregion
     }
 }

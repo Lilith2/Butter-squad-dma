@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Numerics;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
-using MaterialSkin;
+using DarkModeForms;
 using MaterialSkin.Controls;
 using squad_dma.Properties;
 
@@ -18,7 +18,7 @@ namespace squad_dma
         private readonly object _loadMapBitmapsLock = new();
         private readonly System.Timers.Timer _mapChangeTimer = new(100);
         private readonly List<Map> _maps = new(); // Contains all maps from \\Maps folder
-
+        private readonly DarkModeCS _darkmode;
         private bool _isFreeMapToggled = false;
         private float _uiScale = 1.0f;
         private UActor _closestPlayerToMouse = null;
@@ -93,6 +93,7 @@ namespace squad_dma
             _config = Program.Config;
 
             InitializeComponent();
+            SetDarkMode(ref _darkmode);
 
             _mapCanvas = new SKGLControl()
             {
@@ -131,6 +132,20 @@ namespace squad_dma
         #endregion
 
         #region Overrides
+        /// <summary>
+        /// Set Dark Mode on startup.
+        /// </summary>
+        /// <param name="darkmode"></param>
+        private void SetDarkMode(ref DarkModeCS darkmode)
+        {
+            darkmode = new DarkModeCS(this);
+           // if (darkmode.IsDarkMode)
+           // {
+           //     SharedPaints.PaintBitmap.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
+            //    SharedPaints.PaintBitmapAlpha.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
+           // }
+        }
+
         /// <summary>
         /// Form closing event.
         /// </summary>
