@@ -50,12 +50,26 @@ namespace squad_dma
         public void DrawPlayerMarker(SKCanvas canvas, UActor player, int aimlineLength)
         {
             var radians = player.Rotation.X.ToRadians();
-            SKPaint paint;
-            
-            paint = player.GetEntityPaint();
+            SKPaint paint = player.GetEntityPaint();
 
-            canvas.DrawCircle(this.GetPoint(), 6 * UIScale, paint);
-            canvas.DrawLine(this.GetPoint(), this.GetAimlineEndpoint(radians, aimlineLength), paint);
+            // Draw the outline for the player marker
+            SKPaint outlinePaint = new SKPaint
+            {
+                Color = SKColors.Black, // Outline color
+                StrokeWidth = paint.StrokeWidth + 2f * UIScale, // Thicker outline
+                Style = SKPaintStyle.Stroke,
+                IsAntialias = true,
+                FilterQuality = SKFilterQuality.High
+            };
+
+            var size = 6 * UIScale;
+            canvas.DrawCircle(this.GetPoint(), size, outlinePaint); // Draw outline
+            canvas.DrawCircle(this.GetPoint(), size, paint); // Draw player marker
+
+            // Draw the outline for the aimline
+            var aimlineEnd = this.GetAimlineEndpoint(radians, aimlineLength);
+            canvas.DrawLine(this.GetPoint(), aimlineEnd, outlinePaint); // Draw aimline outline
+            canvas.DrawLine(this.GetPoint(), aimlineEnd, paint); // Draw aimline
         }
         /// <summary>
         /// Draws a Projectile on this location.
