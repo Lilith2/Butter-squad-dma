@@ -1,15 +1,15 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
-using MaterialSkin;
+using DarkModeForms;
 using MaterialSkin.Controls;
 using squad_dma.Properties;
 
 namespace squad_dma
 {
-    public partial class frmMain : MaterialForm
+    public partial class MainForm : Form
     {
         private readonly Config _config;
         private readonly SKGLControl _mapCanvas;
@@ -18,7 +18,7 @@ namespace squad_dma
         private readonly object _loadMapBitmapsLock = new();
         private readonly System.Timers.Timer _mapChangeTimer = new(100);
         private readonly List<Map> _maps = new(); // Contains all maps from \\Maps folder
-
+        private readonly DarkModeCS _darkmode;
         private bool _isFreeMapToggled = false;
         private float _uiScale = 1.0f;
         private UActor _closestPlayerToMouse = null;
@@ -30,7 +30,7 @@ namespace squad_dma
         private SKBitmap[] _loadedBitmaps;
         private MapPosition _mapPanPosition = new();
 
-        private const int ZOOM_INTERVAL = 10;
+        private const int ZOOM_INTERVAL = 2;
         private int targetZoomValue = 0;
         private System.Windows.Forms.Timer zoomTimer;
 
@@ -77,7 +77,7 @@ namespace squad_dma
         {
             get => Memory.Actors;
         }
-        
+
         private Vector3 AbsoluteLocation
         {
             get => Memory.AbsoluteLocation;
@@ -88,29 +88,37 @@ namespace squad_dma
         /// <summary>
         /// GUI Constructor.
         /// </summary>
-        public frmMain()
+        public MainForm()
         {
             _config = Program.Config;
 
             InitializeComponent();
+            SetDarkMode(ref _darkmode);
 
-            var materialSkinManager = MaterialSkinManager.Instance;
-            materialSkinManager.AddFormToManage(this);
-            materialSkinManager.EnforceBackcolorOnAllComponents = true;
-            materialSkinManager.Theme = MaterialSkinManager.Themes.DARK;
-            materialSkinManager.ColorScheme = new ColorScheme(Primary.Grey800, Primary.Grey800, Primary.Indigo100, Accent.Orange400, TextShade.WHITE);
+            _mapCanvas = new SKGLControl()
+            {
+                Size = new Size(50, 50),
+                Dock = DockStyle.Fill,
+                VSync = false
+            };
+            tabRadar.Controls.Add(_mapCanvas);
+            chkMapFree.Parent = _mapCanvas;
 
             LoadConfig();
             LoadMaps();
-
-            _mapCanvas = skMapCanvas;
-            _mapCanvas.VSync = _config.VSync;
 
             _mapChangeTimer.AutoReset = false;
             _mapChangeTimer.Elapsed += MapChangeTimer_Elapsed;
 
             this.DoubleBuffered = true;
+            this.Shown += frmMain_Shown;
 
+            _mapCanvas.PaintSurface += skMapCanvas_PaintSurface;
+            _mapCanvas.MouseMove += skMapCanvas_MouseMovePlayer;
+            _mapCanvas.MouseDown += skMapCanvas_MouseDown;
+            _mapCanvas.MouseUp += skMapCanvas_MouseUp;
+
+            tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
             _fpsWatch.Start();
 
             zoomTimer = new System.Windows.Forms.Timer();
@@ -124,6 +132,20 @@ namespace squad_dma
         #endregion
 
         #region Overrides
+        /// <summary>
+        /// Set Dark Mode on startup.
+        /// </summary>
+        /// <param name="darkmode"></param>
+        private void SetDarkMode(ref DarkModeCS darkmode)
+        {
+            darkmode = new DarkModeCS(this);
+           // if (darkmode.IsDarkMode)
+           // {
+           //     SharedPaints.PaintBitmap.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
+            //    SharedPaints.PaintBitmapAlpha.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
+           // }
+        }
+
         /// <summary>
         /// Form closing event.
         /// </summary>
@@ -146,9 +168,7 @@ namespace squad_dma
         {
             Keys.F1 => ZoomIn(5),
             Keys.F2 => ZoomOut(5),
-            Keys.F4 => swAimview.Checked = !swAimview.Checked,
             Keys.F5 => ToggleMap(),
-            Keys.F6 => swNames.Checked = !swNames.Checked,
             _ => base.ProcessCmdKey(ref msg, keyData),
         };
 
@@ -157,7 +177,7 @@ namespace squad_dma
         /// </summary>
         protected override void OnMouseWheel(MouseEventArgs e)
         {
-            if (tabControlMain.SelectedIndex == 0) // Main Radar Tab should be open
+            if (tabControl.SelectedIndex == 0) // Main Radar Tab should be open
             {
                 var zoomSens = (double)_config.ZoomSensitivity / 175;
                 int zoomDelta = -(int)(e.Delta * zoomSens);
@@ -208,12 +228,6 @@ namespace squad_dma
             return true;
         }
 
-        private void InitiateColors()
-        {
-            UpdatePaintColorControls();
-            UpdateThemeColors();
-        }
-
         private void InitiateUIScaling()
         {
             _uiScale = (.01f * _config.UIScale);
@@ -230,7 +244,7 @@ namespace squad_dma
 
         private void InitiateFont()
         {
-            var fontToUse = SKTypeface.FromFamilyName(cboFont.Text);
+            var fontToUse = SKTypeface.FromFamilyName("Arial");
             SKPaints.TextBase.Typeface = fontToUse;
             SKPaints.TextBaseOutline.Typeface = fontToUse;
             SKPaints.TextRadarStatus.Typeface = fontToUse;
@@ -285,26 +299,16 @@ namespace squad_dma
         {
             #region Settings
             #region General
-            // Radar
-            swRadarStats.Checked = _config.ShowRadarStats;
-            mcRadarStats.Visible = _config.ShowRadarStats;
-            swRadarVsync.Checked = _config.VSync;
-            swRadarEnemyCount.Checked = _config.EnemyCount;
-
             // User Interface
-            swAimview.Checked = _config.AimviewEnabled;
-            swNames.Checked = _config.ShowNames;
-            sldrAimlineLength.Value = _config.PlayerAimLineLength;
-            sldrZoomSensitivity.Value = _config.ZoomSensitivity;
+            chkShowAimview.Checked = _config.AimviewEnabled;
+            chkHideNames.Checked = _config.ShowNames;
+            trkAimLength.Value = _config.PlayerAimLineLength;
+            trkZoomSensivity.Value = _config.ZoomSensitivity;
 
-            sldrUIScale.Value = _config.UIScale;
-            cboFont.SelectedIndex = _config.Font;
-            sldrFontSize.Value = _config.FontSize;
+            trkUIScale.Value = _config.UIScale;
             #endregion
 
             #endregion
-
-            InitiateColors();
             InitiateFont();
             InitiateUIScaling();
         }
@@ -386,7 +390,7 @@ namespace squad_dma
         }
 
         private void TabControl_SelectedIndexChanged(object sender, EventArgs e)
-        {}
+        { }
         #endregion
 
         #region Radar Tab
@@ -409,11 +413,11 @@ namespace squad_dma
                     var fps = _fps;
                     var memTicks = Memory.Ticks;
 
-                   // if (lblRadarFPSValue.Text != fps.ToString())
-                   //     lblRadarFPSValue.Text = $"{fps}";
+                   // if (lblFPS.Text != fps.ToString())
+                   //    lblFPS.Text = $"{fps}";
 
-                  //  if (lblRadarMemSValue.Text != memTicks.ToString())
-                  //      lblRadarMemSValue.Text = $"{memTicks}";
+                  //  if (lblMems.Text != memTicks.ToString())
+                   //     lblMems.Text = $"{memTicks}";
                     #endregion
 
                     _fpsWatch.Restart();
@@ -523,7 +527,7 @@ namespace squad_dma
 
             var bounds = new SKRect(
                 Math.Max(Math.Min(localPlayerPos.X, bitmap.Width - zoomWidth / 2) - zoomWidth / 2, 0),
-                Math.Max(Math.Min(localPlayerPos.Y, bitmap.Height - zoomHeight / 2)  - zoomHeight / 2, 0),
+                Math.Max(Math.Min(localPlayerPos.Y, bitmap.Height - zoomHeight / 2) - zoomHeight / 2, 0),
                 Math.Min(Math.Max(localPlayerPos.X, zoomWidth / 2) + zoomWidth / 2, bitmap.Width),
                 Math.Min(Math.Max(localPlayerPos.Y, zoomHeight / 2) + zoomHeight / 2, bitmap.Height)
             ).AspectFill(_mapCanvas.CanvasSize);
@@ -562,15 +566,15 @@ namespace squad_dma
 
         private void DrawMap(SKCanvas canvas)
         {
-            if (mcRadarMapSetup.Visible) // Print coordinates (to make it easy to setup JSON configs)
+            if (grpMapSetup.Visible) // Print coordinates (to make it easy to setup JSON configs)
             {
                 var localPlayer = this.LocalPlayer;
                 var localPlayerPos = localPlayer.Position + AbsoluteLocation;
-                lblRadarMapSetup.Text = $"Map Setup - X,Y,Z: {localPlayerPos.X}, {localPlayerPos.Y}, {localPlayerPos.Z}";
+                grpMapSetup.Text = $"Map Setup - X,Y,Z: {localPlayerPos.X}, {localPlayerPos.Y}, {localPlayerPos.Z}";
             }
-            else if (lblRadarMapSetup.Text != "Map Setup" && !mcRadarMapSetup.Visible)
+            else if (grpMapSetup.Text != "Map Setup" && !grpMapSetup.Visible)
             {
-                lblRadarMapSetup.Text = "Map Setup";
+                grpMapSetup.Text = "Map Setup";
             }
 
             // Prepare to draw Game Map
@@ -613,7 +617,7 @@ namespace squad_dma
                     localPlayerZoomedPos.DrawPlayerMarker(
                         canvas,
                         localPlayer,
-                        sldrAimlineLength.Value
+                        trkAimLength.Value
                     );
 
 
@@ -648,41 +652,73 @@ namespace squad_dma
                 string[] lines = null;
                 var height = actorZoomedPos.Height - localPlayerMapPos.Height;
 
-                var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
-
-                if (dist < 2) {
-                    return;
-                }
-
-                
-                lines = new string[1] { $"{(int)Math.Round(dist / 100)}" }; //{ $"{(int)Math.Round(height / 100)},{(int)Math.Round(dist / 100)}"
-
-               // if (actor.ActorType != ActorType.RallyPoint)
-                //    lines[0] += $" ({(int) actor.Health})";
-                if (actor.ErrorCount > 10)
-                    lines[0] = "ERROR"; // In case POS stops updating, let us know!
-
-                if (actor.ActorType != ActorType.Projectile) {
-                    actorZoomedPos.DrawActorText(
-                        canvas,
-                        actor,
-                        lines
-                    );
-                }
-
-                if (actor.ActorType == ActorType.Player) {
+                if (actor.ActorType == ActorType.Player)
+                {
                     actorZoomedPos.DrawPlayerMarker(
                         canvas,
                         actor,
                         aimlineLength
                     );
-                } else if (actor.ActorType == ActorType.Projectile) {
+                }
+                else if (actor.ActorType == ActorType.Projectile)
+                {
                     actorZoomedPos.DrawProjectile(canvas, actor);
-                } else {
+                }
+                else
+                {
+                    // Define vehicle types that should show distance
+                    var vehicleTypes = new HashSet<ActorType>
+                    {
+                        ActorType.TruckTransport,
+                        ActorType.TruckLogistics,
+                        ActorType.TruckAntiAir,
+                        ActorType.TruckArtillery,
+                        ActorType.TruckTransportArmed,
+                        ActorType.JeepTransport,
+                        ActorType.JeepLogistics,
+                        ActorType.JeepTurret,
+                        ActorType.JeepArtillery,
+                        ActorType.JeepAntitank,
+                        ActorType.JeepRWSTurret,
+                        ActorType.APC,
+                        ActorType.IFV,
+                        ActorType.TrackedAPC,
+                        ActorType.TrackedIFV,
+                        ActorType.TrackedJeep,
+                        ActorType.Tank,
+                        ActorType.TankMGS,
+                        ActorType.TransportHelicopter,
+                        ActorType.AttackHelicopter,
+                        ActorType.Boat,
+                        ActorType.Motorcycle
+                    };
+
+                    // Only calculate/show distance for vehicles
+                    if (vehicleTypes.Contains(actor.ActorType))
+                    {
+                        var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
+
+                        if (dist >= 2)
+                        {
+                            lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
+
+                            if (actor.ErrorCount > 10)
+                                lines[0] = "ERROR";
+
+                            actorZoomedPos.DrawActorText(
+                                canvas,
+                                actor,
+                                lines
+                            );
+                        }
+                    }
+                    // Draw the vehicle/tech marker
                     actorZoomedPos.DrawTechMarker(canvas, actor);
                 }
             }
         }
+
+
         private void DrawToolTips(SKCanvas canvas)
         {
             var localPlayer = this.LocalPlayer;
@@ -692,11 +728,22 @@ namespace squad_dma
             {
                 if (_closestPlayerToMouse is not null)
                 {
+                    // Calculate the distance between the local player and the hovered player
+                    var localPlayerPos = localPlayer.Position + AbsoluteLocation;
+                    var hoveredPlayerPos = _closestPlayerToMouse.Position + AbsoluteLocation;
+                    var distance = Vector3.Distance(localPlayerPos, hoveredPlayerPos);
+
+                    // Format the distance as a string (e.g., "123m")
+                    var distanceText = $"{(int)Math.Round(distance / 100)}m";
+
+                    // Get the zoomed position of the hovered player
                     var playerZoomedPos = (_closestPlayerToMouse
                         .Position + AbsoluteLocation)
                         .ToMapPos(_selectedMap)
                         .ToZoomedPos(mapParams);
-                    playerZoomedPos.DrawToolTip(canvas, _closestPlayerToMouse);
+
+                    // Draw the tooltip with the distance included
+                    playerZoomedPos.DrawToolTip(canvas, _closestPlayerToMouse, distanceText);
                 }
             }
         }
@@ -720,9 +767,6 @@ namespace squad_dma
                 if (selectedMap is not null)
                 {
                     this._selectedMap = null;
-
-                    lblRadarFPSValue.Text = "0";
-                    lblRadarMemSValue.Text = "0";
                 }
             }
             else if (localPlayer is null)
@@ -820,11 +864,11 @@ namespace squad_dma
         #endregion
 
         #region Event Handlers
-        private void btnToggleMapFree_Click(object sender, EventArgs e)
+        private void chkMapFree_CheckedChanged(object sender, EventArgs e)
         {
             if (_isFreeMapToggled)
             {
-                btnToggleMapFree.Icon = Resources.tick;
+                chkMapFree.Text = "Map Follow";
                 _isFreeMapToggled = false;
 
                 lock (_renderLock)
@@ -844,12 +888,12 @@ namespace squad_dma
             }
             else
             {
-                btnToggleMapFree.Icon = Resources.cross;
+                chkMapFree.Text = "Map Free";
                 _isFreeMapToggled = true;
             }
         }
 
-        private void btnMapSetupApply_Click(object sender, EventArgs e)
+        private void btnApplyMapScale_Click(object sender, EventArgs e)
         {
             if (float.TryParse(txtMapSetupX.Text, out float x)
                 && float.TryParse(txtMapSetupY.Text, out float y)
@@ -932,7 +976,7 @@ namespace squad_dma
             try
             {
                 SKCanvas canvas = e.Surface.Canvas;
-                canvas.Clear(new SKColor(picOtherPrimaryDark.BackColor.R, picOtherPrimaryDark.BackColor.G, picOtherPrimaryDark.BackColor.B));
+                canvas.Clear();
 
                 UpdateWindowTitle();
 
@@ -961,48 +1005,23 @@ namespace squad_dma
         {
             ToggleMap();
         }
-
-        private void swRadarStats_CheckedChanged(object sender, EventArgs e)
-        {
-            var enabled = swRadarStats.Checked;
-            _config.ShowRadarStats = enabled;
-            mcRadarStats.Visible = enabled;
-        }
         #endregion
         #endregion
 
         #region Settings
         #region General
         #region Event Handlers
-        private void swMapHelper_CheckedChanged(object sender, EventArgs e)
+        private void chkShowMapSetup_CheckedChanged(object sender, EventArgs e)
         {
-            if (swMapHelper.Checked)
+            if (chkShowMapSetup.Checked)
             {
-                mcRadarMapSetup.Visible = true;
+                grpMapSetup.Visible = true;
                 txtMapSetupX.Text = _selectedMap?.ConfigFile.X.ToString() ?? "0";
                 txtMapSetupY.Text = _selectedMap?.ConfigFile.Y.ToString() ?? "0";
                 txtMapSetupScale.Text = _selectedMap?.ConfigFile.Scale.ToString() ?? "0";
             }
             else
-                mcRadarMapSetup.Visible = false;
-        }
-
-        private void swAimview_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.AimviewEnabled = swAimview.Checked;
-        }
-
-        private void swNames_CheckedChanged(object sender, EventArgs e)
-        {
-            _config.ShowNames = swNames.Checked;
-        }
-
-        private void sldrUIScale_onValueChanged(object sender, int newValue)
-        {
-            _config.UIScale = newValue;
-            _uiScale = (.01f * newValue);
-
-            InitiateUIScaling();
+                grpMapSetup.Visible = false;
         }
 
         private void btnRestartRadar_Click(object sender, EventArgs e)
@@ -1010,57 +1029,23 @@ namespace squad_dma
             Memory.Restart();
         }
 
-        private void swRadarVsync_CheckedChanged(object sender, EventArgs e)
+        private void trkZoomSensivity_Scroll(object sender, EventArgs e)
         {
-            var enabled = swRadarVsync.Checked;
-            _config.VSync = enabled;
-
-            if (_mapCanvas is not null)
-                _mapCanvas.VSync = enabled;
+            _config.ZoomSensitivity = trkZoomSensivity.Value;
         }
 
-        private void swRadarEnemyCount_CheckedChanged(object sender, EventArgs e)
+        private void trkUIScale_Scroll(object sender, EventArgs e)
         {
-            var enabled = swRadarEnemyCount.Checked;
+            _config.UIScale = trkUIScale.Value;
+            _uiScale = (.01f * trkUIScale.Value);
 
-            _config.EnemyCount = enabled;
-        }
-
-        private void cboFont_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _config.Font = cboFont.SelectedIndex;
-            InitiateFont();
-        }
-
-        private void sldrFontSize_onValueChanged(object sender, int newValue)
-        {
-            _config.FontSize = newValue;
-            InitiateFontSize();
-        }
-
-        private void sldrZoomSensitivity_onValueChanged(object sender, int newValue)
-        {
-            _config.ZoomSensitivity = newValue;
+            InitiateUIScaling();
         }
         #endregion
         #endregion
 
         #region Colors
         #region Helper Functions
-        private void UpdateThemeColors()
-        {
-            Color primary = picOtherPrimary.BackColor;
-            Color darkPrimary = picOtherPrimaryDark.BackColor;
-            Color lightPrimary = picOtherPrimaryLight.BackColor;
-            Color accent = picOtherAccent.BackColor;
-
-            MaterialSkinManager.Instance.ColorScheme = new ColorScheme(primary, darkPrimary, lightPrimary, accent, TextShade.WHITE);
-
-            UpdatePaintColorControls();
-
-            this.Invalidate();
-            this.Refresh();
-        }
 
         private Color PaintColorToColor(string name)
         {
@@ -1072,30 +1057,6 @@ namespace squad_dma
         {
             PaintColor.Colors color = _config.DefaultPaintColors[name];
             return Color.FromArgb(color.A, color.R, color.G, color.B);
-        }
-
-        private void UpdatePaintColorControls()
-        {
-            var colors = _config.PaintColors;
-
-            Action<PictureBox, string> setColor = (pictureBox, name) =>
-            {
-                if (colors.ContainsKey(name))
-                {
-                    pictureBox.BackColor = PaintColorToColor(name);
-                }
-                else
-                {
-                    colors.Add(name, _config.DefaultPaintColors[name]);
-                    pictureBox.BackColor = DefaultPaintColorToColor(name);
-                }
-            };
-
-            // Other
-            setColor(picOtherPrimary, "Primary");
-            setColor(picOtherPrimaryDark, "PrimaryDark");
-            setColor(picOtherPrimaryLight, "PrimaryLight");
-            setColor(picOtherAccent, "Accent");
         }
 
         private void UpdatePaintColorByName(string name, PictureBox pictureBox)
@@ -1124,55 +1085,8 @@ namespace squad_dma
             }
         }
         #endregion
-
-        #region Event Handlers
-
-        private void picOtherPrimary_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("Primary", picOtherPrimary);
-            UpdateThemeColors();
-        }
-
-        private void picOtherPrimaryDark_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("PrimaryDark", picOtherPrimaryDark);
-            UpdateThemeColors();
-        }
-
-        private void picOtherPrimaryLight_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("PrimaryLight", picOtherPrimaryLight);
-            UpdateThemeColors();
-        }
-
-        private void picOtherAccent_Click(object sender, EventArgs e)
-        {
-            UpdatePaintColorByName("Accent", picOtherAccent);
-            UpdateThemeColors();
-        }
-
-        private void btnResetTheme_Click(object sender, EventArgs e)
-        {
-            _config.PaintColors["Primary"] = _config.DefaultPaintColors["Primary"];
-            _config.PaintColors["PrimaryDark"] = _config.DefaultPaintColors["PrimaryDark"];
-            _config.PaintColors["PrimaryLight"] = _config.DefaultPaintColors["PrimaryLight"];
-            _config.PaintColors["Accent"] = _config.DefaultPaintColors["Accent"];
-
-            picOtherPrimary.BackColor = DefaultPaintColorToColor("Primary");
-            picOtherPrimaryDark.BackColor = DefaultPaintColorToColor("PrimaryDark");
-            picOtherPrimaryLight.BackColor = DefaultPaintColorToColor("PrimaryLight");
-            picOtherAccent.BackColor = DefaultPaintColorToColor("Accent");
-
-            UpdateThemeColors();
-        }
         #endregion
         #endregion
         #endregion
-        #endregion
-
-        private void toolTip_Popup(object sender, PopupEventArgs e)
-        {
-
-        }
     }
 }
