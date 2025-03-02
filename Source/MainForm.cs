@@ -668,37 +668,38 @@ namespace squad_dma
                 {
                     // Define vehicle types that should show distance
                     var vehicleTypes = new HashSet<ActorType>
-                    {
-                        ActorType.TruckTransport,
-                        ActorType.TruckLogistics,
-                        ActorType.TruckAntiAir,
-                        ActorType.TruckArtillery,
-                        ActorType.TruckTransportArmed,
-                        ActorType.JeepTransport,
-                        ActorType.JeepLogistics,
-                        ActorType.JeepTurret,
-                        ActorType.JeepArtillery,
-                        ActorType.JeepAntitank,
-                        ActorType.JeepRWSTurret,
-                        ActorType.APC,
-                        ActorType.IFV,
-                        ActorType.TrackedAPC,
-                        ActorType.TrackedIFV,
-                        ActorType.TrackedJeep,
-                        ActorType.Tank,
-                        ActorType.TankMGS,
-                        ActorType.TransportHelicopter,
-                        ActorType.AttackHelicopter,
-                        ActorType.Boat,
-                        ActorType.Motorcycle
-                    };
+            {
+                ActorType.TruckTransport,
+                ActorType.TruckLogistics,
+                ActorType.TruckAntiAir,
+                ActorType.TruckArtillery,
+                ActorType.TruckTransportArmed,
+                ActorType.JeepTransport,
+                ActorType.JeepLogistics,
+                ActorType.JeepTurret,
+                ActorType.JeepArtillery,
+                ActorType.JeepAntitank,
+                ActorType.JeepRWSTurret,
+                ActorType.APC,
+                ActorType.IFV,
+                ActorType.TrackedAPC,
+                ActorType.TrackedIFV,
+                ActorType.TrackedJeep,
+                ActorType.Tank,
+                ActorType.TankMGS,
+                ActorType.TransportHelicopter,
+                ActorType.AttackHelicopter,
+                ActorType.Boat,
+                ActorType.Motorcycle
+            };
 
                     // Only calculate/show distance for vehicles
                     if (vehicleTypes.Contains(actor.ActorType))
                     {
                         var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
 
-                        if (dist >= 2)
+                        // Only draw the distance if the vehicle is more than 50 meters away
+                        if (dist >= 50) // Changed from 2 to 50
                         {
                             lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
 

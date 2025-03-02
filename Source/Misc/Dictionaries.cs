@@ -105,6 +105,8 @@ namespace squad_dma {
             {"BP_Technical2Seater_M2_Tan_C", ActorType.JeepTurret},
             {"BP_Technical2Seater_Mortar_Tan_C", ActorType.JeepArtillery},
             {"BP_Technical4Seater_Transport_Tan_C", ActorType.JeepTransport},
+            {"BP_Technical2Seater_Mortar_Black_C", ActorType.JeepArtillery },
+            {"BP_Technical2Seater_M2_Black_C", ActorType.JeepTurret },
 
             {"BP_Safir_C", ActorType.JeepLogistics},
             {"BP_Safir_MG3_C", ActorType.JeepTurret},
