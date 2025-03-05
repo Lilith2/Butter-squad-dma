@@ -29,6 +29,9 @@ namespace squad_dma
         private Map _selectedMap;
         private SKBitmap[] _loadedBitmaps;
         private MapPosition _mapPanPosition = new();
+        private readonly List<PointOfInterest> _pointsOfInterest = new();
+        private PointOfInterest _hoveredPoi;
+        private const int POI_HOVER_THRESHOLD = 15;
 
         private const int ZOOM_INTERVAL = 2;
         private int targetZoomValue = 0;
@@ -82,6 +85,26 @@ namespace squad_dma
         {
             get => Memory.AbsoluteLocation;
         }
+
+        public void AddPointOfInterest(Vector3 position, string name)
+        {
+            _pointsOfInterest.Add(new PointOfInterest(position, name));
+        }
+
+        public void RemovePointOfInterest(string name)
+        {
+            var poi = _pointsOfInterest.FirstOrDefault(p => p.Name == name);
+            if (poi != null)
+            {
+                _pointsOfInterest.Remove(poi);
+            }
+        }
+
+        public void ClearPointsOfInterest()
+        {
+            _pointsOfInterest.Clear();
+        }
+
         #endregion
 
         #region Constructor
@@ -114,7 +137,7 @@ namespace squad_dma
             this.Shown += frmMain_Shown;
 
             _mapCanvas.PaintSurface += skMapCanvas_PaintSurface;
-            _mapCanvas.MouseMove += skMapCanvas_MouseMovePlayer;
+            _mapCanvas.MouseMove += skMapCanvas_MouseMove;;
             _mapCanvas.MouseDown += skMapCanvas_MouseDown;
             _mapCanvas.MouseUp += skMapCanvas_MouseUp;
 
@@ -244,7 +267,7 @@ namespace squad_dma
 
         private void InitiateFont()
         {
-            var fontToUse = SKTypeface.FromFamilyName("Arial");
+            var fontToUse = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
             SKPaints.TextBase.Typeface = fontToUse;
             SKPaints.TextBaseOutline.Typeface = fontToUse;
             SKPaints.TextRadarStatus.Typeface = fontToUse;
@@ -612,14 +635,8 @@ namespace squad_dma
                     var mapParams = GetMapLocation();
 
                     // Draw LocalPlayer
-
                     var localPlayerZoomedPos = localPlayerMapPos.ToZoomedPos(mapParams);
-                    localPlayerZoomedPos.DrawPlayerMarker(
-                        canvas,
-                        localPlayer,
-                        trkAimLength.Value
-                    );
-
+                    localPlayerZoomedPos.DrawPlayerMarker(canvas, localPlayer, trkAimLength.Value);
 
                     foreach (var actor in allPlayers) // Draw actors
                     {
@@ -643,7 +660,7 @@ namespace squad_dma
                     }
                 }
             }
-        }
+        }  
 
         private void DrawActor(SKCanvas canvas, UActor actor, MapPosition actorZoomedPos, int aimlineLength, MapPosition localPlayerMapPos)
         {
@@ -719,6 +736,41 @@ namespace squad_dma
             }
         }
 
+        private void DrawPOIs(SKCanvas canvas)
+        {
+            if (!IsReadyToRender()) return;
+
+            var mapParams = GetMapLocation();
+            var localPlayerPos = LocalPlayer.Position + AbsoluteLocation;
+
+            foreach (var poi in _pointsOfInterest)
+            {
+                var poiMapPos = poi.Position.ToMapPos(_selectedMap);
+                var poiZoomedPos = poiMapPos.ToZoomedPos(mapParams);
+                var distance = Vector3.Distance(localPlayerPos, poi.Position);
+
+                using var poiPaint = new SKPaint { Color = SKColors.Yellow };
+                canvas.DrawCircle(poiZoomedPos.GetPoint(), 6 * _uiScale, poiPaint);
+
+                DrawPOIText(canvas, poiZoomedPos, distance);
+            }
+        }
+
+        private void DrawPOIText(SKCanvas canvas, MapPosition position, float distance)
+        {
+            var text = $"{Math.Round(distance / 100, 0)}m";
+            var textPos = position.GetPoint(8 * _uiScale, 0); 
+
+            using var textPaint = new SKPaint
+            {
+                Color = SKColors.White,
+                TextSize = 14 * _uiScale,
+                Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
+            };
+
+            canvas.DrawText(text, textPos.X, textPos.Y, textPaint);
+        }
+
 
         private void DrawToolTips(SKCanvas canvas)
         {
@@ -748,6 +800,20 @@ namespace squad_dma
                 }
             }
         }
+
+        private void btnAddPOI_Click(object sender, EventArgs e)
+        {
+            var localPlayer = this.LocalPlayer;
+            if (localPlayer is not null)
+            {
+                var position = localPlayer.Position + AbsoluteLocation;
+                AddPointOfInterest(position, "POI 1");
+
+                // Refresh the map canvas to render the new POI
+                _mapCanvas.Invalidate();
+            }
+        }
+
 
         private void DrawStatusText(SKCanvas canvas)
         {
@@ -917,15 +983,54 @@ namespace squad_dma
             }
         }
 
-        private void skMapCanvas_MouseMovePlayer(object sender, MouseEventArgs e)
+        private void HandleMapClick(object sender, MouseEventArgs e)
         {
-            if (this.InGame && this.LocalPlayer is not null) // Must be in-game
+            if (e.Button == MouseButtons.Left && InGame)
+            {
+                var mapParams = GetMapLocation();
+                var mouseX = (e.X / mapParams.XScale) + mapParams.Bounds.Left;
+                var mouseY = (e.Y / mapParams.YScale) + mapParams.Bounds.Top;
+
+                var worldX = (mouseX - _selectedMap.ConfigFile.X) / _selectedMap.ConfigFile.Scale;
+                var worldY = (mouseY - _selectedMap.ConfigFile.Y) / _selectedMap.ConfigFile.Scale;
+                var worldPos = new Vector3(worldX, worldY, LocalPlayer.Position.Z);
+
+                _pointsOfInterest.Add(new PointOfInterest(worldPos, "POI"));
+                _mapCanvas.Invalidate();
+            }
+            else if (e.Button == MouseButtons.Right && _hoveredPoi != null)
+            {
+                _pointsOfInterest.Remove(_hoveredPoi);
+                _mapCanvas.Invalidate();
+            }
+        }
+
+        private float Distance(SKPoint a, SKPoint b)
+        {
+            return (float)Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+        }
+
+        public class PointOfInterest
+        {
+            public Vector3 Position { get; }
+            public string Name { get; }
+
+            public PointOfInterest(Vector3 position, string name)
+            {
+                Position = position;
+                Name = name;
+            }
+        }
+
+        private void skMapCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Handle player hover and dragging
+            if (this.InGame && this.LocalPlayer is not null)
             {
                 var mouse = new Vector2(e.X, e.Y);
 
-                var players = this.AllActors
-                    ?.Select(x => x.Value); // Get all players except LocalPlayer & Exfil'd Players
-
+                // Find the closest player to the mouse cursor
+                var players = this.AllActors?.Select(x => x.Value);
                 _closestPlayerToMouse = FindClosestObject(players, mouse, x => x.ZoomedPosition, 12 * _uiScale);
             }
             else if (this.InGame)
@@ -933,6 +1038,7 @@ namespace squad_dma
                 ClearPlayerRefs();
             }
 
+            // Handle map dragging
             if (this._isDragging && this._isFreeMapToggled)
             {
                 if (!this._lastMousePosition.IsEmpty)
@@ -952,6 +1058,26 @@ namespace squad_dma
 
                 this._lastMousePosition = e.Location;
             }
+
+            // Handle POI hover
+            _hoveredPoi = null;
+            if (InGame && _pointsOfInterest.Count > 0)
+            {
+                var mapParams = GetMapLocation();
+                var mousePos = new SKPoint(e.X, e.Y);
+
+                foreach (var poi in _pointsOfInterest)
+                {
+                    var poiPos = poi.Position.ToMapPos(_selectedMap).ToZoomedPos(mapParams).GetPoint();
+                    if (SKPoint.Distance(mousePos, poiPos) < 20 * _uiScale) // 20px hover threshold
+                    {
+                        _hoveredPoi = poi;
+                        break; 
+                    }
+                }
+            }
+
+            _mapCanvas.Invalidate();
         }
 
         private void skMapCanvas_MouseDown(object sender, MouseEventArgs e)
@@ -960,6 +1086,31 @@ namespace squad_dma
             {
                 this._isDragging = true;
                 this._lastMousePosition = e.Location;
+            }
+
+            if (e.Button == MouseButtons.Left && this.InGame && this.LocalPlayer is not null)
+            {
+                var mapParams = GetMapLocation();
+                var mouseX = e.X / mapParams.XScale + mapParams.Bounds.Left;
+                var mouseY = e.Y / mapParams.YScale + mapParams.Bounds.Top;
+
+                var worldX = (mouseX - _selectedMap.ConfigFile.X) / _selectedMap.ConfigFile.Scale;
+                var worldY = (mouseY - _selectedMap.ConfigFile.Y) / _selectedMap.ConfigFile.Scale;
+                var worldZ = this.LocalPlayer.Position.Z; 
+
+                var poiPosition = new Vector3(worldX, worldY, worldZ);
+
+                AddPointOfInterest(poiPosition, "POI");
+
+                _mapCanvas.Invalidate();
+            }
+
+            // Remove POI on right-click (hover-based removal)
+            if (e.Button == MouseButtons.Right && _hoveredPoi != null)
+            {
+                _pointsOfInterest.Remove(_hoveredPoi);
+                _hoveredPoi = null; 
+                _mapCanvas.Invalidate();
             }
         }
 
@@ -986,6 +1137,8 @@ namespace squad_dma
                     lock (_renderLock)
                     {
                         DrawMap(canvas);
+
+                        DrawPOIs(canvas);
 
                         DrawActors(canvas);
 
