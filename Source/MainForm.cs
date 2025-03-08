@@ -139,6 +139,7 @@ namespace squad_dma
             _mapCanvas.PaintSurface += skMapCanvas_PaintSurface;
             _mapCanvas.MouseMove += skMapCanvas_MouseMove;;
             _mapCanvas.MouseDown += skMapCanvas_MouseDown;
+            _mapCanvas.MouseDoubleClick += skMapCanvas_MouseDoubleClick;
             _mapCanvas.MouseUp += skMapCanvas_MouseUp;
 
             tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
@@ -716,7 +717,7 @@ namespace squad_dma
                         var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
 
                         // Only draw the distance if the vehicle is more than 50 meters away
-                        if (dist >= 50) // Changed from 2 to 50
+                        if (dist > 50 * 100)
                         {
                             lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
 
@@ -744,29 +745,39 @@ namespace squad_dma
             var mapParams = GetMapLocation();
             var localPlayerPos = LocalPlayer.Position + AbsoluteLocation;
 
-            // Draw POI dots first
+            using var crosshairPaint = new SKPaint
+            {
+                Color = SKColors.Red,
+                StrokeWidth = 1.5f,
+                IsAntialias = true,
+                Style = SKPaintStyle.Stroke
+            };
+
             foreach (var poi in _pointsOfInterest)
             {
                 var poiMapPos = poi.Position.ToMapPos(_selectedMap);
                 var poiZoomedPos = poiMapPos.ToZoomedPos(mapParams);
 
-                using var poiPaint = new SKPaint { Color = SKColors.Yellow };
-                canvas.DrawCircle(poiZoomedPos.GetPoint(), 6 * _uiScale, poiPaint);
-            }
+                var center = poiZoomedPos.GetPoint();
+                float crossSize = 8 * _uiScale;
 
-            // Draw POI text on top of dots
-            foreach (var poi in _pointsOfInterest)
-            {
-                var poiMapPos = poi.Position.ToMapPos(_selectedMap);
-                var poiZoomedPos = poiMapPos.ToZoomedPos(mapParams);
+                canvas.DrawLine(
+                    center.X - crossSize, center.Y - crossSize,
+                    center.X + crossSize, center.Y + crossSize,
+                    crosshairPaint);
+
+                canvas.DrawLine(
+                    center.X + crossSize, center.Y - crossSize,
+                    center.X - crossSize, center.Y + crossSize,
+                    crosshairPaint);
+
                 var distance = Vector3.Distance(localPlayerPos, poi.Position);
                 float bearing = CalculateBearing(localPlayerPos, poi.Position);
-
-                DrawPOIText(canvas, poiZoomedPos, distance, bearing);
+                DrawPOIText(canvas, poiZoomedPos, distance, bearing, crossSize);
             }
         }
 
-        private void DrawPOIText(SKCanvas canvas, MapPosition position, float distance, float bearing)
+        private void DrawPOIText(SKCanvas canvas, MapPosition position, float distance, float bearing, float crosshairSize)
         {
             int distanceMeters = (int)Math.Round(distance / 100);
             string[] lines =
@@ -775,31 +786,20 @@ namespace squad_dma
                 $"{distanceMeters}m"
             };
 
-            // Use the same text settings as actor text
             SKPaint textPaint = SKPaints.TextBase;
-            SKPaint outlinePaint = Extensions.GetTextOutlinePaint();
+            SKPaint outlinePaint = SKPaints.TextBaseOutline;
 
-            // Get base position with offset
-            var basePosition = position.GetPoint(8 * _uiScale, 0);
+            var basePosition = position.GetPoint(crosshairSize + 6 * _uiScale, 0);
             float verticalSpacing = 12 * _uiScale;
 
-            // Draw stacked text
             foreach (var line in lines)
             {
-                // Draw outline
                 canvas.DrawText(line, basePosition.X, basePosition.Y, outlinePaint);
-                // Draw main text
                 canvas.DrawText(line, basePosition.X, basePosition.Y, textPaint);
-
-                // Move down for next line
                 basePosition.Y += verticalSpacing;
             }
         }
 
-        private string GetBearingArrow(float degrees)
-        {
-            return $"{(int)Math.Round(degrees)}°";
-        }
 
         private float CalculateBearing(Vector3 playerPos, Vector3 poiPos)
         {
@@ -1131,6 +1131,17 @@ namespace squad_dma
                 this._lastMousePosition = e.Location;
             }
 
+            // Remove POI on right-click (hover-based removal)
+            if (e.Button == MouseButtons.Right && _hoveredPoi != null)
+            {
+                _pointsOfInterest.Remove(_hoveredPoi);
+                _hoveredPoi = null; 
+                _mapCanvas.Invalidate();
+            }
+        }
+
+        private void skMapCanvas_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
             if (e.Button == MouseButtons.Left && this.InGame && this.LocalPlayer is not null)
             {
                 var mapParams = GetMapLocation();
@@ -1139,20 +1150,12 @@ namespace squad_dma
 
                 var worldX = (mouseX - _selectedMap.ConfigFile.X) / _selectedMap.ConfigFile.Scale;
                 var worldY = (mouseY - _selectedMap.ConfigFile.Y) / _selectedMap.ConfigFile.Scale;
-                var worldZ = this.LocalPlayer.Position.Z; 
+                var worldZ = this.LocalPlayer.Position.Z;
 
                 var poiPosition = new Vector3(worldX, worldY, worldZ);
 
                 AddPointOfInterest(poiPosition, "POI");
 
-                _mapCanvas.Invalidate();
-            }
-
-            // Remove POI on right-click (hover-based removal)
-            if (e.Button == MouseButtons.Right && _hoveredPoi != null)
-            {
-                _pointsOfInterest.Remove(_hoveredPoi);
-                _hoveredPoi = null; 
                 _mapCanvas.Invalidate();
             }
         }
