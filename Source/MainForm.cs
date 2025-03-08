@@ -142,7 +142,7 @@ namespace squad_dma
             _mapCanvas.MouseUp += skMapCanvas_MouseUp;
 
             tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
-            _fpsWatch.Start();
+            //_fpsWatch.Start();
 
             zoomTimer = new System.Windows.Forms.Timer();
             zoomTimer.Interval = ZOOM_INTERVAL;
@@ -685,30 +685,30 @@ namespace squad_dma
                 {
                     // Define vehicle types that should show distance
                     var vehicleTypes = new HashSet<ActorType>
-            {
-                ActorType.TruckTransport,
-                ActorType.TruckLogistics,
-                ActorType.TruckAntiAir,
-                ActorType.TruckArtillery,
-                ActorType.TruckTransportArmed,
-                ActorType.JeepTransport,
-                ActorType.JeepLogistics,
-                ActorType.JeepTurret,
-                ActorType.JeepArtillery,
-                ActorType.JeepAntitank,
-                ActorType.JeepRWSTurret,
-                ActorType.APC,
-                ActorType.IFV,
-                ActorType.TrackedAPC,
-                ActorType.TrackedIFV,
-                ActorType.TrackedJeep,
-                ActorType.Tank,
-                ActorType.TankMGS,
-                ActorType.TransportHelicopter,
-                ActorType.AttackHelicopter,
-                ActorType.Boat,
-                ActorType.Motorcycle
-            };
+                    {
+                        ActorType.TruckTransport,
+                        ActorType.TruckLogistics,
+                        ActorType.TruckAntiAir,
+                        ActorType.TruckArtillery,
+                        ActorType.TruckTransportArmed,
+                        ActorType.JeepTransport,
+                        ActorType.JeepLogistics,
+                        ActorType.JeepTurret,
+                        ActorType.JeepArtillery,
+                        ActorType.JeepAntitank,
+                        ActorType.JeepRWSTurret,
+                        ActorType.APC,
+                        ActorType.IFV,
+                        ActorType.TrackedAPC,
+                        ActorType.TrackedIFV,
+                        ActorType.TrackedJeep,
+                        ActorType.Tank,
+                        ActorType.TankMGS,
+                        ActorType.TransportHelicopter,
+                        ActorType.AttackHelicopter,
+                        ActorType.Boat,
+                        ActorType.Motorcycle
+                    };
 
                     // Only calculate/show distance for vehicles
                     if (vehicleTypes.Contains(actor.ActorType))
@@ -748,18 +748,22 @@ namespace squad_dma
                 var poiMapPos = poi.Position.ToMapPos(_selectedMap);
                 var poiZoomedPos = poiMapPos.ToZoomedPos(mapParams);
                 var distance = Vector3.Distance(localPlayerPos, poi.Position);
+                float bearing = CalculateBearing(localPlayerPos, poi.Position);
 
                 using var poiPaint = new SKPaint { Color = SKColors.Yellow };
                 canvas.DrawCircle(poiZoomedPos.GetPoint(), 6 * _uiScale, poiPaint);
 
-                DrawPOIText(canvas, poiZoomedPos, distance);
+                DrawPOIText(canvas, poiZoomedPos, distance, bearing);
             }
         }
 
-        private void DrawPOIText(SKCanvas canvas, MapPosition position, float distance)
+        private void DrawPOIText(SKCanvas canvas, MapPosition position, float distance, float bearing)
         {
-            var text = $"{Math.Round(distance / 100, 0)}m";
-            var textPos = position.GetPoint(8 * _uiScale, 0); 
+            int distanceMeters = (int)Math.Round(distance / 100);
+            string bearingText = GetBearingArrow(bearing);
+            var text = $"{bearingText} {distanceMeters}m";
+
+            var textPosition = position.GetPoint(8 * _uiScale, 0);
 
             using var textPaint = new SKPaint
             {
@@ -768,9 +772,27 @@ namespace squad_dma
                 Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
             };
 
-            canvas.DrawText(text, textPos.X, textPos.Y, textPaint);
+            canvas.DrawText(text, textPosition.X, textPosition.Y, textPaint);
         }
 
+        private string GetBearingArrow(float degrees)
+        {
+            return $"{(int)Math.Round(degrees)}°";
+        }
+
+        private float CalculateBearing(Vector3 playerPos, Vector3 poiPos)
+        {
+            float deltaX = poiPos.X - playerPos.X;
+            float deltaY = playerPos.Y - poiPos.Y;
+
+            float radians = (float)Math.Atan2(deltaY, deltaX);
+            float degrees = radians * (180f / (float)Math.PI);
+            degrees = 90f - degrees;
+
+            if (degrees < 0) degrees += 360f;
+
+            return degrees;
+        }
 
         private void DrawToolTips(SKCanvas canvas)
         {
