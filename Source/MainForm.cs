@@ -736,6 +736,7 @@ namespace squad_dma
             }
         }
 
+
         private void DrawPOIs(SKCanvas canvas)
         {
             if (!IsReadyToRender()) return;
@@ -743,15 +744,23 @@ namespace squad_dma
             var mapParams = GetMapLocation();
             var localPlayerPos = LocalPlayer.Position + AbsoluteLocation;
 
+            // Draw POI dots first
+            foreach (var poi in _pointsOfInterest)
+            {
+                var poiMapPos = poi.Position.ToMapPos(_selectedMap);
+                var poiZoomedPos = poiMapPos.ToZoomedPos(mapParams);
+
+                using var poiPaint = new SKPaint { Color = SKColors.Yellow };
+                canvas.DrawCircle(poiZoomedPos.GetPoint(), 6 * _uiScale, poiPaint);
+            }
+
+            // Draw POI text on top of dots
             foreach (var poi in _pointsOfInterest)
             {
                 var poiMapPos = poi.Position.ToMapPos(_selectedMap);
                 var poiZoomedPos = poiMapPos.ToZoomedPos(mapParams);
                 var distance = Vector3.Distance(localPlayerPos, poi.Position);
                 float bearing = CalculateBearing(localPlayerPos, poi.Position);
-
-                using var poiPaint = new SKPaint { Color = SKColors.Yellow };
-                canvas.DrawCircle(poiZoomedPos.GetPoint(), 6 * _uiScale, poiPaint);
 
                 DrawPOIText(canvas, poiZoomedPos, distance, bearing);
             }
@@ -760,19 +769,31 @@ namespace squad_dma
         private void DrawPOIText(SKCanvas canvas, MapPosition position, float distance, float bearing)
         {
             int distanceMeters = (int)Math.Round(distance / 100);
-            string bearingText = GetBearingArrow(bearing);
-            var text = $"{bearingText} {distanceMeters}m";
-
-            var textPosition = position.GetPoint(8 * _uiScale, 0);
-
-            using var textPaint = new SKPaint
+            string[] lines =
             {
-                Color = SKColors.White,
-                TextSize = 14 * _uiScale,
-                Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
+                $"{(int)Math.Round(bearing)}°",
+                $"{distanceMeters}m"
             };
 
-            canvas.DrawText(text, textPosition.X, textPosition.Y, textPaint);
+            // Use the same text settings as actor text
+            SKPaint textPaint = SKPaints.TextBase;
+            SKPaint outlinePaint = Extensions.GetTextOutlinePaint();
+
+            // Get base position with offset
+            var basePosition = position.GetPoint(8 * _uiScale, 0);
+            float verticalSpacing = 12 * _uiScale;
+
+            // Draw stacked text
+            foreach (var line in lines)
+            {
+                // Draw outline
+                canvas.DrawText(line, basePosition.X, basePosition.Y, outlinePaint);
+                // Draw main text
+                canvas.DrawText(line, basePosition.X, basePosition.Y, textPaint);
+
+                // Move down for next line
+                basePosition.Y += verticalSpacing;
+            }
         }
 
         private string GetBearingArrow(float degrees)
@@ -1159,12 +1180,9 @@ namespace squad_dma
                     lock (_renderLock)
                     {
                         DrawMap(canvas);
-
-                        DrawPOIs(canvas);
-
                         DrawActors(canvas);
-
-                        DrawToolTips(canvas);
+                        DrawPOIs(canvas);
+                        //DrawToolTips(canvas);  temp removed Tooltips since we have POI
                     }
                 }
                 else
