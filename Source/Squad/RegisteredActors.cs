@@ -111,9 +111,9 @@ namespace squad_dma
                     if (item.Value.StartsWith("BP_UAF")) {
                         names[item.Key] = item.Value.Replace("BP_UAF", "BP_Soldier_UAF");
                     }
-                    // if (item.Value.Contains("_Util")) {
-                    //     Program.Log(item.Key + " " + item.Value);
-                    // }
+                     if (item.Value.Contains("BP")) {
+                         Program.Log(item.Key + " " + item.Value);
+                     }
                 }
                 var playersNameIDs = names.Where(x => x.Value.StartsWith("BP_Soldier") || Names.TechNames.ContainsKey(x.Value)).ToDictionary();
                 var filteredActors = actorBaseWithName.Where(actor => playersNameIDs.ContainsKey(actor.Value)).Select(actor => actor.Key).ToList();
