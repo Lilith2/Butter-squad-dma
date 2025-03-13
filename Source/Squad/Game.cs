@@ -47,7 +47,8 @@ namespace squad_dma
             get => _actors?.Actors;
         }
 
-        public Vector3 AbsoluteLocation {
+        public Vector3 AbsoluteLocation
+        {
             get => _absoluteLocation;
         }
         #endregion
@@ -199,7 +200,8 @@ namespace squad_dma
         /// <summary>
         /// Initializes actors list
         /// </summary>
-        private bool InitActors() {
+        private bool InitActors()
+        {
             try
             {
                 var persistentLevel = Memory.ReadPtr(_gameWorld + Offsets.World.PersistentLevel);
@@ -234,8 +236,10 @@ namespace squad_dma
                 throw new GameNotRunningException($"ERROR getting LocalPlayer, game may not be running: {ex}");
             }
         }
-        private bool UpdateLocalPlayerInfo() {
-            try {
+        private bool UpdateLocalPlayerInfo()
+        {
+            try
+            {
                 GetCameraCache();
                 return true;
             }
@@ -268,25 +272,28 @@ namespace squad_dma
                 var cameraInfoScatterMap = new ScatterReadMap(1);
                 var cameraManagerRound = cameraInfoScatterMap.AddRound();
                 var cameraInfoRound = cameraInfoScatterMap.AddRound();
-                
+
                 var cameraManagerPtr = cameraManagerRound.AddEntry<ulong>(0, 0, _playerController + Offsets.PlayerController.PlayerCameraManager);
                 cameraManagerRound.AddEntry<int>(0, 11, _gameWorld + Offsets.World.WorldOrigin);
                 cameraManagerRound.AddEntry<int>(0, 12, _gameWorld + Offsets.World.WorldOrigin + 0x4);
                 cameraManagerRound.AddEntry<int>(0, 13, _gameWorld + Offsets.World.WorldOrigin + 0x8);
                 cameraInfoRound.AddEntry<Vector3>(0, 1, cameraManagerPtr, null, Offsets.Camera.CameraLocation);
                 cameraInfoRound.AddEntry<Vector3>(0, 2, cameraManagerPtr, null, Offsets.Camera.CameraRotation);
-                
+
                 cameraInfoScatterMap.Execute();
 
-                if (!cameraInfoScatterMap.Results[0][1].TryGetResult<Vector3>(out var location)) {
+                if (!cameraInfoScatterMap.Results[0][1].TryGetResult<Vector3>(out var location))
+                {
                     return false;
                 }
-                if (!cameraInfoScatterMap.Results[0][2].TryGetResult<Vector3>(out var rotation)) {
+                if (!cameraInfoScatterMap.Results[0][2].TryGetResult<Vector3>(out var rotation))
+                {
                     return false;
                 }
                 if (cameraInfoScatterMap.Results[0][11].TryGetResult<int>(out var absoluteX)
                 && cameraInfoScatterMap.Results[0][12].TryGetResult<int>(out var absoluteY)
-                && cameraInfoScatterMap.Results[0][13].TryGetResult<int>(out var absoluteZ)) {
+                && cameraInfoScatterMap.Results[0][13].TryGetResult<int>(out var absoluteZ))
+                {
                     _absoluteLocation = new Vector3(absoluteX, absoluteY, absoluteZ);
                     // Program.Log(_absoluteLocation.ToString());
                 }

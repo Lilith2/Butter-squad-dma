@@ -91,7 +91,7 @@ namespace squad_dma
                 try
                 {
                     Program.Log("attempting to regenerate mmap...");
-                    
+
                     if (File.Exists("mmap.txt"))
                         File.Delete("mmap.txt");
 
@@ -520,39 +520,43 @@ namespace squad_dma
                 throw new DMAException($"ERROR reading FString at 0x{addr.ToString("X")}", ex);
             }
         }
-        
-        public static Dictionary<uint, string> GetNamesById(List<uint> addresses) {
+
+        public static Dictionary<uint, string> GetNamesById(List<uint> addresses)
+        {
             var count = addresses.Count;
             var firstNameScatterMap = new ScatterReadMap(count);
             var namePoolChunkRound = firstNameScatterMap.AddRound();
             var nameEntryRound = firstNameScatterMap.AddRound();
             var fnamePoolAddr = _squadBase + Offsets.GameObjects.GNames;
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 var nameId = addresses[i];
                 var chunkOffset = nameId >> 16;
-                var nameOffset = (ushort) nameId;
+                var nameOffset = (ushort)nameId;
 
-                var namePoolChunkAddr = namePoolChunkRound.AddEntry<ulong>(i, 0, fnamePoolAddr + ((ulong) chunkOffset + 2) * 8); // todo optimize by chunks
-                var nameEntryAddr = nameEntryRound.AddEntry<ushort>(i, 1, namePoolChunkAddr, null, 2 * (uint) nameOffset);
+                var namePoolChunkAddr = namePoolChunkRound.AddEntry<ulong>(i, 0, fnamePoolAddr + ((ulong)chunkOffset + 2) * 8); // todo optimize by chunks
+                var nameEntryAddr = nameEntryRound.AddEntry<ushort>(i, 1, namePoolChunkAddr, null, 2 * (uint)nameOffset);
             }
 
             firstNameScatterMap.Execute();
             var finalNameScatterMap = new ScatterReadMap(count);
             var nameRound = finalNameScatterMap.AddRound();
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 if (!firstNameScatterMap.Results[i][0].TryGetResult<ulong>(out var namePoolChunkAddr))
                     continue;
                 if (!firstNameScatterMap.Results[i][1].TryGetResult<ushort>(out var nameEntry))
                     continue;
 
                 var playerNameOffset = addresses[i];
-                var nameOffset = (ushort) playerNameOffset;
-                var entryOffset = namePoolChunkAddr + 2 * (uint) nameOffset;
-                var nameLength = (int) (nameEntry >> 6);
+                var nameOffset = (ushort)playerNameOffset;
+                var entryOffset = namePoolChunkAddr + 2 * (uint)nameOffset;
+                var nameLength = (int)(nameEntry >> 6);
 
-                if (nameLength > 256) {
+                if (nameLength > 256)
+                {
                     nameLength = 255;
                 }
 
@@ -562,11 +566,14 @@ namespace squad_dma
             finalNameScatterMap.Execute();
 
             var result = new Dictionary<uint, string>();
-            for (int i = 0; i < count; i++) {
-                if (finalNameScatterMap.Results[i].Count < 1) {
+            for (int i = 0; i < count; i++)
+            {
+                if (finalNameScatterMap.Results[i].Count < 1)
+                {
                     continue;
                 }
-                if (!finalNameScatterMap.Results[i][0].TryGetResult<string>(out var name)) {
+                if (!finalNameScatterMap.Results[i][0].TryGetResult<string>(out var name))
+                {
                     continue;
                 }
                 result.Add(addresses[i], name);

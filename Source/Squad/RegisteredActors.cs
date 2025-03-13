@@ -13,6 +13,9 @@ namespace squad_dma
 
         private readonly ConcurrentDictionary<ulong, UActor> _actors = new();
 
+        private static bool _loggedVehicles = false;
+
+
         #region Getters
         public ReadOnlyDictionary<ulong, UActor> Actors { get; }
 
@@ -75,7 +78,7 @@ namespace squad_dma
                 var count = this.ActorCount;
 
                 if (count < 1) // todo
-                    throw new GameEnded();
+                   throw new GameEnded();
 
                 var initialActorScatterMap = new ScatterReadMap(count);
 
@@ -111,9 +114,19 @@ namespace squad_dma
                     if (item.Value.StartsWith("BP_UAF")) {
                         names[item.Key] = item.Value.Replace("BP_UAF", "BP_Soldier_UAF");
                     }
-                     if (item.Value.Contains("BP")) {
-                         Program.Log(item.Key + " " + item.Value);
-                     }
+
+                    /*if (!_loggedVehicles)
+                    {
+                        foreach (var nameEntry in names)
+                        {
+                            if (nameEntry.Value.Contains("BP") || (nameEntry.Value.Contains("SD")))
+                            {
+                                Program.Log($"{nameEntry.Key} {nameEntry.Value}");
+                            }
+                        }
+                        _loggedVehicles = true; // Ensures this block only runs once
+                    }*/
+
                 }
                 var playersNameIDs = names.Where(x => x.Value.StartsWith("BP_Soldier") || Names.TechNames.ContainsKey(x.Value)).ToDictionary();
                 var filteredActors = actorBaseWithName.Where(actor => playersNameIDs.ContainsKey(actor.Value)).Select(actor => actor.Key).ToList();

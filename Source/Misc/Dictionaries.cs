@@ -569,6 +569,18 @@ namespace squad_dma {
             {"BP_Kornet_Tripod_MEA_C", ActorType.DeployableAntitank},
             {"BP_Kornet_Tripod_Rus_C", ActorType.DeployableAntitank},
 
+            {"SD_BP_2b14podnosmortar_Deployable_C", ActorType.DeployableMortars},
+            {"SD_BP_81mmMortar_Deployable_C", ActorType.DeployableMortars},
+            {"SD_BP_m1937mortar_Deployable_C", ActorType.DeployableMortars},
+            {"SD_BP_L16mortar_Deployable_C", ActorType.DeployableMortars},
+            {"SD_BP_m252mortar_Deployable_C", ActorType.DeployableMortars},
+            {"SD_BP_PP87Mortar_Deployable_C", ActorType.DeployableMortars},
+
+            {"SD_BP_BGM71TOW_Tripod_USA_C", ActorType.DeployableAntitank},
+            {"SD_BP_HJ-8ATGM_Deployable_C", ActorType.DeployableAntitank},
+            {"SD_BP_Kornet_Tripod_MEA_C", ActorType.DeployableAntitank},
+            {"SD_BP_Kornet_Tripod_Rus_C", ActorType.DeployableAntitank},
+
             {"BP_SPG9_Tripod_C", ActorType.DeployableAntitankGun},
             
             {"BP_DShK_C", ActorType.DeployableHMG},
@@ -681,6 +693,79 @@ namespace squad_dma {
             {"GE_RGF_Hab_C", ActorType.Hab},
             {"GE_NATO_Hab_C", ActorType.Hab},
             {"GE_INS_Hab_C", ActorType.Hab},
+
+            // Steel Division
+            {"SD_BP_M113A3_M2_Cage_C", ActorType.TrackedJeep },
+            {"SD_BP_M113A3_Logistics_Cage_C", ActorType.TruckLogistics },
+            {"SD_BP_MTLB_VMK_RUS_Child_C", ActorType.TrackedJeep },
+            {"SD_BP_MTLB_Logi_C", ActorType.TrackedJeep },
+            {"SD_BP_Technical4Seater_Logi_Grey_C", ActorType.JeepLogistics },
+            {"SD_BP_BRDM-2_Child_C", ActorType.JeepRWSTurret },
+            {"BP_Caiman_C", ActorType.JeepRWSTurret },
+            {"SD_BP_Tigr_C", ActorType.JeepTurret },
+            {"SD_BP_Tigr_RWS_GAU_C", ActorType.JeepRWSTurret },
+            {"SD_BP_Tigr_RWS_Thermal_C", ActorType.JeepRWSTurret },
+            {"SD_BP_Kamaz_5350_C", ActorType.TruckTransport },
+            {"SD_BP_Kamaz_5350_Logi_C", ActorType.TruckLogistics },
+            {"SD_BP_M1126_C", ActorType.APC },
+            {"BP_Caiman_US_C", ActorType.JeepRWSTurret },
+            {"SD_BP_MATV_TOW_Child_C", ActorType.JeepAntitank },
+            {"SD_BP_MATV_CROWS_Woodland_Thermal_C", ActorType.JeepRWSTurret },
+            {"SD_BP_MATV_Mk19_Woodland_C", ActorType.JeepTurret },
+            {"SD_BP_MATV_Woodland_C", ActorType.JeepTurret },
+            {"SD_BP_US_Util_Woodland_C", ActorType.TruckTransport },
+            {"SD_BP_US_Util_Woodland_Logi_C", ActorType.TruckLogistics },
+            {"BP_M163_C", ActorType.AntiAir },
+            {"SD_BP_PARS3_MK19_Forest_C", ActorType.JeepRWSTurret },
+            {"SD_BP_EJDER_YALCIN_CROWS_C", ActorType.JeepRWSTurret },
+            {"BP_BMC_Kirpi_C", ActorType.JeepRWSTurret },
+            {"SD_BP_BMC_UMOG_Transport_C", ActorType.TruckTransport },
+            {"SD_BP_BMC_UMOG_Logi_C", ActorType.TruckLogistics },
+
+
+            {"BP_MI28_C", ActorType.AttackHelicopter },
+            {"BP_MH6_C", ActorType.AttackHelicopter },
+            {"SD_BP_UH60_CAS_C", ActorType.AttackHelicopter },
+            {"BP_AH64_C", ActorType.AttackHelicopter },
+            {"SD_BP_UH60_M240_C", ActorType.TransportHelicopter },
+            {"SD_BP_UH60_M134_C", ActorType.TransportHelicopter },
+            {"BP_UH60_RED_C", ActorType.TransportHelicopter },
+
+            {"SD_BP_RHIB_NSV_C", ActorType.Boat },
+            {"SD_BP_RHIB_M2_C", ActorType.Boat },
+            {"SD_BP_RHIB_M240_C", ActorType.Boat },
+            {"SD_BP_RHIB_M134_C", ActorType.Boat },
+
+            {"SD_BP_Altay_Cage_C", ActorType.Tank },
+            {"BP_M1A2_Woodland_Child_C", ActorType.Tank },
+            {"SD_BP_T84_C", ActorType.Tank },
+            {"BP_T14_Child_C", ActorType.Tank },
+            {"SD_BP_T90A_Woodland_C", ActorType.Tank },
+            {"BP_T72B3_Child_C", ActorType.Tank },
+            {"SD_BP_Sprut_Forest_C", ActorType.TankMGS },
+            {"SD_BP_M1128_C", ActorType.TankMGS },
+            {"BP_M109A6_D_C", ActorType.TankMGS },
+
+
+            {"SD_BP_M2A2_C", ActorType.TrackedIFV },
+            {"SD_BP_BTR4E_C", ActorType.APC },
+            {"SD_BTR3E_C", ActorType.IFV },
+            {"SD_BP_BMP3M_Woodland_C", ActorType.TrackedIFV },
+            {"SD_BP_BMP2M_Woodland_C", ActorType.TrackedIFV },
+            {"SD_BP_BMP2_Child_C", ActorType.TrackedIFV },
+            {"SD_BP_BTR_90_NVG_C", ActorType.APC },
+            {"SD_BP_BTR-82_child_C", ActorType.APC },
+            {"SD_BP_BFV_Woodland_NVG_C", ActorType.TrackedIFV },
+            {"SD_BP_M1126_Dragoon_C", ActorType.IFV },
+            {"SD_BP_PARS3_Forest_C", ActorType.IFV },
+            {"SD_BP_ACV-15_Forest_C", ActorType.TrackedIFV },
+            {"SD_BP_M1064_M121_TSF_Woodland", ActorType.TrackedAPC }, // what is this ? 
+
+
+            {"BP_HIMARS_C", ActorType.TruckArtillery },
+            {"BP_2k22m1_C", ActorType.AntiAir },
+            {"SD_BP_M1064A3_M121_Woodland_C", ActorType.TrackedAPCArtillery }
+
         };
 
         public static readonly Dictionary<ActorType, SKBitmap> BitMaps = new(){
@@ -725,6 +810,7 @@ namespace squad_dma {
         };
         public static readonly Dictionary<string, Team> Teams = new()
         {
+            // Vanilla
             {"BP_Soldier_RU_", Team.RU},
             {"BP_Soldier_VDV", Team.RU},
             {"BP_Soldier_USM", Team.US},
@@ -738,7 +824,7 @@ namespace squad_dma {
             {"BP_Soldier_INS", Team.INS},
             {"BP_Soldier_IMF", Team.IMF},
             {"BP_Soldiers_WP", Team.WPMC},
-            
+            // Global Escalation ?? 
             {"BP_Soldier_Wag", Team.GE_Wagner},
             {"BP_Soldier_GE_", Team.RU},
             {"BP_Soldier_USS", Team.US},
@@ -752,6 +838,12 @@ namespace squad_dma {
             {"BP_Soldier_KON", Team.INS},
             {"BP_Soldier_Hez", Team.INS},
             {"BP_Soldier_PLF", Team.IMF},
+            // Steel Division
+            {"BP_Soldier_Tal", Team.SD_Taliban },
+            {"BP_Soldier_TSF", Team.TR },
+            {"BP_Soldier_SOF", Team.RU },
+            {"BP_Soldier_PMC", Team.WPMC },
+            {"BP_Soldier_SSP", Team.SD_Ukraine },
         };
 
         public static readonly HashSet<ActorType> RotateBy45Degrees = [

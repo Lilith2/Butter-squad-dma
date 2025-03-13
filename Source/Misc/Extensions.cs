@@ -28,6 +28,8 @@ namespace squad_dma
             {Team.GE_UA, new SKColor(255, 223, 0)},        // Golden Yellow for GE_UA
             {Team.GE_FI, new SKColor(70, 130, 180)},       // Steel Blue for GE_FI
             {Team.GE_IS, new SKColor(75, 0, 130)},         // Indigo for GE_IS
+            {Team.SD_Ukraine, new SKColor(255, 215, 0)},
+            {Team.SD_Taliban, new SKColor(244, 164, 96)}
         };
         #region Generic Extensions
         /// <summary>

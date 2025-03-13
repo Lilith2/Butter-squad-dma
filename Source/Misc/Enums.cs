@@ -57,6 +57,8 @@ namespace squad_dma {
         GE_Wagner,
         GE_UA,
         GE_FI,
-        GE_IS
+        GE_IS,
+        SD_Taliban, 
+        SD_Ukraine
     }
 }

@@ -708,7 +708,8 @@ namespace squad_dma
                         ActorType.TransportHelicopter,
                         ActorType.AttackHelicopter,
                         ActorType.Boat,
-                        ActorType.Motorcycle
+                        ActorType.Motorcycle,
+                        ActorType.AntiAir
                     };
 
                     // Only calculate/show distance for vehicles
@@ -1185,7 +1186,7 @@ namespace squad_dma
                         DrawMap(canvas);
                         DrawActors(canvas);
                         DrawPOIs(canvas);
-                        //DrawToolTips(canvas);  temp removed Tooltips since we have POI
+                        //DrawToolTips(canvas); 
                     }
                 }
                 else
