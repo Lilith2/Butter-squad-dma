@@ -43,6 +43,7 @@ namespace squad_dma {
         TruckLogistics,
         TruckTransport,
         TruckTransportArmed,
+        BoatLogistics
     }
     public enum Team {
         RU,
