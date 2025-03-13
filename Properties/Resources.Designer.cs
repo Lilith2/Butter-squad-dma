@@ -89,7 +89,26 @@ namespace squad_dma.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
+        internal static System.Drawing.Bitmap LoachCAS
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("LoachCAS", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap LoachScout
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("LoachScout", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
@@ -369,7 +388,16 @@ namespace squad_dma.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
-        
+
+        internal static System.Drawing.Bitmap TrackedLogistics
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("TrackedLogistics", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>

@@ -203,7 +203,7 @@ namespace squad_dma
             try
             {
                 var count = _actors.Count;
-                if (count < 15) // count < 15
+                if (count < 15)
                     throw new GameEnded();
                 var actorBases = _actors.Values.Select(actor => actor.Base).Order().ToArray();
 

@@ -701,6 +701,7 @@ namespace squad_dma
                         ActorType.APC,
                         ActorType.IFV,
                         ActorType.TrackedAPC,
+                        ActorType.TrackedLogistics,
                         ActorType.TrackedIFV,
                         ActorType.TrackedJeep,
                         ActorType.Tank,
@@ -709,7 +710,10 @@ namespace squad_dma
                         ActorType.AttackHelicopter,
                         ActorType.Boat,
                         ActorType.Motorcycle,
-                        ActorType.AntiAir
+                        ActorType.AntiAir,
+                        ActorType.TrackedLogistics,
+                        ActorType.LoachCAS,
+                        ActorType.LoachScout
                     };
 
                     // Only calculate/show distance for vehicles

@@ -498,8 +498,8 @@ namespace squad_dma {
             {"BP_Z8J_CAS_C", ActorType.AttackHelicopter},
             
             {"BP_CH146_Raven_C", ActorType.TransportHelicopter},
-            {"BP_Loach_C", ActorType.TransportHelicopter},
-            {"BP_Loach_CAS_Small_C", ActorType.AttackHelicopter},
+            {"BP_Loach_C", ActorType.LoachScout},
+            {"BP_Loach_CAS_Small_C", ActorType.LoachCAS},
 
             {"BP_BM21Grad_MIL_C", ActorType.TruckArtillery},
             {"BP_BM21Grad_INS_C", ActorType.TruckArtillery},
@@ -681,9 +681,9 @@ namespace squad_dma {
             {"BP_SA330_IDF_C", ActorType.TransportHelicopter},
             {"BP_MRH90_CAS_Child_Finland_C", ActorType.TransportHelicopter},
             {"BP_MI8_PLF_Child_C", ActorType.TransportHelicopter},
-            {"BP_Loach_CAS_Large_GE_C", ActorType.AttackHelicopter},
+            {"BP_Loach_CAS_Large_GE_C", ActorType.LoachCAS},
             {"BP_GE_KA27_CAS_C", ActorType.AttackHelicopter},
-            {"BP_Loach_Child_GE_C", ActorType.AttackHelicopter},
+            {"BP_Loach_Child_GE_C", ActorType.LoachScout},
 
             {"BP_BM21Grad_INS_GE_C", ActorType.TruckArtillery},
 
@@ -697,9 +697,10 @@ namespace squad_dma {
 
             //Steel Division
 
-            {"SD_BP_M113A3_M2_Cage_C", ActorType.TrackedJeep},
-            {"SD_BP_MTLB_VMK_RUS_Child_C", ActorType.TrackedJeep},
-            {"SD_BP_MTLB_Logi_C", ActorType.TrackedJeep},
+            {"SD_BP_M113A3_M2_Cage_C", ActorType.TrackedAPC},
+            {"SD_BP_M113A3_Logistics_Cage_C", ActorType.TrackedLogistics},
+            {"SD_BP_MTLB_VMK_RUS_Child_C", ActorType.TrackedAPC},
+            {"SD_BP_MTLB_Logi_C", ActorType.TrackedLogistics},
             {"SD_BP_Technical4Seater_Logi_Grey_C", ActorType.JeepLogistics},
             {"SD_BP_BRDM-2_Child_C", ActorType.JeepRWSTurret},
             {"BP_Caiman_C", ActorType.JeepRWSTurret},
@@ -715,7 +716,26 @@ namespace squad_dma {
             {"SD_BP_M1151_Child_C", ActorType.JeepTurret},
             {"SD_BP_Technical_Dshk_INS_Armoured_Child_C", ActorType.JeepTurret},
             {"SD_BP_TAPV_woodland_C", ActorType.JeepRWSTurret},
-
+            {"BP_Caiman_US_C", ActorType.JeepRWSTurret},
+            {"SD_BP_EJDER_YALCIN_CROWS_C", ActorType.JeepRWSTurret},
+            {"BP_BMC_Kirpi_C", ActorType.JeepRWSTurret},
+            {"SD_BP_BRDM-2_Insurgents_Child_C", ActorType.JeepRWSTurret},
+            {"SD_BP_MATV_Desert_C", ActorType.JeepTurret},
+            {"SD_BP_Technical2Seater_White_UB32_Child_C", ActorType.JeepArtillery},
+            {"SD_BP_Technical2Seater_White_M2_C", ActorType.JeepTurret},
+            {"SD_BP_Technical2Seater_White_SPG9_Child_C", ActorType.JeepAntitank},
+            {"SD_BP_Technical4Seater_Logi_Child_C", ActorType.JeepLogistics},
+            {"SD_BP_Technical4Seater_Transport_Child_C", ActorType.JeepTransport},
+            {"SD_BP_M113A3_TOW_C", ActorType.JeepAntitank},
+            {"SD_BP_Technical4Seater_Logi_Ukraine_C", ActorType.JeepLogistics},
+            {"SD_BP_Technical_Kornet_PMC_C", ActorType.JeepAntitank},
+            {"SD_BP_M1151_M2_Woodland_PMC_C", ActorType.JeepTurret},
+            {"BP_50Cal_M1151_USMC_Woodland_C", ActorType.JeepTurret},
+            {"SD_BP_M1151_Mk19_Woodland_PMC_C", ActorType.JeepTurret},
+            {"SD_BP_M1151_Logi_Woodland_C", ActorType.JeepLogistics},
+            {"SD_BP_CPV_Transport_C", ActorType.JeepTransport},
+            {"SD_BP_CPV_M134_C", ActorType.JeepTurret },
+            {"SD_BP_Cobra2_M2_C", ActorType.JeepTurret},
             {"SD_BP_Kamaz_5350_C", ActorType.TruckTransport},
             {"SD_BP_Kamaz_5350_Logi_C", ActorType.TruckLogistics},
             {"SD_BP_US_Util_Woodland_C", ActorType.TruckTransport},
@@ -725,9 +745,10 @@ namespace squad_dma {
             {"SD_BP_Brit_Util_Truck_Child_C", ActorType.TruckTransport},
             {"SD_BP_Brit_Util_Truck_Logi_Child_C", ActorType.TruckLogistics},
             {"SD_BP_Ural_375_Desert_Child_C", ActorType.TruckTransport},
+            {"SD_BP_Ural_375_Logi_INS_Child_C", ActorType.TruckLogistics},
 
+            {"SD_BP_M1126_m2_C", ActorType.APC},
             {"SD_BP_M1126_C", ActorType.APC},
-            {"BP_Caiman_US_C", ActorType.JeepRWSTurret},
             {"SD_BP_BTR4E_C", ActorType.APC},
             {"SD_BTR3E_C", ActorType.IFV},
             {"SD_BP_BMP3M_Woodland_C", ActorType.TrackedIFV},
@@ -742,14 +763,16 @@ namespace squad_dma {
             {"SD_BP_M113_25mm_C", ActorType.TrackedIFV},
             {"SD_BP_BMP1_INS_Child_C", ActorType.TrackedIFV},
             {"SD_BP_BTR-80_Child_C", ActorType.APC},
-            {"SD_BP_M1064_M121_TSF_Woodland", ActorType.TrackedAPC }, // what is this ? 
+            {"SD_BP_PARS3_MK19_Forest_C", ActorType.IFV},
+            {"SD_BP_M113_30mm_C", ActorType.TrackedIFV},
+            {"SD_BP_M2A2_C", ActorType.TrackedIFV},
 
             {"BP_M163_C", ActorType.AntiAir},
             {"BP_2k22m1_C", ActorType.AntiAir},
             {"SD_BP_BMP1_INS_ZU23_Child_C", ActorType.AntiAir},
 
             {"BP_MI28_C", ActorType.AttackHelicopter},
-            {"BP_MH6_C", ActorType.AttackHelicopter},
+            {"BP_MH6_C", ActorType.LoachCAS},
             {"SD_BP_UH60_CAS_C", ActorType.AttackHelicopter},
             {"BP_AH64_C", ActorType.AttackHelicopter},
             {"SD_BP_UH60_M240_C", ActorType.TransportHelicopter},
@@ -773,11 +796,12 @@ namespace squad_dma {
             {"SD_BP_Sprut_Forest_C", ActorType.TankMGS},
             {"SD_BP_M1128_C", ActorType.TankMGS},
             {"BP_M109A6_D_C", ActorType.TankMGS},
+            {"SD_BP_M1128_Woodland_C", ActorType.TankMGS},
             {"SD_BP_T62_Child_C", ActorType.Tank},
 
             {"BP_HIMARS_C", ActorType.TruckArtillery},
             {"SD_BP_M1064A3_M121_Woodland_C", ActorType.TrackedAPCArtillery},
-
+            {"SD_BP_M1064_M121_TSF_Woodland_C", ActorType.TrackedAPCArtillery},
         };
 
         public static readonly Dictionary<ActorType, SKBitmap> BitMaps = new(){
@@ -786,6 +810,8 @@ namespace squad_dma {
             {ActorType.AntiAir, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.AntiAir)},
             {ActorType.APC, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.APC)},
             {ActorType.AttackHelicopter, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.AttackHelicopter)},
+            {ActorType.LoachCAS, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.LoachCAS)},
+            {ActorType.LoachScout, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.LoachScout)},
             {ActorType.Boat, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.Boat)},
             {ActorType.DeployableAntiAir, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.DeployableAntiAir)},
             {ActorType.DeployableAntitank, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.DeployableAntitank)},
@@ -810,6 +836,7 @@ namespace squad_dma {
             {ActorType.Tank, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.Tank)},
             {ActorType.TankMGS, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.TankMGS)},
             {ActorType.TrackedAPC, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.TrackedAPC)},
+            {ActorType.TrackedLogistics, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.TrackedLogistics)},
             {ActorType.TrackedAPCArtillery, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.TrackedAPCArtillery)},
             {ActorType.TrackedIFV, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.TrackedIFV)},
             {ActorType.TrackedJeep, SkiaSharp.Views.Desktop.Extensions.ToSKBitmap(Properties.Resources.TrackedJeep)},
