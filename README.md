@@ -4,6 +4,19 @@
 ## Description
 Squad DMA Radar is a radar tool for Squad that provides real-time tracking of players/vehicles/deployables on a 2D map.
 
+## Mod Support
+- Global Escalation
+- Steel Division
+- Super mod (Soon?)
+- MEE (Soon?)
+
+## Features
+- POI placments for mortar calculations
+- Displays all friendly and enemy players in detail
+- Displays all vehicles / emplacments / deployables in detail
+- Auto selects the layer 
+- Displays a distance for any vehicle for anti-tank players
+
 ## Usage
 1. Clone the repository.
 2. Ensure all necessary dependencies are in place.
