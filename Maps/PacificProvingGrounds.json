@@ -1,5 +1,5 @@
 {
-  "mapID": ["PacificProvingGrounds"],
+  "mapID": ["PacificProvingGrounds", "SD_PacificProvingGrounds", "GE_PacificProvingGrounds"],
   "x": 2048,
   "y": 2049,
   "scale": 0.010158,

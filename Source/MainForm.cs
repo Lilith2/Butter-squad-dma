@@ -298,19 +298,15 @@ namespace squad_dma
                 dir.Create();
 
             var configs = dir.GetFiles("*.json");
-            //Debug.WriteLine($"Found {configs.Length} .json map configs.");
             if (configs.Length == 0)
                 throw new IOException("No .json map configs found!");
 
             foreach (var config in configs)
             {
                 var name = Path.GetFileNameWithoutExtension(config.Name);
-                //Debug.WriteLine($"Loading Map: {name}");
-                var mapConfig = MapConfig.LoadFromFile(config.FullName); // Assuming LoadFromFile is updated to handle new JSON format
-                //Add map ID to map config
-                var mapID = mapConfig.MapID[0];
-                var map = new Map(name.ToUpper(), mapConfig, config.FullName, mapID);
-                // Assuming map.ConfigFile now has a 'mapLayers' property that is a List of a new type matching the JSON structure
+                var mapConfig = MapConfig.LoadFromFile(config.FullName);
+                var map = new Map(name.ToUpper(), mapConfig, config.FullName);
+
                 map.ConfigFile.MapLayers = map.ConfigFile
                     .MapLayers
                     .OrderBy(x => x.MinHeight)
@@ -319,7 +315,6 @@ namespace squad_dma
                 _maps.Add(map);
             }
         }
-
         private void LoadConfig()
         {
             #region Settings
@@ -482,19 +477,21 @@ namespace squad_dma
         private void UpdateSelectedMap()
         {
             string currentMap = this.MapName;
-            string currentMapPrefix = currentMap.ToLower().Substring(0, Math.Min(6, currentMap.Length));
 
-            if (_selectedMap is null || !_selectedMap.MapID.ToLower().StartsWith(currentMapPrefix))
+            if (_selectedMap is null || !_selectedMap.ConfigFile.MapID.Any(id => id.Equals(currentMap, StringComparison.OrdinalIgnoreCase)))
             {
-                var selectedMapName = _maps.FirstOrDefault(x => x.MapID.ToLower().StartsWith(currentMapPrefix) || x.MapID.ToLower() == currentMap.ToLower());
+                var selectedMap = _maps.FirstOrDefault(x => x.ConfigFile.MapID.Any(id => id.Equals(currentMap, StringComparison.OrdinalIgnoreCase)));
 
-                if (selectedMapName is not null)
+                if (selectedMap is not null)
                 {
-                    _selectedMap = selectedMapName;
+                    _selectedMap = selectedMap;
 
-                    // Init map
                     CleanupLoadedBitmaps();
                     LoadMapBitmaps();
+                }
+                else
+                {
+                    Console.WriteLine("No matching map found!"); // Debug logging
                 }
             }
         }
@@ -521,10 +518,17 @@ namespace squad_dma
             {
                 lock (_loadMapBitmapsLock)
                 {
-                    using (var stream = File.Open(mapLayer.Filename, FileMode.Open, FileAccess.Read))
+                    try
                     {
-                        _loadedBitmaps[mapLayers.IndexOf(mapLayer)] = SKBitmap.Decode(stream);
-                        _loadedBitmaps[mapLayers.IndexOf(mapLayer)].SetImmutable();
+                        using (var stream = File.Open(mapLayer.Filename, FileMode.Open, FileAccess.Read))
+                        {
+                            _loadedBitmaps[mapLayers.IndexOf(mapLayer)] = SKBitmap.Decode(stream);
+                            _loadedBitmaps[mapLayers.IndexOf(mapLayer)].SetImmutable();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error loading map layer: {ex.Message}");
                     }
                 }
             });

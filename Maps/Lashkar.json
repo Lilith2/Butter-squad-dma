@@ -1,5 +1,5 @@
 {
-  "mapID": ["Lashkar"],
+  "mapID": ["Lashkar", "GE_Lashkar", "SD_Lashkar"],
   "x": 2047,
   "y": 2047.5,
   "scale": 0.00946,

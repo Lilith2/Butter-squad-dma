@@ -86,12 +86,19 @@ namespace squad_dma
         /// </summary>
         public void DrawTechMarker(SKCanvas canvas, UActor actor)
         {
-            var scale = 0.2f;
-            if (actor.ActorType == ActorType.Mine) {
-                scale /= 1.5f;
+            var scale = 0.2f; // Default scale for most icons
+
+            if (actor.ActorType == ActorType.Mine)
+            {
+                scale /= 1.5f; // Shrink
+            }
+            else if (actor.ActorType == ActorType.Drone)
+            {
+                scale *= 1.5f; // Enlarge
             }
 
-            if (!Names.BitMaps.TryGetValue(actor.ActorType, out SKBitmap skBitMap)) {
+            if (!Names.BitMaps.TryGetValue(actor.ActorType, out SKBitmap skBitMap))
+            {
                 return;
             }
             var icon = skBitMap;
@@ -100,9 +107,12 @@ namespace squad_dma
             var iconHeight = icon.Height * scale;
             var point = this.GetPoint();
             var rotation = actor.Rotation.X + 90;
-            if (Names.DoNotRotate.Contains(actor.ActorType)) {
+            if (Names.DoNotRotate.Contains(actor.ActorType))
+            {
                 rotation = 0;
-            } else if (Names.RotateBy45Degrees.Contains(actor.ActorType)) {
+            }
+            else if (Names.RotateBy45Degrees.Contains(actor.ActorType))
+            {
                 rotation -= 45;
             }
             SKMatrix matrix = SKMatrix.CreateTranslation(point.X, point.Y);
@@ -240,15 +250,12 @@ namespace squad_dma
         /// </summary>
         public readonly string ConfigFilePath;
 
-        public Map(string name, MapConfig config, string configPath, string mapID)
+        public Map(string name, MapConfig config, string configPath)
         {
             Name = name;
             ConfigFile = config;
             ConfigFilePath = configPath;
-            MapID = mapID;
         }
-
-        public readonly string MapID;
     }
 
     /// <summary>
@@ -292,7 +299,7 @@ namespace squad_dma
         };
 
         [JsonPropertyName("mapID")]
-        public List<string> MapID { get; set; } // New property for map IDs
+        public List<string> MapID { get; set; } // List of possible map IDs
 
         [JsonPropertyName("x")]
         public float X { get; set; }
@@ -303,7 +310,6 @@ namespace squad_dma
         [JsonPropertyName("scale")]
         public float Scale { get; set; }
 
-        // Updated to match new JSON format
         [JsonPropertyName("mapLayers")]
         public List<MapLayer> MapLayers { get; set; }
 

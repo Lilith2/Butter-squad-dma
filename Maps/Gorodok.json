@@ -1,5 +1,5 @@
 {
-  "mapID": ["Gorodok"],
+  "mapID": ["Gorodok", "SD_Gorodok", "GE_Gorodok"],
   "x": 2047.5,
   "y": 2048,
   "scale": 0.01007,

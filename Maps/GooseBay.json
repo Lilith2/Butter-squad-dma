@@ -1,5 +1,5 @@
 {
-  "mapID": ["GooseBay"],
+  "mapID": ["GooseBay", "GE_GooseBay", "SD_GooseBay"],
   "x": 2048.5,
   "y": 2049,
   "scale": 0.01016,
