@@ -117,16 +117,16 @@ namespace squad_dma
                         names[item.Key] = item.Value.Replace("BP_UAF", "BP_Soldier_UAF");
                     }
 
-                    /*if (!_loggedVehicles)
+                    /*if (!_loggedVehicles) // Debugging purposes only
                     {
                         foreach (var nameEntry in names)
                         {
-                            if (!Names.TechNames.ContainsKey(nameEntry.Value))
+                            if (!nameEntry.Value.StartsWith("BP_Soldier"))
                             {
                                 Program.Log($"{nameEntry.Key} {nameEntry.Value}");
                             }
                         }
-                        _loggedVehicles = true; // Ensures this block only runs once
+                        _loggedVehicles = true;
                     }*/
                 }
                 var playersNameIDs = names.Where(x => x.Value.StartsWith("BP_Soldier") || Names.TechNames.ContainsKey(x.Value)).ToDictionary();

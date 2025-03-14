@@ -190,9 +190,10 @@ namespace squad_dma
         /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) => keyData switch
         {
-            Keys.F1 => ZoomIn(5),
-            Keys.F2 => ZoomOut(5),
-            Keys.F5 => ToggleMap(),
+        Keys.F1 => ZoomIn(5),
+        Keys.F2 => ZoomOut(5),
+        Keys.F5 => ToggleMap(),
+        Keys.F11 => ToggleFullscreen(FormBorderStyle is FormBorderStyle.Sizable),
             _ => base.ProcessCmdKey(ref msg, keyData),
         };
 
@@ -337,6 +338,30 @@ namespace squad_dma
             InitiateUIScaling();
         }
         #endregion
+
+        private bool ToggleFullscreen(bool toFullscreen)
+        {
+            var screen = Screen.FromControl(this);
+
+            if (toFullscreen)
+            {
+                WindowState = FormWindowState.Normal;
+                FormBorderStyle = FormBorderStyle.None;
+                Location = new Point(screen.Bounds.Left, screen.Bounds.Top);
+                Width = screen.Bounds.Width;
+                Height = screen.Bounds.Height;
+            }
+            else
+            {
+                FormBorderStyle = FormBorderStyle.Sizable;
+                WindowState = FormWindowState.Normal;
+                Width = 1280;
+                Height = 720;
+                CenterToScreen();
+            }
+
+            return true;
+        }
 
         #region General Event Handlers
         private async void frmMain_Shown(object sender, EventArgs e)

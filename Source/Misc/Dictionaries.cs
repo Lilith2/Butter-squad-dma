@@ -79,7 +79,7 @@ namespace squad_dma {
             {"BP_CTM131_Logistic_Naval_C", ActorType.TruckLogistics},
 
             // Jeeps
-            {"BP_Technical4Seater_Transport_C", ActorType.JeepTransport},
+            {"BP_Technical4Seater_Transport_C", ActorType.JeepTransport}, // Candy van labeled wrong
             {"BP_Technical4Seater_Logi_C", ActorType.JeepLogistics},
             {"BP_Technical2Seater_White_M2_C", ActorType.JeepTurret},
             {"BP_Technical2Seater_White_Dshk_C", ActorType.JeepTurret},
@@ -712,7 +712,7 @@ namespace squad_dma {
             {"SD_BP_MATV_Mk19_Woodland_C", ActorType.JeepTurret},
             {"SD_BP_MATV_Woodland_C", ActorType.JeepTurret},
             {"SD_BP_LPPV_M2RWS_Child_C", ActorType.JeepRWSTurret},
-            {"BP_M1151_BMPVEE_Child_C", ActorType.JeepAntitank},
+            {"BP_M1151_BMPVEE_Child_C", ActorType.JeepTurret},
             {"SD_BP_M1151_Child_C", ActorType.JeepTurret},
             {"SD_BP_Technical_Dshk_INS_Armoured_Child_C", ActorType.JeepTurret},
             {"SD_BP_TAPV_woodland_C", ActorType.JeepRWSTurret},
@@ -725,10 +725,10 @@ namespace squad_dma {
             {"SD_BP_Technical2Seater_White_M2_C", ActorType.JeepTurret},
             {"SD_BP_Technical2Seater_White_SPG9_Child_C", ActorType.JeepAntitank},
             {"SD_BP_Technical4Seater_Logi_Child_C", ActorType.JeepLogistics},
-            {"SD_BP_Technical4Seater_Transport_Child_C", ActorType.JeepTransport},
             {"SD_BP_M113A3_TOW_C", ActorType.JeepAntitank},
             {"SD_BP_Technical4Seater_Logi_Ukraine_C", ActorType.JeepLogistics},
             {"SD_BP_Technical_Kornet_PMC_C", ActorType.JeepAntitank},
+            {"SD_BP_BRDM-2_Spandrel_INS_Child_C", ActorType.JeepAntitank},
             {"SD_BP_M1151_M2_Woodland_PMC_C", ActorType.JeepTurret},
             {"BP_50Cal_M1151_USMC_Woodland_C", ActorType.JeepTurret},
             {"SD_BP_M1151_Mk19_Woodland_PMC_C", ActorType.JeepTurret},
@@ -753,6 +753,11 @@ namespace squad_dma {
             {"BP_CROWS_M2_Ejder_C", ActorType.JeepRWSTurret},
             {"SD_BP_BMC_UMOG_Logi_Desert_C", ActorType.TruckLogistics},
             {"SD_BP_BMC_UMOG_Transport_Desert_C", ActorType.TruckTransport},
+            {"SD_BP_US_Util_Desert_C", ActorType.TruckTransport},
+            {"SD_BP_US_Util_Desert_Logi_C", ActorType.TruckLogistics},
+            {"SD_BP_Technical4Seater_Transport_Child_C", ActorType.JeepTransport},
+
+            {"SD_BP_minsk_Child_C", ActorType.Motorcycle},
 
             {"SD_BP_M1126_m2_C", ActorType.APC},
             {"SD_BP_M1126_C", ActorType.APC},
@@ -778,6 +783,7 @@ namespace squad_dma {
             {"SD_BP_BTR_90_Desert_C", ActorType.IFV},
             {"SD_BP_BTR82A_Desert_C", ActorType.IFV},
             {"SD_BP_PARS3_Desert_C", ActorType.IFV},
+            {"SD_BP_BFV_Desert_C", ActorType.TrackedIFV},
 
             {"BP_M163_C", ActorType.AntiAir},
             {"BP_2k22m1_C", ActorType.AntiAir},
@@ -811,10 +817,12 @@ namespace squad_dma {
             {"SD_BP_M1128_Woodland_C", ActorType.TankMGS},
             {"SD_BP_T62_Child_C", ActorType.Tank},
             {"SD_BP_Altay_Cage_Desert_C", ActorType.Tank},
+            {"BP_M1A2_Child_C", ActorType.Tank },
 
             {"BP_HIMARS_C", ActorType.TruckArtillery},
             {"SD_BP_M1064A3_M121_Woodland_C", ActorType.TrackedAPCArtillery},
             {"SD_BP_M1064_M121_TSF_Woodland_C", ActorType.TrackedAPCArtillery},
+            {"BP_M109_Turret_C", ActorType.TrackedAPCArtillery}
         };
 
         public static readonly Dictionary<ActorType, SKBitmap> BitMaps = new(){
