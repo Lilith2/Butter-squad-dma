@@ -746,6 +746,13 @@ namespace squad_dma {
             {"SD_BP_Brit_Util_Truck_Logi_Child_C", ActorType.TruckLogistics},
             {"SD_BP_Ural_375_Desert_Child_C", ActorType.TruckTransport},
             {"SD_BP_Ural_375_Logi_INS_Child_C", ActorType.TruckLogistics},
+            {"SD_BP_Tigr_Desert_C", ActorType.JeepTurret},
+            {"SD_BP_Kamaz_5350_Logi_Desert_C", ActorType.TruckLogistics},
+            {"SD_BP_Tigr_Kord_Turret_Desert_C", ActorType.JeepTurret},
+            {"SD_BP_Kamaz_5350_Desert_C", ActorType.TruckTransport},
+            {"BP_CROWS_M2_Ejder_C", ActorType.JeepRWSTurret},
+            {"SD_BP_BMC_UMOG_Logi_Desert_C", ActorType.TruckLogistics},
+            {"SD_BP_BMC_UMOG_Transport_Desert_C", ActorType.TruckTransport},
 
             {"SD_BP_M1126_m2_C", ActorType.APC},
             {"SD_BP_M1126_C", ActorType.APC},
@@ -766,6 +773,11 @@ namespace squad_dma {
             {"SD_BP_PARS3_MK19_Forest_C", ActorType.IFV},
             {"SD_BP_M113_30mm_C", ActorType.TrackedIFV},
             {"SD_BP_M2A2_C", ActorType.TrackedIFV},
+            {"SD_BP_BMP2M_Desert_C", ActorType.TrackedIFV},
+            {"SD_BP_BMP3M_Desert_C", ActorType.TrackedIFV},
+            {"SD_BP_BTR_90_Desert_C", ActorType.IFV},
+            {"SD_BP_BTR82A_Desert_C", ActorType.IFV},
+            {"SD_BP_PARS3_Desert_C", ActorType.IFV},
 
             {"BP_M163_C", ActorType.AntiAir},
             {"BP_2k22m1_C", ActorType.AntiAir},
@@ -798,6 +810,7 @@ namespace squad_dma {
             {"BP_M109A6_D_C", ActorType.TankMGS},
             {"SD_BP_M1128_Woodland_C", ActorType.TankMGS},
             {"SD_BP_T62_Child_C", ActorType.Tank},
+            {"SD_BP_Altay_Cage_Desert_C", ActorType.Tank},
 
             {"BP_HIMARS_C", ActorType.TruckArtillery},
             {"SD_BP_M1064A3_M121_Woodland_C", ActorType.TrackedAPCArtillery},

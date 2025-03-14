@@ -110,8 +110,10 @@ namespace squad_dma
                     }
                 }
                 var names = Memory.GetNamesById([.. actorBaseWithName.Values.Distinct()]);
-                foreach (var item in names) {
-                    if (item.Value.StartsWith("BP_UAF")) {
+                foreach (var item in names)
+                {
+                    if (item.Value.StartsWith("BP_UAF"))
+                    {
                         names[item.Key] = item.Value.Replace("BP_UAF", "BP_Soldier_UAF");
                     }
 
@@ -119,14 +121,13 @@ namespace squad_dma
                     {
                         foreach (var nameEntry in names)
                         {
-                            if (nameEntry.Value.Contains("BP") || (nameEntry.Value.Contains("SD")))
+                            if (!Names.TechNames.ContainsKey(nameEntry.Value))
                             {
                                 Program.Log($"{nameEntry.Key} {nameEntry.Value}");
                             }
                         }
                         _loggedVehicles = true; // Ensures this block only runs once
                     }*/
-
                 }
                 var playersNameIDs = names.Where(x => x.Value.StartsWith("BP_Soldier") || Names.TechNames.ContainsKey(x.Value)).ToDictionary();
                 var filteredActors = actorBaseWithName.Where(actor => playersNameIDs.ContainsKey(actor.Value)).Select(actor => actor.Key).ToList();
