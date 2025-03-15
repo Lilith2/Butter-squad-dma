@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 using SkiaSharp;
@@ -117,6 +117,9 @@ namespace squad_dma
 
             InitializeComponent();
             SetDarkMode(ref _darkmode);
+            this.Size = new Size(1280, 720);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.WindowState = FormWindowState.Normal;
 
             _mapCanvas = new SKGLControl()
             {
@@ -137,7 +140,7 @@ namespace squad_dma
             this.Shown += frmMain_Shown;
 
             _mapCanvas.PaintSurface += skMapCanvas_PaintSurface;
-            _mapCanvas.MouseMove += skMapCanvas_MouseMove;;
+            _mapCanvas.MouseMove += skMapCanvas_MouseMove; ;
             _mapCanvas.MouseDown += skMapCanvas_MouseDown;
             _mapCanvas.MouseDoubleClick += skMapCanvas_MouseDoubleClick;
             _mapCanvas.MouseUp += skMapCanvas_MouseUp;
@@ -163,11 +166,11 @@ namespace squad_dma
         private void SetDarkMode(ref DarkModeCS darkmode)
         {
             darkmode = new DarkModeCS(this);
-           // if (darkmode.IsDarkMode)
-           // {
-           //     SharedPaints.PaintBitmap.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
+            // if (darkmode.IsDarkMode)
+            // {
+            //     SharedPaints.PaintBitmap.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
             //    SharedPaints.PaintBitmapAlpha.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
-           // }
+            // }
         }
 
         /// <summary>
@@ -190,10 +193,10 @@ namespace squad_dma
         /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) => keyData switch
         {
-        Keys.F1 => ZoomIn(5),
-        Keys.F2 => ZoomOut(5),
-        Keys.F5 => ToggleMap(),
-        Keys.F11 => ToggleFullscreen(FormBorderStyle is FormBorderStyle.Sizable),
+            Keys.F1 => ZoomIn(5),
+            Keys.F2 => ZoomOut(5),
+            Keys.F5 => ToggleMap(),
+            Keys.F11 => ToggleFullscreen(FormBorderStyle is FormBorderStyle.Sizable),
             _ => base.ProcessCmdKey(ref msg, keyData),
         };
 
@@ -457,11 +460,11 @@ namespace squad_dma
                     var fps = _fps;
                     var memTicks = Memory.Ticks;
 
-                   // if (lblFPS.Text != fps.ToString())
-                   //    lblFPS.Text = $"{fps}";
+                    // if (lblFPS.Text != fps.ToString())
+                    //    lblFPS.Text = $"{fps}";
 
-                  //  if (lblMems.Text != memTicks.ToString())
-                   //     lblMems.Text = $"{memTicks}";
+                    //  if (lblMems.Text != memTicks.ToString())
+                    //     lblMems.Text = $"{memTicks}";
                     #endregion
 
                     _fpsWatch.Restart();
@@ -690,7 +693,7 @@ namespace squad_dma
                     }
                 }
             }
-        }  
+        }
 
         private void DrawActor(SKCanvas canvas, UActor actor, MapPosition actorZoomedPos, int aimlineLength, MapPosition localPlayerMapPos)
         {
@@ -816,7 +819,7 @@ namespace squad_dma
             int distanceMeters = (int)Math.Round(distance / 100);
             string[] lines =
             {
-                $"{(int)Math.Round(bearing)}�",
+                $"{(int)Math.Round(bearing)}°",
                 $"{distanceMeters}m"
             };
 
@@ -1149,7 +1152,7 @@ namespace squad_dma
                     if (SKPoint.Distance(mousePos, poiPos) < 20 * _uiScale) // 20px hover threshold
                     {
                         _hoveredPoi = poi;
-                        break; 
+                        break;
                     }
                 }
             }
@@ -1169,7 +1172,7 @@ namespace squad_dma
             if (e.Button == MouseButtons.Right && _hoveredPoi != null)
             {
                 _pointsOfInterest.Remove(_hoveredPoi);
-                _hoveredPoi = null; 
+                _hoveredPoi = null;
                 _mapCanvas.Invalidate();
             }
         }

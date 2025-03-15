@@ -5,249 +5,10 @@ using System.Numerics;
 
 namespace squad_dma
 {
-    /// <summary>
-    /// Defines map position for the 2D Map.
-    /// </summary>
-    public struct MapPosition
-    {
-        public MapPosition()
-        {
-        }
-        /// <summary>
-        /// Contains the Skia Interface (UI) Scaling Value.
-        /// </summary>
-        public float UIScale = 0;
-        /// <summary>
-        /// X coordinate on Bitmap.
-        /// </summary>
-        public float X = 0;
-        /// <summary>
-        /// Y coordinate on Bitmap.
-        /// </summary>
-        public float Y = 0;
-        /// <summary>
-        /// Unit 'height' as determined by Vector3.Z
-        /// </summary>
-        public float Height = 0;
-
-        /// <summary>
-        /// Get exact player location (with optional X,Y offsets).
-        /// </summary>
-        public SKPoint GetPoint(float xOff = 0, float yOff = 0)
-        {
-            return new SKPoint(X + xOff, Y + yOff);
-        }
-        /// <summary>
-        /// Gets the point where the Aimline 'Line' ends. Applies UI Scaling internally.
-        /// </summary>
-        private SKPoint GetAimlineEndpoint(double radians, float aimlineLength)
-        {
-            aimlineLength *= UIScale;
-            return new SKPoint((float)(this.X + Math.Cos(radians) * aimlineLength), (float)(this.Y + Math.Sin(radians) * aimlineLength));
-        }
-        /// <summary>
-        /// Draws a Player Marker on this location.
-        /// </summary>
-        public void DrawPlayerMarker(SKCanvas canvas, UActor player, int aimlineLength)
-        {
-            var radians = player.Rotation.X.ToRadians();
-            SKPaint paint = player.GetEntityPaint();
-
-            // Draw the outline for the player marker
-            SKPaint outlinePaint = new SKPaint
-            {
-                Color = SKColors.Black, // Outline color
-                StrokeWidth = paint.StrokeWidth + 2f * UIScale, // Thicker outline
-                Style = SKPaintStyle.Stroke,
-                IsAntialias = true,
-                FilterQuality = SKFilterQuality.High
-            };
-
-            var size = 6 * UIScale;
-            canvas.DrawCircle(this.GetPoint(), size, outlinePaint); // Draw outline
-            canvas.DrawCircle(this.GetPoint(), size, paint); // Draw player marker
-
-            // Draw the outline for the aimline
-            var aimlineEnd = this.GetAimlineEndpoint(radians, aimlineLength);
-            canvas.DrawLine(this.GetPoint(), aimlineEnd, outlinePaint); // Draw aimline outline
-            canvas.DrawLine(this.GetPoint(), aimlineEnd, paint); // Draw aimline
-        }
-        /// <summary>
-        /// Draws a Projectile on this location.
-        /// </summary>
-        public void DrawProjectile(SKCanvas canvas, UActor projectile)
-        {
-            SKPaint paint = projectile.GetProjectilePaint();
-
-            canvas.DrawCircle(this.GetPoint(), 4 * UIScale, paint);
-        }
-        /// <summary>
-        /// Draws a Tech Marker on this location.
-        /// </summary>
-        public void DrawTechMarker(SKCanvas canvas, UActor actor)
-        {
-            var scale = 0.2f; // Default scale for most icons
-
-            if (actor.ActorType == ActorType.Mine)
-            {
-                scale /= 1.5f; // Shrink
-            }
-            else if (actor.ActorType == ActorType.Drone)
-            {
-                scale *= 1.5f; // Enlarge
-            }
-
-            if (!Names.BitMaps.TryGetValue(actor.ActorType, out SKBitmap skBitMap))
-            {
-                return;
-            }
-            var icon = skBitMap;
-
-            var iconWidth = icon.Width * scale;
-            var iconHeight = icon.Height * scale;
-            var point = this.GetPoint();
-            var rotation = actor.Rotation.X + 90;
-            if (Names.DoNotRotate.Contains(actor.ActorType))
-            {
-                rotation = 0;
-            }
-            else if (Names.RotateBy45Degrees.Contains(actor.ActorType))
-            {
-                rotation -= 45;
-            }
-            SKMatrix matrix = SKMatrix.CreateTranslation(point.X, point.Y);
-            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateRotationDegrees(rotation));
-            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateTranslation(-iconWidth / 2, -iconHeight / 2));
-
-            canvas.Save();
-            canvas.SetMatrix(matrix);
-            canvas.DrawBitmap(icon, SKRect.Create(iconWidth, iconHeight), SKPaints.PaintBitmap);
-            canvas.Restore();
-        }
-        /// <summary>
-        /// Draws Player Text on this location.
-        /// </summary>
-        public void DrawActorText(SKCanvas canvas, UActor actor, string[] lines)
-        {
-            if (lines == null || lines.Length == 0)
-                return;
-
-            SKPaint textPaint = actor.GetTextPaint();
-            SKPaint outlinePaint = Extensions.GetTextOutlinePaint();
-            SKPoint iconPosition = this.GetPoint(0, 0); 
-
-            float horizontalOffset = 15 * UIScale; // Adjust this value for horizontal separation
-            float verticalOffset = 5 * UIScale;   // Adjust this value for vertical separation
-
-            SKPoint textPosition = new SKPoint(iconPosition.X + horizontalOffset, iconPosition.Y + verticalOffset);
-
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrEmpty(line?.Trim()))
-                    continue;
-
-                canvas.DrawText(line, textPosition, outlinePaint);
-                canvas.DrawText(line, textPosition, textPaint);
-
-                textPosition.Y += 12 * UIScale;
-            }
-        }
-        /// <summary>
-        /// Draws player tool tip based on if theyre alive or not
-        /// </summary>
-        public void DrawToolTip(SKCanvas canvas, UActor actor)
-        {
-            if (!actor.IsAlive)
-            {
-                //DrawCorpseTooltip(canvas, player);
-                return;
-            }
-
-            DrawHostileTooltip(canvas, actor);
-        }
-        /// <summary>
-        /// Draws tool tip of hostile players 
-        /// </summary>
-        private void DrawHostileTooltip(SKCanvas canvas, UActor actor)
-        {
-            var lines = new List<string>();
-
-            lines.Insert(0, actor.Name);
-
-            DrawToolTip(canvas, string.Join("\n", lines));
-        }
-        /// <summary>
-        /// Draws the tool tip for players/hostiles
-        /// </summary>
-        private void DrawToolTip(SKCanvas canvas, string tooltipText)
-        {
-            var lines = tooltipText.Split('\n');
-            var maxWidth = 0f;
-
-            foreach (var line in lines)
-            {
-                var width = SKPaints.TextBase.MeasureText(line);
-                maxWidth = Math.Max(maxWidth, width);
-            }
-
-            var textSpacing = 12 * UIScale;
-            var padding = 3 * UIScale;
-
-            var height = lines.Length * textSpacing;
-
-            var left = X + padding;
-            var top = Y - padding;
-            var right = left + maxWidth + padding * 2;
-            var bottom = top + height + padding * 2;
-
-            var backgroundRect = new SKRect(left, top, right, bottom);
-            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
-
-            var y = bottom - (padding * 1.5f);
-            foreach (var line in lines)
-            {
-                canvas.DrawText(line, left + padding, y, SKPaints.TextBase);
-                y -= textSpacing;
-            }
-        }
-
-        /// <summary>
-        /// Draws the tool tip for players/hostiles with distance
-        /// </summary>
-        public void DrawToolTip(SKCanvas canvas, UActor actor, string distanceText)
-        {
-            if (!actor.IsAlive)
-            {
-                //DrawCorpseTooltip(canvas, player);
-                return;
-            }
-
-            var lines = new List<string>();
-
-            // Add the player name and distance to the tooltip
-            lines.Insert(0, actor.Name);
-            lines.Insert(1, $"Distance: {distanceText}");
-
-            DrawToolTip(canvas, string.Join("\n", lines));
-        }
-    }
-
-    /// <summary>
-    /// Defines a Map for use in the GUI.
-    /// </summary>
     public class Map
     {
-        /// <summary>
-        /// Name of map (Ex: Customs)
-        /// </summary>
         public readonly string Name;
-        /// <summary>
-        /// 'MapConfig' class instance
-        /// </summary>
         public readonly MapConfig ConfigFile;
-        /// <summary>
-        /// File path to Map .JSON Config
-        /// </summary>
         public readonly string ConfigFilePath;
 
         public Map(string name, MapConfig config, string configPath)
@@ -258,38 +19,15 @@ namespace squad_dma
         }
     }
 
-    /// <summary>
-    /// Contains multiple map parameters used by the GUI.
-    /// </summary>
     public class MapParameters
     {
-        /// <summary>
-        /// Contains the Skia Interface (UI) Scaling Value.
-        /// </summary>
         public float UIScale;
-        /// <summary>
-        /// Contains the 'index' of which map layer to display.
-        /// For example: Labs has 3 floors, so there is a Bitmap image for 'each' floor.
-        /// Index is dependent on LocalPlayer height.
-        /// </summary>
         public int MapLayerIndex;
-        /// <summary>
-        /// Rectangular 'zoomed' bounds of the Bitmap to display.
-        /// </summary>
         public SKRect Bounds;
-        /// <summary>
-        /// Regular -> Zoomed 'X' Scale correction.
-        /// </summary>
         public float XScale;
-        /// <summary>
-        /// Regular -> Zoomed 'Y' Scale correction.
-        /// </summary>
         public float YScale;
     }
 
-    /// <summary>
-    /// Defines a .JSON Map Config File
-    /// </summary>
     public class MapConfig
     {
         [JsonIgnore]
@@ -333,5 +71,219 @@ namespace squad_dma
 
         [JsonPropertyName("filename")]
         public string Filename { get; set; }
+    }
+
+    public struct MapPosition
+    {
+        public MapPosition() { }
+        public float UIScale = 0;
+        public float X = 0;
+        public float Y = 0;
+        public float Height = 0;
+
+
+        public SKPoint GetPoint(float xOff = 0, float yOff = 0)
+        {
+            return new SKPoint(X + xOff, Y + yOff);
+        }
+
+        private SKPoint GetAimlineEndpoint(double radians, float aimlineLength)
+        {
+            aimlineLength *= UIScale;
+            return new SKPoint((float)(this.X + Math.Cos(radians) * aimlineLength), (float)(this.Y + Math.Sin(radians) * aimlineLength));
+        }
+
+        public void DrawPlayerMarker(SKCanvas canvas, UActor player, int aimlineLength)
+        {
+            var radians = player.Rotation.X.ToRadians();
+            SKPaint paint = player.GetEntityPaint();
+
+            // Draw the outline for the player marker
+            SKPaint outlinePaint = new SKPaint
+            {
+                Color = SKColors.Black,
+                StrokeWidth = paint.StrokeWidth + 2f * UIScale, 
+                Style = SKPaintStyle.Stroke,
+                IsAntialias = true,
+                FilterQuality = SKFilterQuality.High
+            };
+
+            var size = 6 * UIScale;
+            canvas.DrawCircle(this.GetPoint(), size, outlinePaint); 
+            canvas.DrawCircle(this.GetPoint(), size, paint); 
+
+            var aimlineEnd = this.GetAimlineEndpoint(radians, aimlineLength);
+            canvas.DrawLine(this.GetPoint(), aimlineEnd, outlinePaint);
+            canvas.DrawLine(this.GetPoint(), aimlineEnd, paint); 
+        }
+
+        public void DrawProjectile(SKCanvas canvas, UActor projectile)
+        {
+            SKPaint paint = projectile.GetProjectilePaint();
+
+            float crosshairSize = 8 * UIScale; 
+            float crosshairThickness = 2 * UIScale; 
+
+            SKPoint center = this.GetPoint();
+
+            canvas.DrawLine(
+                center.X - crosshairSize, center.Y,
+                center.X + crosshairSize, center.Y,
+                new SKPaint
+                {
+                    Color = paint.Color,
+                    StrokeWidth = crosshairThickness,
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Stroke
+                }
+            );
+
+            canvas.DrawLine(
+                center.X, center.Y - crosshairSize,
+                center.X, center.Y + crosshairSize,
+                new SKPaint
+                {
+                    Color = paint.Color,
+                    StrokeWidth = crosshairThickness,
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Stroke
+                }
+            );
+        }
+
+        public void DrawTechMarker(SKCanvas canvas, UActor actor)
+        {
+            var scale = 0.2f; // Default scale for most icons
+
+            if (actor.ActorType == ActorType.Mine)
+            {
+                scale /= 1.5f; // Shrink
+            }
+            else if (actor.ActorType == ActorType.Drone)
+            {
+                scale *= 1.5f; // Enlarge
+            }
+
+            if (!Names.BitMaps.TryGetValue(actor.ActorType, out SKBitmap skBitMap))
+            {
+                return;
+            }
+            var icon = skBitMap;
+
+            var iconWidth = icon.Width * scale;
+            var iconHeight = icon.Height * scale;
+            var point = this.GetPoint();
+            var rotation = actor.Rotation.X + 90;
+            if (Names.DoNotRotate.Contains(actor.ActorType))
+            {
+                rotation = 0;
+            }
+            else if (Names.RotateBy45Degrees.Contains(actor.ActorType))
+            {
+                rotation -= 45;
+            }
+            SKMatrix matrix = SKMatrix.CreateTranslation(point.X, point.Y);
+            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateRotationDegrees(rotation));
+            matrix = SKMatrix.Concat(matrix, SKMatrix.CreateTranslation(-iconWidth / 2, -iconHeight / 2));
+
+            canvas.Save();
+            canvas.SetMatrix(matrix);
+            canvas.DrawBitmap(icon, SKRect.Create(iconWidth, iconHeight), SKPaints.PaintBitmap);
+            canvas.Restore();
+        }
+
+        public void DrawActorText(SKCanvas canvas, UActor actor, string[] lines)
+        {
+            if (lines == null || lines.Length == 0)
+                return;
+
+            SKPaint textPaint = actor.GetTextPaint();
+            SKPaint outlinePaint = Extensions.GetTextOutlinePaint();
+            SKPoint iconPosition = this.GetPoint(0, 0);
+
+            float horizontalOffset = 15 * UIScale; // Adjust this value for horizontal separation
+            float verticalOffset = 5 * UIScale;   // Adjust this value for vertical separation
+
+            SKPoint textPosition = new SKPoint(iconPosition.X + horizontalOffset, iconPosition.Y + verticalOffset);
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrEmpty(line?.Trim()))
+                    continue;
+
+                canvas.DrawText(line, textPosition, outlinePaint);
+                canvas.DrawText(line, textPosition, textPaint);
+
+                textPosition.Y += 12 * UIScale;
+            }
+        }
+
+        public void DrawToolTip(SKCanvas canvas, UActor actor)
+        {
+            if (!actor.IsAlive)
+            {
+                //DrawCorpseTooltip(canvas, player);
+                return;
+            }
+
+            DrawHostileTooltip(canvas, actor);
+        }
+
+        private void DrawHostileTooltip(SKCanvas canvas, UActor actor)
+        {
+            var lines = new List<string>();
+
+            lines.Insert(0, actor.Name);
+
+            DrawToolTip(canvas, string.Join("\n", lines));
+        }
+        private void DrawToolTip(SKCanvas canvas, string tooltipText)
+        {
+            var lines = tooltipText.Split('\n');
+            var maxWidth = 0f;
+
+            foreach (var line in lines)
+            {
+                var width = SKPaints.TextBase.MeasureText(line);
+                maxWidth = Math.Max(maxWidth, width);
+            }
+
+            var textSpacing = 12 * UIScale;
+            var padding = 3 * UIScale;
+
+            var height = lines.Length * textSpacing;
+
+            var left = X + padding;
+            var top = Y - padding;
+            var right = left + maxWidth + padding * 2;
+            var bottom = top + height + padding * 2;
+
+            var backgroundRect = new SKRect(left, top, right, bottom);
+            canvas.DrawRect(backgroundRect, SKPaints.PaintTransparentBacker);
+
+            var y = bottom - (padding * 1.5f);
+            foreach (var line in lines)
+            {
+                canvas.DrawText(line, left + padding, y, SKPaints.TextBase);
+                y -= textSpacing;
+            }
+        }
+
+        public void DrawToolTip(SKCanvas canvas, UActor actor, string distanceText)
+        {
+            if (!actor.IsAlive)
+            {
+                //DrawCorpseTooltip(canvas, player);
+                return;
+            }
+
+            var lines = new List<string>();
+
+            // Add the player name and distance to the tooltip
+            lines.Insert(0, actor.Name);
+            lines.Insert(1, $"Distance: {distanceText}");
+
+            DrawToolTip(canvas, string.Join("\n", lines));
+        }
     }
 }

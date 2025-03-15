@@ -823,6 +823,7 @@ namespace squad_dma {
             {"SD_BP_M1064A3_M121_Woodland_C", ActorType.TrackedAPCArtillery},
             {"SD_BP_M1064_M121_TSF_Woodland_C", ActorType.TrackedAPCArtillery},
             {"BP_M109_Turret_C", ActorType.TrackedAPCArtillery},
+            {"SD_BP_M1064_M121_TSF_Desert_C", ActorType.TrackedAPCArtillery},
 
             {"BP_Drone_C", ActorType.Drone},
             {"BP_FlyingDrone_THWK_C", ActorType.Drone}

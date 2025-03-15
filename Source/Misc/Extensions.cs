@@ -114,10 +114,13 @@ namespace squad_dma
         /// <summary>
         /// Gets projectile drawing paintbrush
         /// </summary>
-        public static SKPaint GetProjectilePaint(this UActor actor) {
-            if (projectilePaint != null) {
+        public static SKPaint GetProjectilePaint(this UActor actor)
+        {
+            if (projectilePaint != null)
+            {
                 return projectilePaint;
             }
+
             SKPaint basePaint = SKPaints.PaintBase.Clone();
             basePaint.Color = new SKColor(255, 0, 255);
             projectilePaint = basePaint;
