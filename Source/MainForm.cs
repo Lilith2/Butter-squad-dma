@@ -31,9 +31,7 @@ namespace squad_dma
         private MapPosition _mapPanPosition = new();
         private readonly List<PointOfInterest> _pointsOfInterest = new();
         private PointOfInterest _hoveredPoi;
-        private const int POI_HOVER_THRESHOLD = 15;
-
-        private const int ZOOM_INTERVAL = 2;
+        private const int ZOOM_INTERVAL = 10;
         private int targetZoomValue = 0;
         private System.Windows.Forms.Timer zoomTimer;
 
@@ -45,17 +43,11 @@ namespace squad_dma
         private System.Windows.Forms.Timer panTimer;
 
         #region Getters
-        /// <summary>
-        /// Radar has found process and is ready.
-        /// </summary>
         private bool Ready
         {
             get => Memory.Ready;
         }
 
-        /// <summary>
-        /// Radar has found Local Game World.
-        /// </summary>
         private bool InGame
         {
             get => Memory.InGame;
@@ -65,17 +57,11 @@ namespace squad_dma
             get => Memory.MapName;
         }
 
-        /// <summary>
-        /// LocalPlayer (who is running Radar) 'Player' object.
-        /// </summary>
         private UActor LocalPlayer
         {
             get => Memory.LocalPlayer;
         }
 
-        /// <summary>
-        /// All Actors in Game World (including tech)
-        /// </summary>
         private ReadOnlyDictionary<ulong, UActor> AllActors
         {
             get => Memory.Actors;
@@ -109,9 +95,6 @@ namespace squad_dma
         #endregion
 
         #region Constructor
-        /// <summary>
-        /// GUI Constructor.
-        /// </summary>
         public MainForm()
         {
             _config = Program.Config;
@@ -147,7 +130,7 @@ namespace squad_dma
             _mapCanvas.MouseUp += skMapCanvas_MouseUp;
 
             tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
-            //_fpsWatch.Start();
+            _fpsWatch.Start();
 
             zoomTimer = new System.Windows.Forms.Timer();
             zoomTimer.Interval = ZOOM_INTERVAL;
@@ -160,10 +143,6 @@ namespace squad_dma
         #endregion
 
         #region Overrides
-        /// <summary>
-        /// Set Dark Mode on startup.
-        /// </summary>
-        /// <param name="darkmode"></param>
         private void SetDarkMode(ref DarkModeCS darkmode)
         {
             darkmode = new DarkModeCS(this);
@@ -194,7 +173,7 @@ namespace squad_dma
         {
             if (tabControl.SelectedIndex == 0) // Main Radar Tab should be open
             {
-                var zoomSens = (double)_config.ZoomSensitivity / 175;
+                var zoomSens = (double)_config.ZoomSensitivity / 100;
                 int zoomDelta = -(int)(e.Delta * zoomSens);
 
                 if (zoomDelta < 0)
@@ -448,11 +427,11 @@ namespace squad_dma
                     var fps = _fps;
                     var memTicks = Memory.Ticks;
 
-                    // if (lblFPS.Text != fps.ToString())
-                    //    lblFPS.Text = $"{fps}";
+                    if (lblFPS.Text != fps.ToString())
+                        lblFPS.Text = $"{fps}";
 
-                    //  if (lblMems.Text != memTicks.ToString())
-                    //     lblMems.Text = $"{memTicks}";
+                    if (lblMems.Text != memTicks.ToString())
+                        lblMems.Text = $"{memTicks}";
                     #endregion
 
                     _fpsWatch.Restart();
@@ -1022,7 +1001,7 @@ namespace squad_dma
 
             return false;
         }
-#endregion
+        #endregion
 
         #region Event Handlers
         private void chkMapFree_CheckedChanged(object sender, EventArgs e)
@@ -1250,8 +1229,8 @@ namespace squad_dma
         {
             ToggleMap();
         }
-#endregion
-#endregion
+        #endregion
+        #endregion
 
         #region Settings
         #region General
@@ -1289,6 +1268,11 @@ namespace squad_dma
         #endregion
         #endregion
         #endregion
-#endregion
+        #endregion
+
+        private void grpMapSetup_Enter(object sender, EventArgs e)
+        {
+
+        }
     }
 }

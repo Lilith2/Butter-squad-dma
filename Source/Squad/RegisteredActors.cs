@@ -12,41 +12,10 @@ namespace squad_dma
         private readonly Stopwatch _regSw = new();
 
         private readonly ConcurrentDictionary<ulong, UActor> _actors = new();
-#if DEBUG
         public IEnumerable<uint> GetActorNameIds()
         {
             return _actors.Values.Select(actor => actor.NameId).Where(id => id != 0);
         }
-
-        private static bool _loggedVehicles = false;
-        public void LogVehicles(Dictionary<uint, string> names)
-        {
-            if (!_loggedVehicles)
-            {
-                Program.Log($"Logging {names.Count} vehicles.");
-
-                foreach (var nameEntry in names)
-                {
-                    if (!nameEntry.Value.StartsWith("BP_Soldier"))
-                    {
-                        Program.Log($"{nameEntry.Key} {nameEntry.Value}");
-                    }
-                }
-                _loggedVehicles = true;
-            }
-        }
-
-        public void ResetAndLogVehicles(Dictionary<uint, string> names)
-        {
-            _loggedVehicles = false; 
-            LogVehicles(names); 
-        }
-
-        public void ResetLoggedVehicles()
-        {
-            _loggedVehicles = false; 
-        }
-#endif
 
         #region Getters
         public ReadOnlyDictionary<ulong, UActor> Actors { get; }
@@ -100,6 +69,41 @@ namespace squad_dma
         /// <summary>
         /// Updates the ConcurrentDictionary of 'Players'
         /// </summary>
+        /// 
+#if DEBUG
+        public Dictionary<ulong, uint> GetActorBaseWithName()
+        {
+            var count = this.ActorCount;
+            if (count < 1)
+                return new Dictionary<ulong, uint>();
+
+            var initialActorScatterMap = new ScatterReadMap(count);
+
+            var actorRound = initialActorScatterMap.AddRound();
+            var playerObjectIdRound = initialActorScatterMap.AddRound();
+
+            for (int i = 0; i < count; i++)
+            {
+                var actorAddr = actorRound.AddEntry<ulong>(i, 0, _actorsArray + (uint)(i * 0x8));
+                var playerObjectId = playerObjectIdRound.AddEntry<uint>(i, 1, actorAddr, null, Offsets.Actor.ID);
+            }
+
+            initialActorScatterMap.Execute();
+
+            var actorBaseWithName = new Dictionary<ulong, uint>();
+            for (int i = 0; i < count; i++)
+            {
+                if (!initialActorScatterMap.Results[i][0].TryGetResult<ulong>(out var actorAddr) || actorAddr == 0)
+                    continue;
+                if (!initialActorScatterMap.Results[i][1].TryGetResult<uint>(out var actorNameId) || actorNameId == 0)
+                    continue;
+                actorBaseWithName[actorAddr] = actorNameId;
+            }
+
+            return actorBaseWithName;
+        }
+#endif
+
         public void UpdateList()
         {
             if (this._regSw.ElapsedMilliseconds < 500)
@@ -148,21 +152,6 @@ namespace squad_dma
                     {
                         names[item.Key] = item.Value.Replace("BP_UAF", "BP_Soldier_UAF");
                     }
-                    /*  Added a better method but it seems less reliable. may remove that and bring this method back. 
-#if DEBUG
-                    if (!_loggedVehicles) // Debugging purposes only
-                    {
-                        foreach (var nameEntry in names)
-                        {
-                            if (!nameEntry.Value.StartsWith("BP_Soldier"))
-                            {
-                                Program.Log($"{nameEntry.Key} {nameEntry.Value}");
-                            }
-                        }
-                        _loggedVehicles = true;
-                    }
-#endif
-                    */
                 }
                 var playersNameIDs = names.Where(x => x.Value.StartsWith("BP_Soldier") || Names.TechNames.ContainsKey(x.Value)).ToDictionary();
                 var filteredActors = actorBaseWithName.Where(actor => playersNameIDs.ContainsKey(actor.Value)).Select(actor => actor.Key).ToList();

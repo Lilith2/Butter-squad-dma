@@ -72,10 +72,7 @@ namespace squad_dma
             {
                 if (!this._inGame)
                 {
-#if DEBUG
                     this._vehiclesLogged = false;
-                    this._actors.ResetLoggedVehicles();
-#endif
                     throw new GameEnded("Game has ended!");
                 }
 
@@ -86,16 +83,19 @@ namespace squad_dma
 #if DEBUG
                 if (!_vehiclesLogged)
                 {
-                    var nameIds = this._actors.GetActorNameIds().Distinct().ToArray();
-                    Program.Log($"Found {nameIds.Length} actor name IDs.");
-
-                    if (nameIds.Length > 0)
+                    var actorBaseWithName = this._actors.GetActorBaseWithName();
+                    if (actorBaseWithName.Count > 0)
                     {
-                        var nameIdsList = nameIds.ToList();
-                        var names = Memory.GetNamesById(nameIdsList);
-                        Program.Log($"Retrieved {names.Count} names.");
+                        var names = Memory.GetNamesById([.. actorBaseWithName.Values.Distinct()]);
 
-                        this._actors.ResetAndLogVehicles(names);
+                        foreach (var nameEntry in names)
+                        {
+                            if (!nameEntry.Value.StartsWith("BP_Soldier"))
+                            {
+                                Program.Log($"{nameEntry.Key} {nameEntry.Value}");
+                            }
+                        }
+
                         _vehiclesLogged = true;
                     }
                 }

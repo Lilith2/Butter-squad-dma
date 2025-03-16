@@ -49,11 +49,6 @@ namespace squad_dma
             lblUIScale = new Label();
             grpRadar = new GroupBox();
             tabRadar = new TabPage();
-            //grpStats = new GroupBox();
-            //lblMems = new Label();
-           // lblFPS = new Label();
-           // lblMemSTitle = new Label();
-           // lblFPSTitle = new Label();
             grpMapSetup = new GroupBox();
             btnApplyMapScale = new Button();
             chkMapFree = new CheckBox();
@@ -63,6 +58,11 @@ namespace squad_dma
             lblMapXY = new Label();
             txtMapSetupX = new TextBox();
             lblMapCoords = new Label();
+            grpStats = new GroupBox();
+            lblMems = new Label();
+            lblFPS = new Label();
+            lblMemSTitle = new Label();
+            lblFPSTitle = new Label();
             tabControl = new TabControl();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
@@ -72,8 +72,8 @@ namespace squad_dma
             grpUserInterface.SuspendLayout();
             grpRadar.SuspendLayout();
             tabRadar.SuspendLayout();
-            //grpStats.SuspendLayout();
             grpMapSetup.SuspendLayout();
+            grpStats.SuspendLayout();
             tabControl.SuspendLayout();
             SuspendLayout();
             // 
@@ -188,7 +188,7 @@ namespace squad_dma
             tabSettings.Location = new Point(4, 24);
             tabSettings.Name = "tabSettings";
             tabSettings.Padding = new Padding(3);
-            tabSettings.Size = new Size(1592, 772);
+            tabSettings.Size = new Size(1592, 872);
             tabSettings.TabIndex = 1;
             tabSettings.Text = "Settings";
             tabSettings.UseVisualStyleBackColor = true;
@@ -202,7 +202,7 @@ namespace squad_dma
             grpConfig.Margin = new Padding(4, 3, 4, 3);
             grpConfig.Name = "grpConfig";
             grpConfig.Padding = new Padding(4, 3, 4, 3);
-            grpConfig.Size = new Size(1586, 766);
+            grpConfig.Size = new Size(1586, 866);
             grpConfig.TabIndex = 8;
             grpConfig.TabStop = false;
             grpConfig.Text = "Radar Config";
@@ -270,67 +270,14 @@ namespace squad_dma
             // 
             // tabRadar
             // 
-           // tabRadar.Controls.Add(grpStats);
             tabRadar.Controls.Add(grpMapSetup);
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
             tabRadar.Padding = new Padding(3);
-            tabRadar.Size = new Size(1592, 772);
+            tabRadar.Size = new Size(1592, 872);
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
-            // 
-            // grpStats
-            // 
-            /*grpStats.Controls.Add(lblMems);
-            grpStats.Controls.Add(lblFPS);
-            grpStats.Controls.Add(lblMemSTitle);
-            grpStats.Controls.Add(lblFPSTitle);
-            grpStats.Location = new Point(1467, 717);
-            grpStats.Name = "grpStats";
-            grpStats.Size = new Size(129, 59);
-            grpStats.TabIndex = 19;
-            grpStats.TabStop = false;
-            grpStats.Text = "FPS stats";
-            // 
-            // lblMems
-            // 
-            lblMems.AutoSize = true;
-            lblMems.Location = new Point(96, 34);
-            lblMems.Margin = new Padding(4, 0, 4, 0);
-            lblMems.Name = "lblMems";
-            lblMems.Size = new Size(13, 15);
-            lblMems.TabIndex = 14;
-            lblMems.Text = "0";
-            // 
-            // lblFPS
-            // 
-            lblFPS.AutoSize = true;
-            lblFPS.Location = new Point(96, 19);
-            lblFPS.Margin = new Padding(4, 0, 4, 0);
-            lblFPS.Name = "lblFPS";
-            lblFPS.Size = new Size(13, 15);
-            lblFPS.TabIndex = 13;
-            lblFPS.Text = "0";
-            // 
-            // lblMemSTitle
-            // 
-            lblMemSTitle.AutoSize = true;
-            lblMemSTitle.Location = new Point(6, 34);
-            lblMemSTitle.Name = "lblMemSTitle";
-            lblMemSTitle.Size = new Size(48, 15);
-            lblMemSTitle.TabIndex = 12;
-            lblMemSTitle.Text = "Mem/s:";
-            // 
-            // lblFPSTitle
-            // 
-            lblFPSTitle.AutoSize = true;
-            lblFPSTitle.Location = new Point(7, 19);
-            lblFPSTitle.Margin = new Padding(4, 0, 4, 0);
-            lblFPSTitle.Name = "lblFPSTitle";
-            lblFPSTitle.Size = new Size(29, 15);
-            lblFPSTitle.TabIndex = 10;
-            lblFPSTitle.Text = "FPS:";*/
             // 
             // grpMapSetup
             // 
@@ -422,6 +369,58 @@ namespace squad_dma
             lblMapCoords.TabIndex = 10;
             lblMapCoords.Text = "coords";
             // 
+            // grpStats
+            // 
+            grpStats.Controls.Add(lblMems);
+            grpStats.Controls.Add(lblFPS);
+            grpStats.Controls.Add(lblMemSTitle);
+            grpStats.Controls.Add(lblFPSTitle);
+            grpStats.Location = new Point(1463, 813);
+            grpStats.Name = "grpStats";
+            grpStats.Size = new Size(129, 59);
+            grpStats.TabIndex = 19;
+            grpStats.TabStop = false;
+            grpStats.Text = "FPS stats";
+            // 
+            // lblMems
+            // 
+            lblMems.AutoSize = true;
+            lblMems.Location = new Point(96, 34);
+            lblMems.Margin = new Padding(4, 0, 4, 0);
+            lblMems.Name = "lblMems";
+            lblMems.Size = new Size(13, 15);
+            lblMems.TabIndex = 14;
+            lblMems.Text = "0";
+            // 
+            // lblFPS
+            // 
+            lblFPS.AutoSize = true;
+            lblFPS.Location = new Point(96, 19);
+            lblFPS.Margin = new Padding(4, 0, 4, 0);
+            lblFPS.Name = "lblFPS";
+            lblFPS.Size = new Size(13, 15);
+            lblFPS.TabIndex = 13;
+            lblFPS.Text = "0";
+            // 
+            // lblMemSTitle
+            // 
+            lblMemSTitle.AutoSize = true;
+            lblMemSTitle.Location = new Point(6, 34);
+            lblMemSTitle.Name = "lblMemSTitle";
+            lblMemSTitle.Size = new Size(48, 15);
+            lblMemSTitle.TabIndex = 12;
+            lblMemSTitle.Text = "Mem/s:";
+            // 
+            // lblFPSTitle
+            // 
+            lblFPSTitle.AutoSize = true;
+            lblFPSTitle.Location = new Point(7, 19);
+            lblFPSTitle.Margin = new Padding(4, 0, 4, 0);
+            lblFPSTitle.Name = "lblFPSTitle";
+            lblFPSTitle.Size = new Size(29, 15);
+            lblFPSTitle.TabIndex = 10;
+            lblFPSTitle.Text = "FPS:";
+            // 
             // tabControl
             // 
             tabControl.Controls.Add(tabRadar);
@@ -440,7 +439,7 @@ namespace squad_dma
             ClientSize = new Size(1600, 900);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
-            Name = "I Love Squad";
+            Name = "MainForm";
             Text = "I Love Squad";
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
@@ -452,10 +451,10 @@ namespace squad_dma
             grpRadar.ResumeLayout(false);
             grpRadar.PerformLayout();
             tabRadar.ResumeLayout(false);
-            //grpStats.ResumeLayout(false);
-            //grpStats.PerformLayout();
             grpMapSetup.ResumeLayout(false);
             grpMapSetup.PerformLayout();
+            grpStats.ResumeLayout(false);
+            grpStats.PerformLayout();
             tabControl.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -489,10 +488,10 @@ namespace squad_dma
         private TabControl tabControl;
         private TrackBar trkZoomSensivity;
         private Label lblZoomSensivity;
-        //private GroupBox grpStats;
-        //private Label lblMemSTitle;
-        //private Label lblFPSTitle;
-       // private Label lblMems;
-        //private Label lblFPS;
+        private GroupBox grpStats;
+        private Label lblMemSTitle;
+        private Label lblFPSTitle;
+        private Label lblMems;
+        private Label lblFPS;
     }
 }
