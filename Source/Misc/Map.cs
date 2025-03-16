@@ -93,36 +93,41 @@ namespace squad_dma
             return new SKPoint((float)(this.X + Math.Cos(radians) * aimlineLength), (float)(this.Y + Math.Sin(radians) * aimlineLength));
         }
 
-        public void DrawPlayerMarker(SKCanvas canvas, UActor player, int aimlineLength)
+        public void DrawPlayerMarker(SKCanvas canvas, UActor player, int aimlineLength, SKColor? color = null)
         {
             var radians = player.Rotation.X.ToRadians();
             SKPaint paint = player.GetEntityPaint();
+
+            if (color.HasValue)
+            {
+                paint.Color = color.Value;
+            }
 
             // Draw the outline for the player marker
             SKPaint outlinePaint = new SKPaint
             {
                 Color = SKColors.Black,
-                StrokeWidth = paint.StrokeWidth + 2f * UIScale, 
+                StrokeWidth = paint.StrokeWidth + 2f * UIScale,
                 Style = SKPaintStyle.Stroke,
                 IsAntialias = true,
                 FilterQuality = SKFilterQuality.High
             };
 
             var size = 6 * UIScale;
-            canvas.DrawCircle(this.GetPoint(), size, outlinePaint); 
-            canvas.DrawCircle(this.GetPoint(), size, paint); 
+            canvas.DrawCircle(this.GetPoint(), size, outlinePaint);
+            canvas.DrawCircle(this.GetPoint(), size, paint);
 
             var aimlineEnd = this.GetAimlineEndpoint(radians, aimlineLength);
             canvas.DrawLine(this.GetPoint(), aimlineEnd, outlinePaint);
-            canvas.DrawLine(this.GetPoint(), aimlineEnd, paint); 
+            canvas.DrawLine(this.GetPoint(), aimlineEnd, paint);
         }
 
         public void DrawProjectile(SKCanvas canvas, UActor projectile)
         {
             SKPaint paint = projectile.GetProjectilePaint();
 
-            float crosshairSize = 8 * UIScale; 
-            float crosshairThickness = 2 * UIScale; 
+            float crosshairSize = 8 * UIScale;
+            float crosshairThickness = 2 * UIScale;
 
             SKPoint center = this.GetPoint();
 

@@ -12,9 +12,41 @@ namespace squad_dma
         private readonly Stopwatch _regSw = new();
 
         private readonly ConcurrentDictionary<ulong, UActor> _actors = new();
+#if DEBUG
+        public IEnumerable<uint> GetActorNameIds()
+        {
+            return _actors.Values.Select(actor => actor.NameId).Where(id => id != 0);
+        }
 
         private static bool _loggedVehicles = false;
+        public void LogVehicles(Dictionary<uint, string> names)
+        {
+            if (!_loggedVehicles)
+            {
+                Program.Log($"Logging {names.Count} vehicles.");
 
+                foreach (var nameEntry in names)
+                {
+                    if (!nameEntry.Value.StartsWith("BP_Soldier"))
+                    {
+                        Program.Log($"{nameEntry.Key} {nameEntry.Value}");
+                    }
+                }
+                _loggedVehicles = true;
+            }
+        }
+
+        public void ResetAndLogVehicles(Dictionary<uint, string> names)
+        {
+            _loggedVehicles = false; 
+            LogVehicles(names); 
+        }
+
+        public void ResetLoggedVehicles()
+        {
+            _loggedVehicles = false; 
+        }
+#endif
 
         #region Getters
         public ReadOnlyDictionary<ulong, UActor> Actors { get; }
@@ -116,8 +148,9 @@ namespace squad_dma
                     {
                         names[item.Key] = item.Value.Replace("BP_UAF", "BP_Soldier_UAF");
                     }
-
-                    /*if (!_loggedVehicles) // Debugging purposes only
+                    /*  Added a better method but it seems less reliable. may remove that and bring this method back. 
+#if DEBUG
+                    if (!_loggedVehicles) // Debugging purposes only
                     {
                         foreach (var nameEntry in names)
                         {
@@ -127,7 +160,9 @@ namespace squad_dma
                             }
                         }
                         _loggedVehicles = true;
-                    }*/
+                    }
+#endif
+                    */
                 }
                 var playersNameIDs = names.Where(x => x.Value.StartsWith("BP_Soldier") || Names.TechNames.ContainsKey(x.Value)).ToDictionary();
                 var filteredActors = actorBaseWithName.Where(actor => playersNameIDs.ContainsKey(actor.Value)).Select(actor => actor.Key).ToList();
@@ -211,19 +246,24 @@ namespace squad_dma
                 var playerInfoScatterMap = new ScatterReadMap(count);
                 var playerInstanceInfoRound = playerInfoScatterMap.AddRound();
                 var instigatorAndRootRound = playerInfoScatterMap.AddRound();
-                
+
                 for (int i = 0; i < count; i++)
                 {
                     var actorAddr = actorBases[i];
                     var actorType = _actors[actorAddr].ActorType;
 
                     var rootComponent = playerInstanceInfoRound.AddEntry<ulong>(i, 1, actorAddr + Offsets.Actor.RootComponent);
-                    if (actorType == ActorType.Player) {
+                    if (actorType == ActorType.Player)
+                    {
                         var health = playerInstanceInfoRound.AddEntry<float>(i, 2, actorAddr + Offsets.ASQSoldier.Health);
-                    } else if (Names.Deployables.Contains(actorType)) {
+                    }
+                    else if (Names.Deployables.Contains(actorType))
+                    {
                         var health = playerInstanceInfoRound.AddEntry<float>(i, 2, actorAddr + Offsets.SQDeployable.Health);
                         var maxHealth = playerInstanceInfoRound.AddEntry<float>(i, 3, actorAddr + Offsets.SQDeployable.MaxHealth);
-                    } else {
+                    }
+                    else
+                    {
                         var health = playerInstanceInfoRound.AddEntry<float>(i, 2, actorAddr + Offsets.SQVehicle.Health);
                         var maxHealth = playerInstanceInfoRound.AddEntry<float>(i, 3, actorAddr + Offsets.SQVehicle.MaxHealth);
                     }
@@ -237,25 +277,35 @@ namespace squad_dma
                 for (int i = 0; i < count; i++)
                 {
                     var actor = _actors[actorBases[i]];
-                    
-                    if (playerInfoScatterMap.Results[i][2].TryGetResult<float>(out var hp)) {
+
+                    if (playerInfoScatterMap.Results[i][2].TryGetResult<float>(out var hp))
+                    {
+                        if (actor.Health > 0 && hp <= 0)
+                        {
+                            actor.DeathPosition = actor.Position;
+                            actor.TimeOfDeath = DateTime.Now;
+                        }
                         actor.Health = hp;
                     }
-                    if (playerInfoScatterMap.Results[i].ContainsKey(3) && playerInfoScatterMap.Results[i][3].TryGetResult<float>(out var maxHp)) {
+                    if (playerInfoScatterMap.Results[i].ContainsKey(3) && playerInfoScatterMap.Results[i][3].TryGetResult<float>(out var maxHp))
+                    {
                         actor.Health /= maxHp;
                         actor.Health *= 100;
                     }
 
-                    if (playerInfoScatterMap.Results[i][4].TryGetResult<Vector3>(out var location)) {
+                    if (playerInfoScatterMap.Results[i][4].TryGetResult<Vector3>(out var location))
+                    {
                         actor.Position = location;
                     }
 
-                    if (playerInfoScatterMap.Results[i][5].TryGetResult<Vector3>(out var rotation)) {
+                    if (playerInfoScatterMap.Results[i][5].TryGetResult<Vector3>(out var rotation))
+                    {
                         actor.Rotation = new Vector2(rotation.Y, rotation.X);
                         actor.Rotation3D = rotation;
                     }
                 }
-            } catch (GameEnded)
+            }
+            catch (GameEnded)
             {
                 throw;
             }

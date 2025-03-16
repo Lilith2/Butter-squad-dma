@@ -756,18 +756,26 @@ namespace squad_dma {
             {"SD_BP_US_Util_Desert_C", ActorType.TruckTransport},
             {"SD_BP_US_Util_Desert_Logi_C", ActorType.TruckLogistics},
             {"SD_BP_Technical4Seater_Transport_Child_C", ActorType.JeepTransport},
+            {"SD_BP_MATV_TOW_Desert_C", ActorType.JeepAntitank},
+            {"SD_BP_MATV_Mk19_Desert_C", ActorType.JeepTurret},
+            {"SD_BP_M1151_Mk19_PMC_C", ActorType.JeepTurret},
+            {"SD_BP_M113A3_TOW_Desert_C", ActorType.JeepAntitank},
+            {"SD_BP_CPV_M134_Desert_C", ActorType.JeepTurret},
+            {"SD_BP_M1151_Logi_C", ActorType.JeepLogistics},
+            {"SD_BP_BRDM-2_Desert_C", ActorType.JeepRWSTurret},
+            {"SD_BP_Tigr_RWS_GAU_Desert_C", ActorType.JeepRWSTurret},
 
             {"SD_BP_minsk_Child_C", ActorType.Motorcycle},
 
             {"SD_BP_M1126_m2_C", ActorType.APC},
             {"SD_BP_M1126_C", ActorType.APC},
-            {"SD_BP_BTR4E_C", ActorType.APC},
+            {"SD_BP_BTR4E_C", ActorType.IFV},
             {"SD_BTR3E_C", ActorType.IFV},
             {"SD_BP_BMP3M_Woodland_C", ActorType.TrackedIFV},
             {"SD_BP_BMP2M_Woodland_C", ActorType.TrackedIFV},
             {"SD_BP_BMP2_Child_C", ActorType.TrackedIFV},
-            {"SD_BP_BTR_90_NVG_C", ActorType.APC},
-            {"SD_BP_BTR-82_child_C", ActorType.APC},
+            {"SD_BP_BTR_90_NVG_C", ActorType.IFV},
+            {"SD_BP_BTR-82_child_C", ActorType.IFV},
             {"SD_BP_BFV_Woodland_NVG_C", ActorType.TrackedIFV},
             {"SD_BP_M1126_Dragoon_C", ActorType.IFV},
             {"SD_BP_PARS3_Forest_C", ActorType.IFV},
@@ -784,6 +792,8 @@ namespace squad_dma {
             {"SD_BP_BTR82A_Desert_C", ActorType.IFV},
             {"SD_BP_PARS3_Desert_C", ActorType.IFV},
             {"SD_BP_BFV_Desert_C", ActorType.TrackedIFV},
+            {"SD_BP_M113_30mm_Desert_C", ActorType.TrackedIFV},
+            {"SD_BP_M113_25mm_Desert_C", ActorType.TrackedIFV},
 
             {"BP_M163_C", ActorType.AntiAir},
             {"BP_2k22m1_C", ActorType.AntiAir},
@@ -813,20 +823,22 @@ namespace squad_dma {
             {"BP_T72B3_Child_C", ActorType.Tank},
             {"SD_BP_Sprut_Forest_C", ActorType.TankMGS},
             {"SD_BP_M1128_C", ActorType.TankMGS},
-            {"BP_M109A6_D_C", ActorType.TankMGS},
             {"SD_BP_M1128_Woodland_C", ActorType.TankMGS},
             {"SD_BP_T62_Child_C", ActorType.Tank},
             {"SD_BP_Altay_Cage_Desert_C", ActorType.Tank},
             {"BP_M1A2_Child_C", ActorType.Tank },
+            {"SD_BP_T90A_Desert_C", ActorType.Tank},
 
             {"BP_HIMARS_C", ActorType.TruckArtillery},
             {"SD_BP_M1064A3_M121_Woodland_C", ActorType.TrackedAPCArtillery},
             {"SD_BP_M1064_M121_TSF_Woodland_C", ActorType.TrackedAPCArtillery},
             {"BP_M109_Turret_C", ActorType.TrackedAPCArtillery},
             {"SD_BP_M1064_M121_TSF_Desert_C", ActorType.TrackedAPCArtillery},
+            {"BP_M109A6_D_C", ActorType.TrackedAPCArtillery},
 
             {"BP_Drone_C", ActorType.Drone},
-            {"BP_FlyingDrone_THWK_C", ActorType.Drone}
+            {"BP_FlyingDrone_THWK_C", ActorType.Drone},
+            {"BP_FlyingDrone_SOF_C", ActorType.Drone}
         };
 
         public static readonly Dictionary<ActorType, SKBitmap> BitMaps = new(){

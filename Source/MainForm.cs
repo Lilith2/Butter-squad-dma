@@ -103,6 +103,7 @@ namespace squad_dma
         public void ClearPointsOfInterest()
         {
             _pointsOfInterest.Clear();
+            _mapCanvas.Invalidate();
         }
 
         #endregion
@@ -166,16 +167,8 @@ namespace squad_dma
         private void SetDarkMode(ref DarkModeCS darkmode)
         {
             darkmode = new DarkModeCS(this);
-            // if (darkmode.IsDarkMode)
-            // {
-            //     SharedPaints.PaintBitmap.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
-            //    SharedPaints.PaintBitmapAlpha.ColorFilter = SharedPaints.GetDarkModeColorFilter(0.7f);
-            // }
         }
 
-        /// <summary>
-        /// Form closing event.
-        /// </summary>
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             e.Cancel = true; // Cancel shutdown
@@ -188,9 +181,6 @@ namespace squad_dma
             base.OnFormClosing(e); // Proceed with closing
         }
 
-        /// <summary>
-        /// Process hotkey presses.sc
-        /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) => keyData switch
         {
             Keys.F1 => ZoomIn(5),
@@ -200,9 +190,6 @@ namespace squad_dma
             _ => base.ProcessCmdKey(ref msg, keyData),
         };
 
-        /// <summary>
-        /// Process mousewheel events.
-        /// </summary>
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             if (tabControl.SelectedIndex == 0) // Main Radar Tab should be open
@@ -251,6 +238,7 @@ namespace squad_dma
 
             tabRadar.Text = $"Radar ({_maps[_mapSelectionIndex].Name})";
             _mapChangeTimer.Restart(); // Start delay
+            ClearPointsOfInterest();
             Program.Log("Toggled Map");
 
             return true;
@@ -490,6 +478,7 @@ namespace squad_dma
                     _selectedMap = selectedMap;
 
                     CleanupLoadedBitmaps();
+                    ClearPointsOfInterest();
                     LoadMapBitmaps();
                 }
                 else
@@ -667,28 +656,49 @@ namespace squad_dma
                     var localPlayerMapPos = localPlayerPos.ToMapPos(_selectedMap);
                     var mapParams = GetMapLocation();
 
-                    // Draw LocalPlayer
                     var localPlayerZoomedPos = localPlayerMapPos.ToZoomedPos(mapParams);
                     localPlayerZoomedPos.DrawPlayerMarker(canvas, localPlayer, trkAimLength.Value);
 
-                    foreach (var actor in allPlayers) // Draw actors
+                    foreach (var actor in allPlayers)
                     {
                         var actorPos = actor.Position + AbsoluteLocation;
-                        if (actor.ActorType == ActorType.Player && !actor.IsAlive || (Math.Abs(actorPos.X - AbsoluteLocation.X) + Math.Abs(actorPos.Y - AbsoluteLocation.Y) + Math.Abs(actorPos.Z - AbsoluteLocation.Z) < 1.0))
+
+                        if (Math.Abs(actorPos.X - AbsoluteLocation.X) + Math.Abs(actorPos.Y - AbsoluteLocation.Y) + Math.Abs(actorPos.Z - AbsoluteLocation.Z) < 1.0)
                             continue;
 
                         var actorMapPos = actorPos.ToMapPos(_selectedMap);
                         var actorZoomedPos = actorMapPos.ToZoomedPos(mapParams);
 
-                        actor.ZoomedPosition = new Vector2() // Cache Position as Vec2 for MouseMove event
+                        actor.ZoomedPosition = new Vector2()
                         {
                             X = actorZoomedPos.X,
                             Y = actorZoomedPos.Y
                         };
 
+                        if (actor.ActorType == ActorType.Player && !actor.IsAlive && actor.DeathPosition != Vector3.Zero)
+                        {
+#if DEBUG
+                            var timeSinceDeath = DateTime.Now - actor.TimeOfDeath;
+                            if (timeSinceDeath.TotalSeconds <= 8)
+                            {
+                                var deathMapPos = actor.DeathPosition.ToMapPos(_selectedMap);
+                                var deathZoomedPos = deathMapPos.ToZoomedPos(mapParams);
+
+                                DrawDead(canvas, deathZoomedPos.GetPoint(), SKColors.Gray, 5 * _uiScale);
+#endif
+                            }
+                            else
+                            {
+                                actor.DeathPosition = Vector3.Zero;
+                                actor.TimeOfDeath = DateTime.MinValue;
+                            }
+                        }
+
+                        if (actor.ActorType == ActorType.Player && !actor.IsAlive)
+                            continue;
+
                         int aimlineLength = 15;
 
-                        // Draw
                         DrawActor(canvas, actor, actorZoomedPos, aimlineLength, localPlayerMapPos);
                     }
                 }
@@ -716,7 +726,6 @@ namespace squad_dma
                 }
                 else
                 {
-                    // Define vehicle types that should show distance
                     var vehicleTypes = new HashSet<ActorType>
                     {
                         ActorType.TruckTransport,
@@ -748,12 +757,10 @@ namespace squad_dma
                         ActorType.LoachScout
                     };
 
-                    // Only calculate/show distance for vehicles
                     if (vehicleTypes.Contains(actor.ActorType))
                     {
                         var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
 
-                        // Only draw the distance if the vehicle is more than 50 meters away
                         if (dist > 50 * 100)
                         {
                             lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
@@ -768,12 +775,24 @@ namespace squad_dma
                             );
                         }
                     }
-                    // Draw the vehicle/tech marker
                     actorZoomedPos.DrawTechMarker(canvas, actor);
                 }
             }
         }
 
+        private void DrawDead(SKCanvas canvas, SKPoint position, SKColor color, float size)
+        {
+            using var paint = new SKPaint
+            {
+                Color = color,
+                StrokeWidth = 3 * _uiScale,
+                IsAntialias = true,
+                Style = SKPaintStyle.Stroke
+            };
+
+            canvas.DrawLine(position.X - size, position.Y - size, position.X + size, position.Y + size, paint);
+            canvas.DrawLine(position.X + size, position.Y - size, position.X - size, position.Y + size, paint);
+        }
 
         private void DrawPOIs(SKCanvas canvas)
         {
@@ -861,21 +880,17 @@ namespace squad_dma
             {
                 if (_closestPlayerToMouse is not null)
                 {
-                    // Calculate the distance between the local player and the hovered player
                     var localPlayerPos = localPlayer.Position + AbsoluteLocation;
                     var hoveredPlayerPos = _closestPlayerToMouse.Position + AbsoluteLocation;
                     var distance = Vector3.Distance(localPlayerPos, hoveredPlayerPos);
 
-                    // Format the distance as a string (e.g., "123m")
                     var distanceText = $"{(int)Math.Round(distance / 100)}m";
 
-                    // Get the zoomed position of the hovered player
                     var playerZoomedPos = (_closestPlayerToMouse
                         .Position + AbsoluteLocation)
                         .ToMapPos(_selectedMap)
                         .ToZoomedPos(mapParams);
 
-                    // Draw the tooltip with the distance included
                     playerZoomedPos.DrawToolTip(canvas, _closestPlayerToMouse, distanceText);
                 }
             }
@@ -889,7 +904,6 @@ namespace squad_dma
                 var position = localPlayer.Position + AbsoluteLocation;
                 AddPointOfInterest(position, "POI 1");
 
-                // Refresh the map canvas to render the new POI
                 _mapCanvas.Invalidate();
             }
         }
@@ -1085,11 +1099,6 @@ namespace squad_dma
             }
         }
 
-        private float Distance(SKPoint a, SKPoint b)
-        {
-            return (float)Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
-        }
-
         public class PointOfInterest
         {
             public Vector3 Position { get; }
@@ -1222,7 +1231,9 @@ namespace squad_dma
                         DrawMap(canvas);
                         DrawActors(canvas);
                         DrawPOIs(canvas);
-                        //DrawToolTips(canvas); 
+#if DEBUG
+                        DrawToolTips(canvas);
+#endif
                     }
                 }
                 else
@@ -1239,8 +1250,8 @@ namespace squad_dma
         {
             ToggleMap();
         }
-        #endregion
-        #endregion
+#endregion
+#endregion
 
         #region Settings
         #region General
@@ -1277,50 +1288,7 @@ namespace squad_dma
         }
         #endregion
         #endregion
-
-        #region Colors
-        #region Helper Functions
-
-        private Color PaintColorToColor(string name)
-        {
-            PaintColor.Colors color = _config.PaintColors[name];
-            return Color.FromArgb(color.A, color.R, color.G, color.B);
-        }
-
-        private Color DefaultPaintColorToColor(string name)
-        {
-            PaintColor.Colors color = _config.DefaultPaintColors[name];
-            return Color.FromArgb(color.A, color.R, color.G, color.B);
-        }
-
-        private void UpdatePaintColorByName(string name, PictureBox pictureBox)
-        {
-            if (colDialog.ShowDialog() == DialogResult.OK)
-            {
-                Color col = colDialog.Color;
-                pictureBox.BackColor = col;
-
-                var paintColorToUse = new PaintColor.Colors
-                {
-                    A = col.A,
-                    R = col.R,
-                    G = col.G,
-                    B = col.B
-                };
-
-                if (_config.PaintColors.ContainsKey(name))
-                {
-                    _config.PaintColors[name] = paintColorToUse;
-                }
-                else
-                {
-                    _config.PaintColors.Add(name, paintColorToUse);
-                }
-            }
-        }
         #endregion
-        #endregion
-        #endregion
-        #endregion
+#endregion
     }
 }

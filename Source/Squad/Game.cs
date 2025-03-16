@@ -18,6 +18,7 @@ namespace squad_dma
         private ulong _playerController;
         private Vector3 _absoluteLocation;
         private string _currentLevel = string.Empty;
+        private bool _vehiclesLogged = false;
 
         public enum GameStatus
         {
@@ -71,11 +72,34 @@ namespace squad_dma
             {
                 if (!this._inGame)
                 {
+#if DEBUG
+                    this._vehiclesLogged = false;
+                    this._actors.ResetLoggedVehicles();
+#endif
                     throw new GameEnded("Game has ended!");
                 }
+
                 UpdateLocalPlayerInfo();
                 this._actors.UpdateList();
                 this._actors.UpdateAllPlayers();
+
+#if DEBUG
+                if (!_vehiclesLogged)
+                {
+                    var nameIds = this._actors.GetActorNameIds().Distinct().ToArray();
+                    Program.Log($"Found {nameIds.Length} actor name IDs.");
+
+                    if (nameIds.Length > 0)
+                    {
+                        var nameIdsList = nameIds.ToList();
+                        var names = Memory.GetNamesById(nameIdsList);
+                        Program.Log($"Retrieved {names.Count} names.");
+
+                        this._actors.ResetAndLogVehicles(names);
+                        _vehiclesLogged = true;
+                    }
+                }
+#endif
             }
             catch (DMAShutdown)
             {
