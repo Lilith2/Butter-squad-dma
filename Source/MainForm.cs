@@ -677,13 +677,13 @@ namespace squad_dma
 
                         if (actor.ActorType == ActorType.Player && !actor.IsAlive && actor.DeathPosition != Vector3.Zero)
                         {
-#if DEBUG
+
                             var timeSinceDeath = DateTime.Now - actor.TimeOfDeath;
                             if (timeSinceDeath.TotalSeconds <= 8)
                             {
                                 var deathMapPos = actor.DeathPosition.ToMapPos(_selectedMap);
                                 var deathZoomedPos = deathMapPos.ToZoomedPos(mapParams);
-
+#if DEBUG
                                 DrawDead(canvas, deathZoomedPos.GetPoint(), SKColors.Gray, 5 * _uiScale);
 #endif
                             }
@@ -1022,7 +1022,7 @@ namespace squad_dma
 
             return false;
         }
-        #endregion
+#endregion
 
         #region Event Handlers
         private void chkMapFree_CheckedChanged(object sender, EventArgs e)
