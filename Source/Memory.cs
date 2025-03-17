@@ -169,7 +169,7 @@ namespace squad_dma
         /// <summary>
         /// Gets module base entry address
         /// </summary>
-        private static bool GetModuleBase()
+        public static bool GetModuleBase()
         {
             try
             {

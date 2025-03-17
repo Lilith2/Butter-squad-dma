@@ -36,7 +36,7 @@ namespace squad_dma
             btnToggleMap = new Button();
             chkShowMapSetup = new CheckBox();
             btnRestartRadar = new Button();
-            chkHideNames = new CheckBox();
+            btnDumpNames = new Button();
             chkShowAimview = new CheckBox();
             trkUIScale = new TrackBar();
             trkAimLength = new TrackBar();
@@ -48,8 +48,8 @@ namespace squad_dma
             lblAimline = new Label();
             lblUIScale = new Label();
             grpRadar = new GroupBox();
-            tabRadar = new TabPage();
-            grpMapSetup = new GroupBox();
+            tabRadar = new TabPage();            
+             grpMapSetup = new GroupBox();
             btnApplyMapScale = new Button();
             chkMapFree = new CheckBox();
             txtMapSetupScale = new TextBox();
@@ -58,11 +58,6 @@ namespace squad_dma
             lblMapXY = new Label();
             txtMapSetupX = new TextBox();
             lblMapCoords = new Label();
-            grpStats = new GroupBox();
-            lblMems = new Label();
-            lblFPS = new Label();
-            lblMemSTitle = new Label();
-            lblFPSTitle = new Label();
             tabControl = new TabControl();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
@@ -73,7 +68,6 @@ namespace squad_dma
             grpRadar.SuspendLayout();
             tabRadar.SuspendLayout();
             grpMapSetup.SuspendLayout();
-            grpStats.SuspendLayout();
             tabControl.SuspendLayout();
             SuspendLayout();
             // 
@@ -117,21 +111,22 @@ namespace squad_dma
             btnRestartRadar.UseVisualStyleBackColor = true;
             btnRestartRadar.Click += btnRestartRadar_Click;
             // 
-            // chkHideNames
+            // btnDumpNames
             // 
-            chkHideNames.AutoSize = true;
-            chkHideNames.Location = new Point(250, 22);
-            chkHideNames.Name = "chkHideNames";
-            chkHideNames.Size = new Size(114, 19);
-            chkHideNames.TabIndex = 26;
-            chkHideNames.Text = "Hide Names (F6)";
-            toolTip.SetToolTip(chkHideNames, "Removes player names");
-            chkHideNames.UseVisualStyleBackColor = true;
+            btnDumpNames.AutoSize = true;
+            btnDumpNames.Location = new Point(310, 22);
+            btnDumpNames.Name = "btnDumpNames";
+            btnDumpNames.Size = new Size(114, 25);
+            btnDumpNames.TabIndex = 26;
+            btnDumpNames.Text = "Dump Names (F6)";
+            toolTip.SetToolTip(btnDumpNames, "Dumps entity names in the game instance");
+            btnDumpNames.UseVisualStyleBackColor = true;
+            btnDumpNames.Click += btnDumpNames_Click;
             // 
             // chkShowAimview
             // 
             chkShowAimview.AutoSize = true;
-            chkShowAimview.Location = new Point(117, 22);
+            chkShowAimview.Location = new Point(162, 26);
             chkShowAimview.Name = "chkShowAimview";
             chkShowAimview.Size = new Size(127, 19);
             chkShowAimview.TabIndex = 19;
@@ -142,7 +137,7 @@ namespace squad_dma
             // trkUIScale
             // 
             trkUIScale.LargeChange = 10;
-            trkUIScale.Location = new Point(100, 102);
+            trkUIScale.Location = new Point(25, 142);
             trkUIScale.Maximum = 200;
             trkUIScale.Minimum = 50;
             trkUIScale.Name = "trkUIScale";
@@ -156,7 +151,7 @@ namespace squad_dma
             // trkAimLength
             // 
             trkAimLength.LargeChange = 50;
-            trkAimLength.Location = new Point(100, 45);
+            trkAimLength.Location = new Point(175, 142);
             trkAimLength.Margin = new Padding(4, 3, 4, 3);
             trkAimLength.Maximum = 2000;
             trkAimLength.Minimum = 10;
@@ -167,11 +162,12 @@ namespace squad_dma
             trkAimLength.TickStyle = TickStyle.None;
             toolTip.SetToolTip(trkAimLength, "Length of the 'bar' or 'aim line' on the localplayer");
             trkAimLength.Value = 500;
+            trkAimLength.Scroll += trkAimLength_Scroll;
             // 
             // trkZoomSensivity
             // 
             trkZoomSensivity.LargeChange = 1;
-            trkZoomSensivity.Location = new Point(335, 45);
+            trkZoomSensivity.Location = new Point(320, 142);
             trkZoomSensivity.Maximum = 30;
             trkZoomSensivity.Minimum = 1;
             trkZoomSensivity.Name = "trkZoomSensivity";
@@ -216,7 +212,7 @@ namespace squad_dma
             grpUserInterface.Controls.Add(lblUIScale);
             grpUserInterface.Controls.Add(trkUIScale);
             grpUserInterface.Controls.Add(chkShowAimview);
-            grpUserInterface.Controls.Add(chkHideNames);
+            grpUserInterface.Controls.Add(btnDumpNames);
             grpUserInterface.Location = new Point(5, 93);
             grpUserInterface.Name = "grpUserInterface";
             grpUserInterface.Size = new Size(463, 203);
@@ -227,7 +223,7 @@ namespace squad_dma
             // lblZoomSensivity
             // 
             lblZoomSensivity.AutoSize = true;
-            lblZoomSensivity.Location = new Point(241, 45);
+            lblZoomSensivity.Location = new Point(336, 124);
             lblZoomSensivity.Margin = new Padding(4, 0, 4, 0);
             lblZoomSensivity.Name = "lblZoomSensivity";
             lblZoomSensivity.Size = new Size(88, 15);
@@ -238,7 +234,7 @@ namespace squad_dma
             // lblAimline
             // 
             lblAimline.AutoSize = true;
-            lblAimline.Location = new Point(7, 45);
+            lblAimline.Location = new Point(188, 124);
             lblAimline.Margin = new Padding(4, 0, 4, 0);
             lblAimline.Name = "lblAimline";
             lblAimline.Size = new Size(88, 15);
@@ -249,7 +245,7 @@ namespace squad_dma
             // lblUIScale
             // 
             lblUIScale.AutoSize = true;
-            lblUIScale.Location = new Point(47, 102);
+            lblUIScale.Location = new Point(56, 124);
             lblUIScale.Name = "lblUIScale";
             lblUIScale.Size = new Size(48, 15);
             lblUIScale.TabIndex = 28;
@@ -289,7 +285,7 @@ namespace squad_dma
             grpMapSetup.Controls.Add(lblMapXY);
             grpMapSetup.Controls.Add(txtMapSetupX);
             grpMapSetup.Controls.Add(lblMapCoords);
-            grpMapSetup.Location = new Point(8, 11);
+            grpMapSetup.Location = new Point(8, 6);
             grpMapSetup.Name = "grpMapSetup";
             grpMapSetup.Size = new Size(327, 175);
             grpMapSetup.TabIndex = 11;
@@ -369,58 +365,6 @@ namespace squad_dma
             lblMapCoords.TabIndex = 10;
             lblMapCoords.Text = "coords";
             // 
-            // grpStats
-            // 
-            grpStats.Controls.Add(lblMems);
-            grpStats.Controls.Add(lblFPS);
-            grpStats.Controls.Add(lblMemSTitle);
-            grpStats.Controls.Add(lblFPSTitle);
-            grpStats.Location = new Point(1463, 813);
-            grpStats.Name = "grpStats";
-            grpStats.Size = new Size(129, 59);
-            grpStats.TabIndex = 19;
-            grpStats.TabStop = false;
-            grpStats.Text = "FPS stats";
-            // 
-            // lblMems
-            // 
-            lblMems.AutoSize = true;
-            lblMems.Location = new Point(96, 34);
-            lblMems.Margin = new Padding(4, 0, 4, 0);
-            lblMems.Name = "lblMems";
-            lblMems.Size = new Size(13, 15);
-            lblMems.TabIndex = 14;
-            lblMems.Text = "0";
-            // 
-            // lblFPS
-            // 
-            lblFPS.AutoSize = true;
-            lblFPS.Location = new Point(96, 19);
-            lblFPS.Margin = new Padding(4, 0, 4, 0);
-            lblFPS.Name = "lblFPS";
-            lblFPS.Size = new Size(13, 15);
-            lblFPS.TabIndex = 13;
-            lblFPS.Text = "0";
-            // 
-            // lblMemSTitle
-            // 
-            lblMemSTitle.AutoSize = true;
-            lblMemSTitle.Location = new Point(6, 34);
-            lblMemSTitle.Name = "lblMemSTitle";
-            lblMemSTitle.Size = new Size(48, 15);
-            lblMemSTitle.TabIndex = 12;
-            lblMemSTitle.Text = "Mem/s:";
-            // 
-            // lblFPSTitle
-            // 
-            lblFPSTitle.AutoSize = true;
-            lblFPSTitle.Location = new Point(7, 19);
-            lblFPSTitle.Margin = new Padding(4, 0, 4, 0);
-            lblFPSTitle.Name = "lblFPSTitle";
-            lblFPSTitle.Size = new Size(29, 15);
-            lblFPSTitle.TabIndex = 10;
-            lblFPSTitle.Text = "FPS:";
-            // 
             // tabControl
             // 
             tabControl.Controls.Add(tabRadar);
@@ -453,8 +397,6 @@ namespace squad_dma
             tabRadar.ResumeLayout(false);
             grpMapSetup.ResumeLayout(false);
             grpMapSetup.PerformLayout();
-            grpStats.ResumeLayout(false);
-            grpStats.PerformLayout();
             tabControl.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -470,7 +412,7 @@ namespace squad_dma
         private Label lblUIScale;
         private TrackBar trkUIScale;
         private CheckBox chkShowAimview;
-        private CheckBox chkHideNames;
+        private Button btnDumpNames;
         private GroupBox grpRadar;
         private Button btnRestartRadar;
         private CheckBox chkShowMapSetup;
@@ -488,10 +430,5 @@ namespace squad_dma
         private TabControl tabControl;
         private TrackBar trkZoomSensivity;
         private Label lblZoomSensivity;
-        private GroupBox grpStats;
-        private Label lblMemSTitle;
-        private Label lblFPSTitle;
-        private Label lblMems;
-        private Label lblFPS;
     }
 }

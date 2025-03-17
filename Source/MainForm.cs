@@ -1,11 +1,12 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Numerics;
+﻿using DarkModeForms;
+using MaterialSkin.Controls;
+using Offsets;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
-using DarkModeForms;
-using MaterialSkin.Controls;
 using squad_dma.Properties;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Numerics;
 
 namespace squad_dma
 {
@@ -34,9 +35,7 @@ namespace squad_dma
         private const int ZOOM_INTERVAL = 10;
         private int targetZoomValue = 0;
         private System.Windows.Forms.Timer zoomTimer;
-
         private const float DRAG_SENSITIVITY = 3.5f;
-
         private const double PAN_SMOOTHNESS = 0.1;
         private const int PAN_INTERVAL = 10;
         private SKPoint targetPanPosition;
@@ -256,11 +255,6 @@ namespace squad_dma
             return new MaterialDialog(this, "Error", message, "OK", false, "", true).ShowDialog(this);
         }
 
-        private DialogResult ShowConfirmationDialog(string message, string title)
-        {
-            return new MaterialDialog(this, title, message, "Yes", true, "No", true).ShowDialog(this);
-        }
-
         private void LoadMaps()
         {
             var dir = new DirectoryInfo($"{Environment.CurrentDirectory}\\Maps");
@@ -291,7 +285,7 @@ namespace squad_dma
             #region General
             // User Interface
             chkShowAimview.Checked = _config.AimviewEnabled;
-            chkHideNames.Checked = _config.ShowNames;
+            //chkHideNames.Checked = _config.ShowNames;
             trkAimLength.Value = _config.PlayerAimLineLength;
             trkZoomSensivity.Value = _config.ZoomSensitivity;
 
@@ -418,31 +412,29 @@ namespace squad_dma
             {
                 UpdateSelectedMap();
 
-                if (_fpsWatch.ElapsedMilliseconds >= 1000)
+                if (_fpsWatch.ElapsedMilliseconds >= 1000) 
                 {
-                    // RE-ENABLE & EXPLORE WHAT THIS DOES
-                    _mapCanvas.GRContext.PurgeResources(); // Seems to fix mem leak issue on increasing resource cache
+                    // Purge resources to mitigate memory leak
+                    _mapCanvas.GRContext.PurgeResources();
 
-                    #region Radar Stats
                     var fps = _fps;
                     var memTicks = Memory.Ticks;
 
-                    if (lblFPS.Text != fps.ToString())
-                        lblFPS.Text = $"{fps}";
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        this.Text = $"Squad DMA ({fps} fps)";
+                    });
 
-                    if (lblMems.Text != memTicks.ToString())
-                        lblMems.Text = $"{memTicks}";
-                    #endregion
-
-                    _fpsWatch.Restart();
-                    _fps = 0;
+                    _fpsWatch.Restart(); 
+                    _fps = 0; 
                 }
                 else
                 {
-                    _fps++;
+                    _fps++; 
                 }
             }
         }
+
 
         private void UpdateSelectedMap()
         {
@@ -1253,6 +1245,11 @@ namespace squad_dma
             Memory.Restart();
         }
 
+        private void btnDumpNames_Click(object sender, EventArgs e)
+        {
+            // nothing
+        }
+
         private void trkZoomSensivity_Scroll(object sender, EventArgs e)
         {
             _config.ZoomSensitivity = trkZoomSensivity.Value;
@@ -1271,6 +1268,11 @@ namespace squad_dma
         #endregion
 
         private void grpMapSetup_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void trkAimLength_Scroll(object sender, EventArgs e)
         {
 
         }

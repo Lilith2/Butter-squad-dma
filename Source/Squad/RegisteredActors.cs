@@ -10,7 +10,6 @@ namespace squad_dma
         private readonly ulong _persistentLevel;
         private ulong _actorsArray;
         private readonly Stopwatch _regSw = new();
-
         private readonly ConcurrentDictionary<ulong, UActor> _actors = new();
         public IEnumerable<uint> GetActorNameIds()
         {
@@ -66,11 +65,6 @@ namespace squad_dma
         }
 
         #region Update List/Player Functions
-        /// <summary>
-        /// Updates the ConcurrentDictionary of 'Players'
-        /// </summary>
-        /// 
-#if DEBUG
         public Dictionary<ulong, uint> GetActorBaseWithName()
         {
             var count = this.ActorCount;
@@ -102,7 +96,7 @@ namespace squad_dma
 
             return actorBaseWithName;
         }
-#endif
+
 
         public void UpdateList()
         {

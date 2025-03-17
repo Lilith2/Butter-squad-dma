@@ -79,7 +79,6 @@ namespace squad_dma
                 UpdateLocalPlayerInfo();
                 this._actors.UpdateList();
                 this._actors.UpdateAllPlayers();
-
 #if DEBUG
                 if (!_vehiclesLogged)
                 {
@@ -100,6 +99,7 @@ namespace squad_dma
                     }
                 }
 #endif
+
             }
             catch (DMAShutdown)
             {
