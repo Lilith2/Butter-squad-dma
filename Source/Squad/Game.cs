@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using Offsets;
+using System.Collections.ObjectModel;
 using System.Numerics;
 
 namespace squad_dma
@@ -80,24 +81,7 @@ namespace squad_dma
                 this._actors.UpdateList();
                 this._actors.UpdateAllPlayers();
 #if DEBUG
-                if (!_vehiclesLogged)
-                {
-                    var actorBaseWithName = this._actors.GetActorBaseWithName();
-                    if (actorBaseWithName.Count > 0)
-                    {
-                        var names = Memory.GetNamesById([.. actorBaseWithName.Values.Distinct()]);
-
-                        foreach (var nameEntry in names)
-                        {
-                            if (!nameEntry.Value.StartsWith("BP_Soldier"))
-                            {
-                                Program.Log($"{nameEntry.Key} {nameEntry.Value}");
-                            }
-                        }
-
-                        _vehiclesLogged = true;
-                    }
-                }
+               // LogVehicles();
 #endif
 
             }
@@ -156,10 +140,28 @@ namespace squad_dma
         /// 
         public void WaitForGame()
         {
-            while (!this.GetGameWorld() || !this.GetGameInstance() || !this.GetCurrentLevel() || !this.InitActors() || !this.GetLocalPlayer())
+            while (true)
             {
+                try
+                {
+                    if (this.GetGameWorld() && this.GetGameInstance() && this.GetCurrentLevel() && this.InitActors() && this.GetLocalPlayer())
+                    {
+                        // If all components are initialized successfully, break out of the loop
+                        break;
+                    }
+                }
+                catch (NullPtrException)
+                {
+                    // Empty
+                }
+                catch (Exception ex)
+                {
+                    Program.Log($"Unexpected error in WaitForGame(): {ex}. Retrying...");
+                }
                 Thread.Sleep(1500);
             }
+
+            // Game has started successfully
             Thread.Sleep(1000);
             Program.Log("Game has started!!");
             this._inGame = true;
@@ -172,164 +174,127 @@ namespace squad_dma
         /// </summary>
         private bool GetGameWorld()
         {
-            try
-            {
-                _gameWorld = Memory.ReadPtr(_squadBase + Offsets.GameObjects.GWorld);
-                // Program.Log($"Found Game World at 0x{_gameWorld:X},\n0x{_gameWorld + 0x00F8:X}=0x16,\n0x{_gameWorld + 0x0158:X}=0x28,\n0x{_gameWorld + 0x01A8:X}=0x50,\n0x{_gameWorld + 0x0270:X}=0x370,\n0x{_gameWorld + 0x05E8:X}=0x90,\n0x{_gameWorld + 0x06D0:X}=0xC8");
-                return true;
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting Game World, game may not be running: {ex}");
-            }
+            _gameWorld = Memory.ReadPtr(_squadBase + Offsets.GameObjects.GWorld);
+            //Program.Log($"Found Game World at 0x{_gameWorld:X},\n0x{_gameWorld + 0x00F8:X}=0x16,\n0x{_gameWorld + 0x0158:X}=0x28,\n0x{_gameWorld + 0x01A8:X}=0x50,\n0x{_gameWorld + 0x0270:X}=0x370,\n0x{_gameWorld + 0x05E8:X}=0x90,\n0x{_gameWorld + 0x06D0:X}=0xC8");
+            return true;
         }
         /// <summary>
         /// Gets GameInstance
         /// </summary>
         private bool GetGameInstance()
         {
-            try
-            {
-                _gameInstance = Memory.ReadPtr(_gameWorld + Offsets.World.OwningGameInstance);
-                // Program.Log($"Found Game Instance at 0x{_gameInstance:X}");
-                return true;
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting Game Instance, game may not be running: {ex}");
-            }
+            _gameInstance = Memory.ReadPtr(_gameWorld + Offsets.World.OwningGameInstance);
+            //Program.Log($"Found Game Instance at 0x{_gameInstance:X}");
+            return true;
         }
         /// <summary>
         /// Gets GameInstance
         /// </summary>
         private bool GetCurrentLevel()
         {
-            try
-            {
-                var currentLayer = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.CurrentLayer);
-                var currentLevelIdPtr = currentLayer + Offsets.SQLayer.LevelID;
-                var currentLevelId = Memory.ReadValue<uint>(currentLevelIdPtr);
-                _currentLevel = Memory.GetNamesById([currentLevelId])[currentLevelId];
-                Program.Log("Current level is " + _currentLevel);
-                return true;
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting Current Layer, game may not be running: {ex}");
-            }
+            var currentLayer = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.CurrentLayer);
+            var currentLevelIdPtr = currentLayer + Offsets.SQLayer.LevelID;
+            var currentLevelId = Memory.ReadValue<uint>(currentLevelIdPtr);
+            _currentLevel = Memory.GetNamesById([currentLevelId])[currentLevelId];
+            Program.Log("Current level is " + _currentLevel);
+            return true;
         }
         /// <summary>
         /// Initializes actors list
         /// </summary>
         private bool InitActors()
         {
-            try
-            {
-                var persistentLevel = Memory.ReadPtr(_gameWorld + Offsets.World.PersistentLevel);
-                // Program.Log($"Found PersistentLevel at 0x{persistentLevel:X}");
-                _actors = new RegistredActors(persistentLevel);
-                return true;
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR Initializing actors, game may not be running: {ex}");
-            }
+            var persistentLevel = Memory.ReadPtr(_gameWorld + Offsets.World.PersistentLevel);
+            //Program.Log($"Found PersistentLevel at 0x{persistentLevel:X}");
+            _actors = new RegistredActors(persistentLevel);
+            return true;
         }
         /// <summary>
         /// Gets LocalPlayer
         /// </summary>
         private bool GetLocalPlayer()
         {
-            try
-            {
-                var localPlayers = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.LocalPlayers);
-                _localPlayer = Memory.ReadPtr(localPlayers);
-                // Program.Log($"Found LocalPlayer at 0x{_localPlayer:X}");
-                _localUPlayer = new UActor(_localPlayer);
-                _localUPlayer.Team = Team.Unknown;
-                GetPlayerController();
-                return true;
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting LocalPlayer, game may not be running: {ex}");
-            }
+            var localPlayers = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.LocalPlayers);
+            _localPlayer = Memory.ReadPtr(localPlayers);
+            //Program.Log($"Found LocalPlayer at 0x{_localPlayer:X}");
+            _localUPlayer = new UActor(_localPlayer);
+            _localUPlayer.Team = Team.Unknown;
+            GetPlayerController();
+            return true;
         }
         private bool UpdateLocalPlayerInfo()
         {
-            try
-            {
-                GetCameraCache();
-                return true;
-            }
-            catch (DMAShutdown) { throw; }
+            GetCameraCache();
+            return true;
         }
+
         /// <summary>
         /// Gets PlayerController
         /// </summary>
         private bool GetPlayerController()
         {
-            try
-            {
-                _playerController = Memory.ReadPtr(_localPlayer + Offsets.UPlayer.PlayerController);
-                // Program.Log($"Found PlayerController at 0x{_playerController:X}");
-                return true;
-            }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting PlayerController, game may not be running: {ex}");
-            }
+            _playerController = Memory.ReadPtr(_localPlayer + Offsets.UPlayer.PlayerController);
+            //Program.Log($"Found PlayerController at 0x{_playerController:X}");
+            return true;
         }
         /// <summary>
         /// Gets CameraCache
         /// </summary>
         private bool GetCameraCache()
         {
-            try
+            var cameraInfoScatterMap = new ScatterReadMap(1);
+            var cameraManagerRound = cameraInfoScatterMap.AddRound();
+            var cameraInfoRound = cameraInfoScatterMap.AddRound();
+
+            var cameraManagerPtr = cameraManagerRound.AddEntry<ulong>(0, 0, _playerController + Offsets.PlayerController.PlayerCameraManager);
+            cameraManagerRound.AddEntry<int>(0, 11, _gameWorld + Offsets.World.WorldOrigin);
+            cameraManagerRound.AddEntry<int>(0, 12, _gameWorld + Offsets.World.WorldOrigin + 0x4);
+            cameraManagerRound.AddEntry<int>(0, 13, _gameWorld + Offsets.World.WorldOrigin + 0x8);
+            cameraInfoRound.AddEntry<Vector3>(0, 1, cameraManagerPtr, null, Offsets.Camera.CameraLocation);
+            cameraInfoRound.AddEntry<Vector3>(0, 2, cameraManagerPtr, null, Offsets.Camera.CameraRotation);
+
+            cameraInfoScatterMap.Execute();
+
+            if (!cameraInfoScatterMap.Results[0][1].TryGetResult<Vector3>(out var location))
             {
-                var cameraInfoScatterMap = new ScatterReadMap(1);
-                var cameraManagerRound = cameraInfoScatterMap.AddRound();
-                var cameraInfoRound = cameraInfoScatterMap.AddRound();
-
-                var cameraManagerPtr = cameraManagerRound.AddEntry<ulong>(0, 0, _playerController + Offsets.PlayerController.PlayerCameraManager);
-                cameraManagerRound.AddEntry<int>(0, 11, _gameWorld + Offsets.World.WorldOrigin);
-                cameraManagerRound.AddEntry<int>(0, 12, _gameWorld + Offsets.World.WorldOrigin + 0x4);
-                cameraManagerRound.AddEntry<int>(0, 13, _gameWorld + Offsets.World.WorldOrigin + 0x8);
-                cameraInfoRound.AddEntry<Vector3>(0, 1, cameraManagerPtr, null, Offsets.Camera.CameraLocation);
-                cameraInfoRound.AddEntry<Vector3>(0, 2, cameraManagerPtr, null, Offsets.Camera.CameraRotation);
-
-                cameraInfoScatterMap.Execute();
-
-                if (!cameraInfoScatterMap.Results[0][1].TryGetResult<Vector3>(out var location))
-                {
-                    return false;
-                }
-                if (!cameraInfoScatterMap.Results[0][2].TryGetResult<Vector3>(out var rotation))
-                {
-                    return false;
-                }
-                if (cameraInfoScatterMap.Results[0][11].TryGetResult<int>(out var absoluteX)
-                && cameraInfoScatterMap.Results[0][12].TryGetResult<int>(out var absoluteY)
-                && cameraInfoScatterMap.Results[0][13].TryGetResult<int>(out var absoluteZ))
-                {
-                    _absoluteLocation = new Vector3(absoluteX, absoluteY, absoluteZ);
-                    // Program.Log(_absoluteLocation.ToString());
-                }
-                _localUPlayer.Position = location;
-                _localUPlayer.Rotation = new Vector2(rotation.Y, rotation.X);
-                _localUPlayer.Rotation3D = rotation;
-                return true;
+                return false;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
+            if (!cameraInfoScatterMap.Results[0][2].TryGetResult<Vector3>(out var rotation))
             {
-                throw new GameNotRunningException($"ERROR getting CameraCache, game may not be running: {ex}");
+                return false;
+            }
+            if (cameraInfoScatterMap.Results[0][11].TryGetResult<int>(out var absoluteX)
+            && cameraInfoScatterMap.Results[0][12].TryGetResult<int>(out var absoluteY)
+            && cameraInfoScatterMap.Results[0][13].TryGetResult<int>(out var absoluteZ))
+            {
+                _absoluteLocation = new Vector3(absoluteX, absoluteY, absoluteZ);
+                // Program.Log(_absoluteLocation.ToString());
+            }
+            _localUPlayer.Position = location;
+            _localUPlayer.Rotation = new Vector2(rotation.Y, rotation.X);
+            _localUPlayer.Rotation3D = rotation;
+            return true;
+        }
+
+        private void LogVehicles()
+        {
+            if (!_vehiclesLogged)
+            {
+                var actorBaseWithName = this._actors.GetActorBaseWithName();
+                if (actorBaseWithName.Count > 0)
+                {
+                    var names = Memory.GetNamesById([.. actorBaseWithName.Values.Distinct()]);
+
+                    foreach (var nameEntry in names)
+                    {
+                        if (!nameEntry.Value.StartsWith("BP_Soldier"))
+                        {
+                            Program.Log($"{nameEntry.Key} {nameEntry.Value}");
+                        }
+                    }
+
+                    _vehiclesLogged = true;
+                }
             }
         }
         #endregion

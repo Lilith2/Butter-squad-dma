@@ -222,7 +222,7 @@ namespace squad_dma
             try
             {
                 var count = _actors.Count;
-                if (count < 15)
+                if (count < 15) // todo | this causes seeding servers not to render
                     throw new GameEnded();
                 var actorBases = _actors.Values.Select(actor => actor.Base).Order().ToArray();
 
