@@ -140,28 +140,10 @@ namespace squad_dma
         /// 
         public void WaitForGame()
         {
-            while (true)
+            while (!this.GetGameWorld() || !this.GetGameInstance() || !this.GetCurrentLevel() || !this.InitActors() || !this.GetLocalPlayer())
             {
-                try
-                {
-                    if (this.GetGameWorld() && this.GetGameInstance() && this.GetCurrentLevel() && this.InitActors() && this.GetLocalPlayer())
-                    {
-                        // If all components are initialized successfully, break out of the loop
-                        break;
-                    }
-                }
-                catch (NullPtrException)
-                {
-                    // Empty
-                }
-                catch (Exception ex)
-                {
-                    Program.Log($"Unexpected error in WaitForGame(): {ex}. Retrying...");
-                }
                 Thread.Sleep(1500);
             }
-
-            // Game has started successfully
             Thread.Sleep(1000);
             Program.Log("Game has started!!");
             this._inGame = true;

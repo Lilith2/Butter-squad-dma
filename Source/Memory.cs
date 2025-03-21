@@ -14,7 +14,7 @@ namespace squad_dma
         /// </summary>
         private static Vmm vmmInstance;
 
-        public static volatile bool _running = false;
+        private static volatile bool _running = false;
         private static volatile bool _restart = false;
         private static volatile bool _ready = false;
         private static Thread _workerThread;
@@ -25,7 +25,6 @@ namespace squad_dma
         private static int _ticksCounter = 0;
         private static volatile int _ticks = 0;
         private static readonly Stopwatch _tickSw = new();
-
 
         public static Game.GameStatus GameStatus = Game.GameStatus.NotFound;
 
@@ -146,7 +145,7 @@ namespace squad_dma
         /// <summary>
         /// Gets Squad Process ID.
         /// </summary>
-        public static bool GetPid()
+        private static bool GetPid()
         {
             try
             {
@@ -170,7 +169,7 @@ namespace squad_dma
         /// <summary>
         /// Gets module base entry address
         /// </summary>
-        public static bool GetModuleBase()
+        private static bool GetModuleBase()
         {
             try
             {
@@ -262,22 +261,15 @@ namespace squad_dma
                         Thread.Sleep(15000);
                     }
                     Program.Log("Squad process located! Startup successful.");
-
-                    Memory.GameStatus = Game.GameStatus.Menu;
-                    Program.Log("Game is in the main menu. Waiting for game to start...");
-
-                    Memory._game = new Game(Memory._squadBase);
-                    Memory._ready = true;
-
                     while (true)
                     {
+                        Memory._game = new Game(Memory._squadBase);
                         try
                         {
+                            Program.Log("Ready -- Waiting for game...");
+                            Memory.GameStatus = Game.GameStatus.Menu;
+                            Memory._ready = true;
                             Memory._game.WaitForGame();
-
-                            Program.Log("Game has started!!");
-                            Memory.GameStatus = Game.GameStatus.InGame;
-
                             while (Memory.GameStatus == Game.GameStatus.InGame && _running)
                             {
                                 if (Memory._tickSw.ElapsedMilliseconds >= 1000)
@@ -303,15 +295,12 @@ namespace squad_dma
                                 Thread.SpinWait(1000);
                             }
                         }
-                        catch (GameNotRunningException)
-                        {
-                            Program.Log("Game is no longer running! Attempting to restart...");
-                            break;
-                        }
+                        catch (GameNotRunningException) { break; }
+                        catch (ThreadInterruptedException) { throw; }
+                        catch (DMAShutdown) { throw; }
                         catch (Exception ex)
                         {
                             Program.Log($"CRITICAL ERROR in Game Loop: {ex}");
-                            Thread.Sleep(5000);
                         }
                         finally
                         {
@@ -319,6 +308,7 @@ namespace squad_dma
                             Thread.Sleep(100);
                         }
                     }
+                    Program.Log("Game is no longer running! Attempting to restart...");
                 }
             }
             catch (ThreadInterruptedException) { }
@@ -348,80 +338,77 @@ namespace squad_dma
         /// <param name="useCache">Use caching for this read (recommended).</param>
         internal static void ReadScatter(ReadOnlySpan<IScatterEntry> entries)
         {
-            var pagesToRead = new HashSet<ulong>(); // Unique pages to read
-            var entryInfo = new List<(IScatterEntry Entry, ulong ReadAddress, uint Size, uint NumPages, ulong BasePage)>();
-
-            // First loop: Gather information and validate entries
-            foreach (var entry in entries)
+            var pagesToRead = new HashSet<ulong>(); // Will contain each unique page only once to prevent reading the same page multiple times
+            foreach (var entry in entries) // First loop through all entries - GET INFO
             {
                 if (entry is null)
                     continue;
-
+                // Parse Address and Size properties
                 ulong addr = entry.ParseAddr();
                 uint size = (uint)entry.ParseSize();
 
-                // Integrity check
+                // INTEGRITY CHECK - Make sure the read is valid
                 if (addr == 0x0 || size == 0)
                 {
                     entry.IsFailed = true;
                     continue;
                 }
-
+                // location of object
                 ulong readAddress = addr + entry.Offset;
+                // get the number of pages
                 uint numPages = ADDRESS_AND_SIZE_TO_SPAN_PAGES(readAddress, size);
                 ulong basePage = PAGE_ALIGN(readAddress);
 
-                entryInfo.Add((entry, readAddress, size, numPages, basePage));
-
-                // Add pages to the set
+                //loop all the pages we would need
                 for (int p = 0; p < numPages; p++)
                 {
                     ulong page = basePage + PAGE_SIZE * (uint)p;
                     pagesToRead.Add(page);
                 }
             }
+            var scatters = vmmInstance.MemReadScatter(_pid, Vmm.FLAG_NOCACHE, pagesToRead.ToArray()); // execute scatter read
 
-            // Execute scatter read
-            var scatters = vmmInstance.MemReadScatter(_pid, Vmm.FLAG_NOCACHE, pagesToRead.ToArray());
-
-            // Map pages to scatter results for O(1) lookup
-            var scatterMap = scatters.ToDictionary(x => x.qwA, x => x);
-
-            // Second loop: Parse results
-            foreach (var (entry, readAddress, size, numPages, basePage) in entryInfo)
+            foreach (var entry in entries) // Second loop through all entries - PARSE RESULTS
             {
-                if (entry.IsFailed)
+                if (entry is null || entry.IsFailed) // Skip this entry, leaves result as null
                     continue;
 
-                var buffer = new byte[size]; // Allocate buffer
-                int bytesCopied = 0;
-                uint pageOffset = BYTE_OFFSET(readAddress);
-                uint cb = Math.Min(size, (uint)PAGE_SIZE - pageOffset);
+                ulong readAddress = (ulong)entry.Addr + entry.Offset; // location of object
+                uint pageOffset = BYTE_OFFSET(readAddress); // Get object offset from the page start address
+
+                uint size = (uint)(int)entry.Size;
+                var buffer = new byte[size]; // Alloc result buffer on heap
+                int bytesCopied = 0; // track number of bytes copied to ensure nothing is missed
+                uint cb = Math.Min(size, (uint)PAGE_SIZE - pageOffset); // bytes to read this page
+
+                uint numPages = ADDRESS_AND_SIZE_TO_SPAN_PAGES(readAddress, size); // number of pages to read from (in case result spans multiple pages)
+                ulong basePage = PAGE_ALIGN(readAddress);
 
                 for (int p = 0; p < numPages; p++)
                 {
-                    ulong page = basePage + PAGE_SIZE * (uint)p;
-
-                    if (!scatterMap.TryGetValue(page, out var scatter) || !scatter.f)
+                    ulong page = basePage + PAGE_SIZE * (uint)p; // get current page addr
+                    var scatter = scatters.FirstOrDefault(x => x.qwA == page); // retrieve page of mem needed
+                    if (scatter.f) // read succeeded -> copy to buffer
+                    {
+                        scatter.pb
+                            .AsSpan((int)pageOffset, (int)cb)
+                            .CopyTo(buffer.AsSpan(bytesCopied, (int)cb)); // Copy bytes to buffer
+                        bytesCopied += (int)cb;
+                    }
+                    else // read failed -> set failed flag
                     {
                         entry.IsFailed = true;
                         break;
                     }
 
-                    scatter.pb.AsSpan((int)pageOffset, (int)cb).CopyTo(buffer.AsSpan(bytesCopied, (int)cb));
-                    bytesCopied += (int)cb;
-
-                    // Prepare for the next page
-                    cb = (uint)PAGE_SIZE;
-                    if (bytesCopied + cb > size)
+                    cb = (uint)PAGE_SIZE; // set bytes to read next page
+                    if (bytesCopied + cb > size) // partial chunk last page
                         cb = size - (uint)bytesCopied;
 
-                    pageOffset = 0x0; // Reset offset for the next page
+                    pageOffset = 0x0; // Next page (if any) should start at 0x0
                 }
-
                 if (bytesCopied != size)
                     entry.IsFailed = true;
-
                 entry.SetResult(buffer);
             }
         }
