@@ -701,6 +701,7 @@ namespace squad_dma {
             {"SD_BP_M113A3_Logistics_Cage_C", ActorType.TrackedLogistics},
             {"SD_BP_MTLB_VMK_RUS_Child_C", ActorType.TrackedAPC},
             {"SD_BP_MTLB_Logi_C", ActorType.TrackedLogistics},
+            {"SD_BP_MTLB_LOGI_RUS_C", ActorType.TrackedLogistics},
             {"SD_BP_Technical4Seater_Logi_Grey_C", ActorType.JeepLogistics},
             {"SD_BP_BRDM-2_Child_C", ActorType.JeepRWSTurret},
             {"BP_Caiman_C", ActorType.JeepRWSTurret},
@@ -837,8 +838,9 @@ namespace squad_dma {
             {"BP_M109A6_D_C", ActorType.TrackedAPCArtillery},
 
             {"BP_Drone_C", ActorType.Drone},
-            {"BP_FlyingDrone_THWK_C", ActorType.Drone},
-            {"BP_FlyingDrone_SOF_C", ActorType.Drone}
+            //{"BP_FlyingDrone_THWK_C", ActorType.Drone},
+            {"BP_Drone_SOF_C", ActorType.Drone},
+            //{"BP_FlyingDrone_SOF_C", ActorType.Drone}
         };
 
         public static readonly Dictionary<ActorType, SKBitmap> BitMaps = new(){
