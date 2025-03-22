@@ -80,9 +80,6 @@ namespace squad_dma
                 UpdateLocalPlayerInfo();
                 this._actors.UpdateList();
                 this._actors.UpdateAllPlayers();
-#if DEBUG
-                LogVehicles();
-#endif
 
             }
             catch (DMAShutdown)
@@ -140,16 +137,49 @@ namespace squad_dma
         /// 
         public void WaitForGame()
         {
-            while (!this.GetGameWorld() || !this.GetGameInstance() || !this.GetCurrentLevel() || !this.InitActors() || !this.GetLocalPlayer())
+            while (true)
             {
-                Thread.Sleep(1500);
+                try
+                {
+                    if (!Memory.GetModuleBase())
+                    {
+                        throw new GameNotRunningException("Process terminated during wait");
+                    }
+
+                    if (GetGameWorld() && GetGameInstance() && GetCurrentLevel() && InitActors() && GetLocalPlayer())
+                    {
+                        if (!Memory.GetModuleBase())
+                        {
+                            throw new GameNotRunningException("Process terminated during initialization");
+                        }
+
+                        Thread.Sleep(1000);
+                        Program.Log("Game has started!!");
+                        this._inGame = true;
+                        Memory.GameStatus = Game.GameStatus.InGame;
+                        return;
+                    }
+                }
+                catch (GameNotRunningException)
+                {
+                    throw; // Propagate up to break out of wait loop
+                }
+                catch (Exception ex) when (IsExpectedException(ex))
+                {
+                    Program.Log($"Ignoring expected exception during wait: {ex.Message}");
+                }
+
+                Thread.Sleep(500);
             }
-            Thread.Sleep(1000);
-            Program.Log("Game has started!!");
-            this._inGame = true;
-            Memory.GameStatus = Game.GameStatus.InGame;
-            Thread.Sleep(1500);
         }
+
+        private static bool IsExpectedException(Exception ex)
+        {
+            return ex is NullReferenceException
+                || ex is AccessViolationException
+                || ex is DMAException;
+        }
+
 
         /// <summary>
         /// Gets Game Object Manager ptr
@@ -162,11 +192,7 @@ namespace squad_dma
                 // Program.Log($"Found Game World at 0x{_gameWorld:X},\n0x{_gameWorld + 0x00F8:X}=0x16,\n0x{_gameWorld + 0x0158:X}=0x28,\n0x{_gameWorld + 0x01A8:X}=0x50,\n0x{_gameWorld + 0x0270:X}=0x370,\n0x{_gameWorld + 0x05E8:X}=0x90,\n0x{_gameWorld + 0x06D0:X}=0xC8");
                 return true;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting Game World, game may not be running: {ex}");
-            }
+            catch { return false; }
         }
         /// <summary>
         /// Gets GameInstance
@@ -179,11 +205,7 @@ namespace squad_dma
                 // Program.Log($"Found Game Instance at 0x{_gameInstance:X}");
                 return true;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting Game Instance, game may not be running: {ex}");
-            }
+            catch { return false; }
         }
         /// <summary>
         /// Gets GameInstance
@@ -199,11 +221,7 @@ namespace squad_dma
                 Program.Log("Current level is " + _currentLevel);
                 return true;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting Current Layer, game may not be running: {ex}");
-            }
+            catch { return false; }
         }
         /// <summary>
         /// Initializes actors list
@@ -217,11 +235,7 @@ namespace squad_dma
                 _actors = new RegistredActors(persistentLevel);
                 return true;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR Initializing actors, game may not be running: {ex}");
-            }
+            catch { return false; }
         }
         /// <summary>
         /// Gets LocalPlayer
@@ -238,11 +252,8 @@ namespace squad_dma
                 GetPlayerController();
                 return true;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting LocalPlayer, game may not be running: {ex}");
-            }
+            catch { return false; }
+
         }
         private bool UpdateLocalPlayerInfo()
         {
@@ -251,7 +262,7 @@ namespace squad_dma
                 GetCameraCache();
                 return true;
             }
-            catch (DMAShutdown) { throw; }
+            catch { return false; }
         }
         /// <summary>
         /// Gets PlayerController
@@ -264,11 +275,7 @@ namespace squad_dma
                 // Program.Log($"Found PlayerController at 0x{_playerController:X}");
                 return true;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting PlayerController, game may not be running: {ex}");
-            }
+            catch { return false; }
         }
         /// <summary>
         /// Gets CameraCache
@@ -310,32 +317,36 @@ namespace squad_dma
                 _localUPlayer.Rotation3D = rotation;
                 return true;
             }
-            catch (DMAShutdown) { throw; }
-            catch (Exception ex)
-            {
-                throw new GameNotRunningException($"ERROR getting CameraCache, game may not be running: {ex}");
-            }
+            catch { return false; }
         }
 
-        private void LogVehicles()
+        public void LogVehicles(bool force = false)
         {
-            if (!_vehiclesLogged)
+            if (!force && _vehiclesLogged)
+                return;
+
+            var actorBaseWithName = this._actors.GetActorBaseWithName();
+            if (actorBaseWithName.Count > 0)
             {
-                var actorBaseWithName = this._actors.GetActorBaseWithName();
-                if (actorBaseWithName.Count > 0)
+                var names = Memory.GetNamesById([.. actorBaseWithName.Values.Distinct()]);
+
+                int totalEntries = 0;
+
+                foreach (var nameEntry in names)
                 {
-                    var names = Memory.GetNamesById([.. actorBaseWithName.Values.Distinct()]);
-
-                    foreach (var nameEntry in names)
+                    if (!nameEntry.Value.StartsWith("BP_Soldier"))
                     {
-                        if (!nameEntry.Value.StartsWith("BP_Soldier"))
-                        {
-                            Program.Log($"{nameEntry.Key} {nameEntry.Value}");
-                        }
+                        Program.Log($"{nameEntry.Key} {nameEntry.Value}");
+                        totalEntries++;
                     }
-
-                    _vehiclesLogged = true;
                 }
+
+                Program.Log($"Total entries found: {totalEntries}");
+                _vehiclesLogged = !force; // Reset only if not forced
+            }
+            else
+            {
+                Program.Log("No entries found.");
             }
         }
 

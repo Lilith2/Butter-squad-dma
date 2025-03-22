@@ -12,6 +12,7 @@ namespace squad_dma
 {
     public partial class MainForm : Form
     {
+        private Game _game;
         private readonly Config _config;
         private readonly SKGLControl _mapCanvas;
         private readonly Stopwatch _fpsWatch = new();
@@ -94,7 +95,7 @@ namespace squad_dma
         #endregion
 
         #region Constructor
-        public MainForm()
+        public MainForm(Game game)
         {
             _config = Program.Config;
 
@@ -138,6 +139,7 @@ namespace squad_dma
             panTimer = new System.Windows.Forms.Timer();
             panTimer.Interval = PAN_INTERVAL;
             panTimer.Tick += PanTimer_Tick;
+            _game = game;
         }
         #endregion
 
@@ -164,6 +166,7 @@ namespace squad_dma
             Keys.F1 => ZoomIn(5),
             Keys.F2 => ZoomOut(5),
             Keys.F5 => ToggleMap(),
+            Keys.F6 => DumpNames(),
             Keys.F11 => ToggleFullscreen(FormBorderStyle is FormBorderStyle.Sizable),
             _ => base.ProcessCmdKey(ref msg, keyData),
         };
@@ -296,7 +299,6 @@ namespace squad_dma
             InitiateFont();
             InitiateUIScaling();
         }
-        #endregion
 
         private bool ToggleFullscreen(bool toFullscreen)
         {
@@ -321,6 +323,8 @@ namespace squad_dma
 
             return true;
         }
+        #endregion
+
 
         #region General Event Handlers
         private async void frmMain_Shown(object sender, EventArgs e)
@@ -652,11 +656,10 @@ namespace squad_dma
                             var timeSinceDeath = DateTime.Now - actor.TimeOfDeath;
                             if (timeSinceDeath.TotalSeconds <= 8)
                             {
-                                var deathMapPos = actor.DeathPosition.ToMapPos(_selectedMap);
+                                var deathPosAdjusted = actor.DeathPosition + AbsoluteLocation;
+                                var deathMapPos = deathPosAdjusted.ToMapPos(_selectedMap);
                                 var deathZoomedPos = deathMapPos.ToZoomedPos(mapParams);
-#if DEBUG
-                                DrawDead(canvas, deathZoomedPos.GetPoint(), SKColors.Gray, 5 * _uiScale);
-#endif
+                                DrawDead(canvas, deathZoomedPos.GetPoint(), SKColors.Black, SKColors.White, 5 * _uiScale);
                             }
                             else
                             {
@@ -751,18 +754,40 @@ namespace squad_dma
             }
         }
 
-        private void DrawDead(SKCanvas canvas, SKPoint position, SKColor color, float size)
+        private void DrawDead(SKCanvas canvas, SKPoint position, SKColor outlineColor, SKColor fillColor, float size)
         {
-            using var paint = new SKPaint
+            // Outline settings
+            using var outlinePaint = new SKPaint
             {
-                Color = color,
-                StrokeWidth = 3 * _uiScale,
+                Color = outlineColor,
+                StrokeWidth = 4 * _uiScale, 
                 IsAntialias = true,
-                Style = SKPaintStyle.Stroke
+                Style = SKPaintStyle.Stroke,
+                StrokeCap = SKStrokeCap.Round 
             };
 
-            canvas.DrawLine(position.X - size, position.Y - size, position.X + size, position.Y + size, paint);
-            canvas.DrawLine(position.X + size, position.Y - size, position.X - size, position.Y + size, paint);
+            // Fill settings
+            using var fillPaint = new SKPaint
+            {
+                Color = fillColor,
+                StrokeWidth = 2 * _uiScale, 
+                IsAntialias = true,
+                Style = SKPaintStyle.Stroke,
+                StrokeCap = SKStrokeCap.Round 
+            };
+
+            float x1 = position.X - size;
+            float y1 = position.Y - size;
+            float x2 = position.X + size;
+            float y2 = position.Y + size;
+
+            // Draw the outline X mark
+            canvas.DrawLine(x1, y1, x2, y2, outlinePaint); 
+            canvas.DrawLine(x2, y1, x1, y2, outlinePaint); 
+
+            // Draw the fill X mark 
+            canvas.DrawLine(x1, y1, x2, y2, fillPaint); 
+            canvas.DrawLine(x2, y1, x1, y2, fillPaint); 
         }
 
         private void DrawPOIs(SKCanvas canvas)
@@ -1245,9 +1270,15 @@ namespace squad_dma
             Memory.Restart();
         }
 
+        private bool DumpNames()
+        {
+            _game.LogVehicles(force: true);
+            return true;
+        }
+
         private void btnDumpNames_Click(object sender, EventArgs e)
         {
-            // nothing
+            DumpNames();
         }
 
         private void trkZoomSensivity_Scroll(object sender, EventArgs e)

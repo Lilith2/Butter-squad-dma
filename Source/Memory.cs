@@ -21,10 +21,13 @@ namespace squad_dma
         private static CancellationTokenSource _workerCancellationTokenSource;
         private static uint _pid;
         private static ulong _squadBase;
-        private static Game _game;
+        public static Game _game;
         private static int _ticksCounter = 0;
         private static volatile int _ticks = 0;
         private static readonly Stopwatch _tickSw = new();
+        private static readonly ManualResetEvent _syncProcessRunning = new(false);
+        private static readonly Stopwatch _processCheckTimer = new();
+        private const int PROCESS_CHECK_INTERVAL = 2000;
 
         public static Game.GameStatus GameStatus = Game.GameStatus.NotFound;
 
@@ -152,16 +155,16 @@ namespace squad_dma
                 ThrowIfDMAShutdown();
                 if (!vmmInstance.PidGetFromName("SquadGame.exe", out _pid))
                     throw new DMAException("Unable to obtain PID. Game is not running.");
-                else
-                {
-                    Program.Log($"SquadGame.exe is running at PID {_pid}");
-                    return true;
-                }
+                //  else
+                // {
+                //     Program.Log($"SquadGame.exe is running at PID {_pid}");
+                //     return true;
+                // }
+                return true;
             }
             catch (DMAShutdown) { throw; }
             catch (Exception ex)
             {
-                Program.Log($"ERROR getting PID: {ex}");
                 return false;
             }
         }
@@ -169,23 +172,23 @@ namespace squad_dma
         /// <summary>
         /// Gets module base entry address
         /// </summary>
-        private static bool GetModuleBase()
+        public static bool GetModuleBase()
         {
             try
             {
                 ThrowIfDMAShutdown();
                 _squadBase = vmmInstance.ProcessGetModuleBase(_pid, "SquadGame.exe");
                 if (_squadBase == 0) throw new DMAException("Unable to obtain Base Module Address. Game may not be running");
-                else
-                {
-                    Program.Log($"Found SquadGame.exe at 0x{_squadBase.ToString("x")}");
-                    return true;
-                }
+                // else
+                // {
+                //     Program.Log($"Found SquadGame.exe at 0x{_squadBase.ToString("x")}");
+                //     return true;
+                // }
+                return true;
             }
             catch (DMAShutdown) { throw; }
             catch (Exception ex)
             {
-                Program.Log($"ERROR getting module base: {ex}");
                 return false;
             }
         }
@@ -244,6 +247,38 @@ namespace squad_dma
             Program.Log("[Memory] Refresh thread stopped.");
         }
 
+        private static bool VerifyRunningProcess()
+        {
+            try
+            {
+                if (!GetModuleBase())
+                {
+                    Program.Log($"Process {_pid} is no longer running!");
+                    return false;
+                }
+
+                var scatterMap = new ScatterReadMap(2);
+                var baseCheckRound = scatterMap.AddRound();
+                baseCheckRound.AddEntry<ulong>(0, 0, _squadBase);
+                baseCheckRound.AddEntry<string>(0, 1, _squadBase, 32); // Read module header
+
+                scatterMap.Execute();
+
+                if (!scatterMap.Results[0][1].TryGetResult<string>(out var moduleHeader) ||
+                    !moduleHeader.StartsWith("MZ"))
+                {
+                    Program.Log("Module header verification failed!");
+                    return false;
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Main worker to perform DMA Reads on.
         /// </summary>
@@ -254,13 +289,21 @@ namespace squad_dma
                 while (true)
                 {
                     Program.Log("Attempting to find Squad Process...");
+                    bool firstAttempt = true;
                     while (!Memory.GetPid() || !Memory.GetModuleBase())
                     {
-                        Program.Log("Squad startup failed, trying again in 15 seconds...");
                         Memory.GameStatus = Game.GameStatus.NotFound;
-                        Thread.Sleep(15000);
+                        _syncProcessRunning.Reset();
+                        var delay = firstAttempt ? 15000 : 5000;
+                        Program.Log($"Squad startup failed, trying again in {delay / 1000} seconds...");
+                        Thread.Sleep(delay);
+                        firstAttempt = false;
                     }
+
                     Program.Log("Squad process located! Startup successful.");
+                    _syncProcessRunning.Set();
+                    _processCheckTimer.Restart();
+
                     while (true)
                     {
                         Memory._game = new Game(Memory._squadBase);
@@ -270,24 +313,23 @@ namespace squad_dma
                             Memory.GameStatus = Game.GameStatus.Menu;
                             Memory._ready = true;
                             Memory._game.WaitForGame();
+
                             while (Memory.GameStatus == Game.GameStatus.InGame && _running)
                             {
-                                if (Memory._tickSw.ElapsedMilliseconds >= 1000)
+                                // Periodic process verification
+                                if (_processCheckTimer.ElapsedMilliseconds > PROCESS_CHECK_INTERVAL)
                                 {
-                                    Memory._ticks = _ticksCounter;
-                                    Memory._ticksCounter = 0;
-                                    Memory._tickSw.Restart();
-                                }
-                                else
-                                {
-                                    Memory._ticksCounter++;
+                                    if (!VerifyRunningProcess())
+                                    {
+                                        Program.Log("Game process verification failed!");
+                                        throw new GameNotRunningException();
+                                    }
+                                    _processCheckTimer.Restart();
                                 }
 
                                 if (Memory._restart)
                                 {
-                                    Memory.GameStatus = Game.GameStatus.Menu;
-                                    Program.Log("Restarting game... getting fresh GameWorld instance");
-                                    Memory._restart = false;
+                                    HandleRestart();
                                     break;
                                 }
 
@@ -300,7 +342,7 @@ namespace squad_dma
                         catch (DMAShutdown) { throw; }
                         catch (Exception ex)
                         {
-                            Program.Log($"CRITICAL ERROR in Game Loop: {ex}");
+                            Program.Log($"Game loop error: {ex.Message}");
                         }
                         finally
                         {
@@ -660,6 +702,12 @@ namespace squad_dma
                 _restart = true;
             }
         }
+        private static void HandleRestart()
+        {
+            Memory.GameStatus = Game.GameStatus.Menu;
+            Program.Log("Restarting game... getting fresh GameWorld instance");
+            Memory._restart = false;
+        }
         /// <summary>
         /// Close down DMA Device Connection.
         /// </summary>
@@ -677,7 +725,6 @@ namespace squad_dma
         {
             if (!_running) throw new DMAShutdown("Memory Thread/DMA is shutting down!");
         }
-
 
         /// Mem Align Functions Ported from Win32 (C Macros)
         private const ulong PAGE_SIZE = 0x1000;

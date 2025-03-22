@@ -24,17 +24,25 @@ namespace squad_dma {
 
         #region Program Entry Point
         [STAThread]
-        private static void Main(string[] args) {
-            Console.OutputEncoding = System.Text.Encoding.Unicode; // allow russian chars
+        private static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
             try
             {
                 if (_singleton)
                 {
-                    RuntimeHelpers.RunClassConstructor(typeof(Memory).TypeHandle); // invoke static constructor
+                    RuntimeHelpers.RunClassConstructor(typeof(Memory).TypeHandle); // Initialize Memory
                     ApplicationConfiguration.Initialize();
                     Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(true);                    
-                    Application.Run(new MainForm());
+                    Application.SetCompatibleTextRenderingDefault(true);
+
+                    // Wait for the Memory worker to initialize and find the game
+                    while (!Memory.Ready)
+                    {
+                        Thread.Sleep(100);
+                    }
+                    Game game = Memory._game;
+                    Application.Run(new MainForm(game));
                 }
             }
             catch (Exception ex)

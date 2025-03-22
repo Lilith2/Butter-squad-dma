@@ -837,10 +837,15 @@ namespace squad_dma {
             {"SD_BP_M1064_M121_TSF_Desert_C", ActorType.TrackedAPCArtillery},
             {"BP_M109A6_D_C", ActorType.TrackedAPCArtillery},
 
+            {"BP_Stinger_Base_Deployable_C", ActorType.DeployableAntitank }, // todo Change icon to better suit Steel Division Stingers
+            {"BP_Strela_Base_Deployable_C", ActorType.DeployableAntitank },
+
+            {"BP_HIMARS_Rocket_Proj2_C", ActorType.Projectile},
+
             {"BP_Drone_C", ActorType.Drone},
-            //{"BP_FlyingDrone_THWK_C", ActorType.Drone},
+            {"BP_FlyingDrone_THWK_C", ActorType.Drone}, // not sure if correct
             {"BP_Drone_SOF_C", ActorType.Drone},
-            //{"BP_FlyingDrone_SOF_C", ActorType.Drone}
+            {"BP_FlyingDrone_SOF_C", ActorType.Drone} // not sure if correct
         };
 
         public static readonly Dictionary<ActorType, SKBitmap> BitMaps = new(){
