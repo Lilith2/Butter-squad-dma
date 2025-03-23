@@ -330,18 +330,13 @@ namespace squad_dma
             {
                 var names = Memory.GetNamesById([.. actorBaseWithName.Values.Distinct()]);
 
-                int totalEntries = 0;
-
                 foreach (var nameEntry in names)
                 {
                     if (!nameEntry.Value.StartsWith("BP_Soldier"))
                     {
                         Program.Log($"{nameEntry.Key} {nameEntry.Value}");
-                        totalEntries++;
                     }
                 }
-
-                Program.Log($"Total entries found: {totalEntries}");
                 _vehiclesLogged = !force; // Reset only if not forced
             }
             else

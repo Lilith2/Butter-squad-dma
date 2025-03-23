@@ -105,7 +105,7 @@
 
     public struct ASQPlayerState
     {
-        public const uint TeamID = 0x3F0;
+        public const uint TeamID = 0x400;
     }
 
     public struct ASQSoldier

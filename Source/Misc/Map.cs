@@ -121,8 +121,31 @@ namespace squad_dma
             canvas.DrawLine(this.GetPoint(), aimlineEnd, outlinePaint);
             canvas.DrawLine(this.GetPoint(), aimlineEnd, paint);
         }
+        public void DrawProjectileAA(SKCanvas canvas, UActor projectile) // AntiAir Projectiles for Steel Division
+        {
+            float size = 16 * UIScale;
+            SKPoint center = this.GetPoint();
+            string text = "AA";
 
-        public void DrawProjectile(SKCanvas canvas, UActor projectile)
+            using (var textPaint = new SKPaint
+            {
+                Color = SKColors.Cyan,
+                TextSize = size,
+                IsAntialias = true,
+                TextAlign = SKTextAlign.Center,
+                Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright) // Normal weight, clean font
+            })
+            {
+                SKRect textBounds = new SKRect();
+                textPaint.MeasureText(text, ref textBounds);
+
+                float yOffset = textBounds.Height / 2 - textBounds.Bottom;
+
+                canvas.DrawText(text, center.X, center.Y - yOffset, textPaint);
+            }
+        }
+
+        public void DrawProjectile(SKCanvas canvas, UActor projectile) // Normal Projectiles Like Mortars / CAS Rockets / etc
         {
             SKPaint paint = projectile.GetProjectilePaint();
 

@@ -6,6 +6,7 @@ using SkiaSharp.Views.Desktop;
 using squad_dma.Properties;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 
 namespace squad_dma
@@ -652,7 +653,6 @@ namespace squad_dma
 
                         if (actor.ActorType == ActorType.Player && !actor.IsAlive && actor.DeathPosition != Vector3.Zero)
                         {
-
                             var timeSinceDeath = DateTime.Now - actor.TimeOfDeath;
                             if (timeSinceDeath.TotalSeconds <= 8)
                             {
@@ -673,11 +673,27 @@ namespace squad_dma
 
                         int aimlineLength = 15;
 
-                        DrawActor(canvas, actor, actorZoomedPos, aimlineLength, localPlayerMapPos);
+                        if (actor.ActorType != ActorType.ProjectileAA)
+                        {
+                            DrawActor(canvas, actor, actorZoomedPos, aimlineLength, localPlayerMapPos);
+                        }
+                    }
+                    foreach (var actor in allPlayers)
+                    {
+                        if (actor.ActorType == ActorType.ProjectileAA)
+                        {
+                            var actorPos = actor.Position + AbsoluteLocation;
+                            var actorMapPos = actorPos.ToMapPos(_selectedMap);
+                            var actorZoomedPos = actorMapPos.ToZoomedPos(mapParams);
+
+                            DrawActor(canvas, actor, actorZoomedPos, 0, localPlayerMapPos); // aimlineLength is 0 for AA projectiles
+                        }
                     }
                 }
             }
         }
+
+        private Dictionary<UActor, Vector3> _projectileAAStartPositions = new Dictionary<UActor, Vector3>();
 
         private void DrawActor(SKCanvas canvas, UActor actor, MapPosition actorZoomedPos, int aimlineLength, MapPosition localPlayerMapPos)
         {
@@ -751,6 +767,69 @@ namespace squad_dma
                     }
                     actorZoomedPos.DrawTechMarker(canvas, actor);
                 }
+
+                if (actor.ActorType == ActorType.ProjectileAA)
+                {
+                    if (!_projectileAAStartPositions.ContainsKey(actor))
+                        _projectileAAStartPositions[actor] = actor.Position + AbsoluteLocation;
+
+                    actorZoomedPos.DrawProjectileAA(canvas, actor);
+
+                    if (_projectileAAStartPositions.TryGetValue(actor, out var startPos))
+                    {
+                        var startMapPos = startPos.ToMapPos(_selectedMap);
+                        var startZoomedPos = startMapPos.ToZoomedPos(GetMapLocation());
+                        DrawAAStartMarker(canvas, startZoomedPos);
+                    }
+                }
+            }
+        }
+
+        private void DrawAAStartMarker(SKCanvas canvas, MapPosition startPos)
+        {
+            float size = 8 * _uiScale;
+            float thickness = 2 * _uiScale;
+            SKPaint xPaint = new SKPaint
+            {
+                Color = SKColors.Cyan,
+                StrokeWidth = thickness,
+                IsAntialias = true,
+                Style = SKPaintStyle.Stroke,
+                StrokeCap = SKStrokeCap.Round
+            };
+
+            canvas.DrawLine(
+                startPos.X - size, startPos.Y - size,
+                startPos.X + size, startPos.Y + size,
+                xPaint
+            );
+
+            canvas.DrawLine(
+                startPos.X + size, startPos.Y - size,
+                startPos.X - size, startPos.Y + size,
+                xPaint
+            );
+
+            string text = "AA";
+            float textSize = 12 * _uiScale;
+            float textOffset = size + 4 * _uiScale;
+
+            using (var textPaint = new SKPaint
+            {
+                Color = SKColors.Cyan,
+                TextSize = textSize,
+                IsAntialias = true,
+                TextAlign = SKTextAlign.Left,
+                Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
+            })
+            {
+                SKRect textBounds = new SKRect();
+                textPaint.MeasureText(text, ref textBounds);
+
+                float textX = startPos.X + textOffset;
+                float textY = startPos.Y + (textBounds.Height / 2);
+
+                canvas.DrawText(text, textX, textY, textPaint);
             }
         }
 

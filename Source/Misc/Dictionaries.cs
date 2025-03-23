@@ -841,11 +841,14 @@ namespace squad_dma {
             {"BP_Strela_Base_Deployable_C", ActorType.DeployableAntitank },
 
             {"BP_HIMARS_Rocket_Proj2_C", ActorType.Projectile},
+            {"BP_Projectile_GuidedAA_Stinger_C", ActorType.ProjectileAA},
+            {"BP_Projectile_GuidedAA_Strela_C", ActorType.ProjectileAA},
+            {"BP_Projectile_GuidedAA_Parent_C", ActorType.ProjectileAA},
 
-            {"BP_Drone_C", ActorType.Drone},
-            {"BP_FlyingDrone_THWK_C", ActorType.Drone}, // not sure if correct
-            {"BP_Drone_SOF_C", ActorType.Drone},
-            {"BP_FlyingDrone_SOF_C", ActorType.Drone} // not sure if correct
+            {"BP_Drone_C", ActorType.Drone},// these are nothing i think 
+            {"BP_FlyingDrone_THWK_C", ActorType.Drone}, // Russia
+            {"BP_Drone_SOF_C", ActorType.Drone}, // these are nothing i think
+            {"BP_FlyingDrone_SOF_C", ActorType.Drone} // Ukraine
         };
 
         public static readonly Dictionary<ActorType, SKBitmap> BitMaps = new(){

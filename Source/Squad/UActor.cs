@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using SkiaSharp;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace squad_dma
@@ -42,7 +43,7 @@ namespace squad_dma
         public int ErrorCount { get; set; } = 0;
 
         public Vector3 DeathPosition { get; set; } = Vector3.Zero; 
-        public DateTime TimeOfDeath { get; set; } = DateTime.MinValue; 
+        public DateTime TimeOfDeath { get; set; } = DateTime.MinValue;
 
         #endregion
 

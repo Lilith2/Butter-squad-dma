@@ -29,6 +29,7 @@ namespace squad_dma {
         Mine,
         Motorcycle,
         Projectile,
+        ProjectileAA,
         RallyPoint,
         Tank,
         TankMGS,
