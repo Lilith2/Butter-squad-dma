@@ -37,19 +37,17 @@ namespace squad_dma
             chkShowMapSetup = new CheckBox();
             btnRestartRadar = new Button();
             btnDumpNames = new Button();
-            chkShowAimview = new CheckBox();
+            chkShowEnemyDistance = new CheckBox();
             trkUIScale = new TrackBar();
             trkAimLength = new TrackBar();
-            trkZoomSensivity = new TrackBar();
             tabSettings = new TabPage();
             grpConfig = new GroupBox();
             grpUserInterface = new GroupBox();
-            lblZoomSensivity = new Label();
             lblAimline = new Label();
             lblUIScale = new Label();
             grpRadar = new GroupBox();
-            tabRadar = new TabPage();            
-             grpMapSetup = new GroupBox();
+            tabRadar = new TabPage();
+            grpMapSetup = new GroupBox();
             btnApplyMapScale = new Button();
             chkMapFree = new CheckBox();
             txtMapSetupScale = new TextBox();
@@ -61,7 +59,6 @@ namespace squad_dma
             tabControl = new TabControl();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)trkZoomSensivity).BeginInit();
             tabSettings.SuspendLayout();
             grpConfig.SuspendLayout();
             grpUserInterface.SuspendLayout();
@@ -123,16 +120,16 @@ namespace squad_dma
             btnDumpNames.UseVisualStyleBackColor = true;
             btnDumpNames.Click += btnDumpNames_Click;
             // 
-            // chkShowAimview
+            // chkShowEnemyDistance
             // 
-            chkShowAimview.AutoSize = true;
-            chkShowAimview.Location = new Point(162, 26);
-            chkShowAimview.Name = "chkShowAimview";
-            chkShowAimview.Size = new Size(127, 19);
-            chkShowAimview.TabIndex = 19;
-            chkShowAimview.Text = "Show Aimview (F4)";
-            toolTip.SetToolTip(chkShowAimview, "Displays the 3D aimview");
-            chkShowAimview.UseVisualStyleBackColor = true;
+            chkShowEnemyDistance.AutoSize = true;
+            chkShowEnemyDistance.Location = new Point(162, 26);
+            chkShowEnemyDistance.Name = "chkShowEnemyDistance";
+            chkShowEnemyDistance.Size = new Size(126, 19);
+            chkShowEnemyDistance.TabIndex = 19;
+            chkShowEnemyDistance.Text = "Show Distance (F4)";
+            toolTip.SetToolTip(chkShowEnemyDistance, "Displays the distance for the enemy players");
+            chkShowEnemyDistance.UseVisualStyleBackColor = true;
             // 
             // trkUIScale
             // 
@@ -164,20 +161,6 @@ namespace squad_dma
             trkAimLength.Value = 500;
             trkAimLength.Scroll += trkAimLength_Scroll;
             // 
-            // trkZoomSensivity
-            // 
-            trkZoomSensivity.LargeChange = 1;
-            trkZoomSensivity.Location = new Point(320, 142);
-            trkZoomSensivity.Maximum = 30;
-            trkZoomSensivity.Minimum = 1;
-            trkZoomSensivity.Name = "trkZoomSensivity";
-            trkZoomSensivity.Size = new Size(118, 45);
-            trkZoomSensivity.TabIndex = 29;
-            trkZoomSensivity.TickStyle = TickStyle.None;
-            toolTip.SetToolTip(trkZoomSensivity, "The map zoom sensivity");
-            trkZoomSensivity.Value = 30;
-            trkZoomSensivity.Scroll += trkZoomSensivity_Scroll;
-            // 
             // tabSettings
             // 
             tabSettings.Controls.Add(grpConfig);
@@ -205,13 +188,11 @@ namespace squad_dma
             // 
             // grpUserInterface
             // 
-            grpUserInterface.Controls.Add(trkZoomSensivity);
-            grpUserInterface.Controls.Add(lblZoomSensivity);
             grpUserInterface.Controls.Add(trkAimLength);
             grpUserInterface.Controls.Add(lblAimline);
             grpUserInterface.Controls.Add(lblUIScale);
             grpUserInterface.Controls.Add(trkUIScale);
-            grpUserInterface.Controls.Add(chkShowAimview);
+            grpUserInterface.Controls.Add(chkShowEnemyDistance);
             grpUserInterface.Controls.Add(btnDumpNames);
             grpUserInterface.Location = new Point(5, 93);
             grpUserInterface.Name = "grpUserInterface";
@@ -219,17 +200,6 @@ namespace squad_dma
             grpUserInterface.TabIndex = 26;
             grpUserInterface.TabStop = false;
             grpUserInterface.Text = "UI";
-            // 
-            // lblZoomSensivity
-            // 
-            lblZoomSensivity.AutoSize = true;
-            lblZoomSensivity.Location = new Point(336, 124);
-            lblZoomSensivity.Margin = new Padding(4, 0, 4, 0);
-            lblZoomSensivity.Name = "lblZoomSensivity";
-            lblZoomSensivity.Size = new Size(88, 15);
-            lblZoomSensivity.TabIndex = 30;
-            lblZoomSensivity.Text = "Zoom Sensivity";
-            lblZoomSensivity.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // lblAimline
             // 
@@ -387,7 +357,6 @@ namespace squad_dma
             Text = "I Love Squad";
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
-            ((System.ComponentModel.ISupportInitialize)trkZoomSensivity).EndInit();
             tabSettings.ResumeLayout(false);
             grpConfig.ResumeLayout(false);
             grpUserInterface.ResumeLayout(false);
@@ -411,7 +380,7 @@ namespace squad_dma
         private Label lblAimline;
         private Label lblUIScale;
         private TrackBar trkUIScale;
-        private CheckBox chkShowAimview;
+        private CheckBox chkShowEnemyDistance;
         private Button btnDumpNames;
         private GroupBox grpRadar;
         private Button btnRestartRadar;
@@ -428,7 +397,5 @@ namespace squad_dma
         private TextBox txtMapSetupX;
         private Label lblMapCoords;
         private TabControl tabControl;
-        private TrackBar trkZoomSensivity;
-        private Label lblZoomSensivity;
     }
 }
