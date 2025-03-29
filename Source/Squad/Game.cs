@@ -260,7 +260,6 @@ namespace squad_dma
                 return true;
             }
             catch { return false; }
-
         }
         private bool UpdateLocalPlayerInfo()
         {
@@ -359,7 +358,8 @@ namespace squad_dma
             var teamTickets = new Dictionary<int, int>();
 
             try
-            {
+            { 
+
                 ulong gameState = Memory.ReadPtr(_gameWorld + Offsets.World.GameState);
                 if (gameState == 0)
                     return teamTickets;

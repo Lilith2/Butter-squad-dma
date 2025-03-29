@@ -93,12 +93,6 @@ namespace squad_dma
         public MainForm()
         {
             _config = Program.Config;
-            InputManager.SetVmmInstance(Memory.vmmInstance);
-            if (!InputManager.InitInputManager())
-            {
-                Console.WriteLine("Failed to initialize input manager!");
-            }
-
             InitializeComponent();
             SetDarkMode(ref _darkmode);
             this.Size = new Size(1280, 720);
@@ -182,6 +176,7 @@ namespace squad_dma
 
         private void InputUpdate_Tick(object sender, EventArgs e)
         {
+
             if (!InputManager.IsManagerLoaded && !InputManager.InitInputManager())
                 return;
 
