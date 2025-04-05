@@ -57,26 +57,27 @@ namespace squad_dma
             chkAllowShootingInMainBase = new CheckBox();
             chkSpeedHack = new CheckBox();
             chkAirStuck = new CheckBox();
+            chkDisableCollision = new CheckBox();
             chkHideActor = new CheckBox();
+            chkQuickZoom = new CheckBox();
+            chkRapidFire = new CheckBox();
+            chkInfiniteAmmo = new CheckBox();
+            chkQuickSwap = new CheckBox();
             grpKeybinds = new GroupBox();
-            lblKeybindSetInteractionDistances = new Label();
-            btnKeybindSetInteractionDistances = new Button();
-            lblKeybindAllowShootingInMainBase = new Label();
-            btnKeybindAllowShootingInMainBase = new Button();
             lblKeybindSpeedHack = new Label();
             btnKeybindSpeedHack = new Button();
             lblKeybindAirStuck = new Label();
             btnKeybindAirStuck = new Button();
             lblKeybindHideActor = new Label();
             btnKeybindHideActor = new Button();
+            lblKeybindQuickZoom = new Label();
+            btnKeybindQuickZoom = new Button();
             lblKeybindToggleEnemyDistance = new Label();
             btnKeybindToggleEnemyDistance = new Button();
             lblKeybindToggleMap = new Label();
             btnKeybindToggleMap = new Button();
             lblKeybindToggleFullscreen = new Label();
             btnKeybindToggleFullscreen = new Button();
-            lblStatusSetInteractionDistances = new Label();
-            lblStatusAllowShootingInMainBase = new Label();
             lblStatusSpeedHack = new Label();
             lblStatusAirStuck = new Label();
             lblStatusHideActor = new Label();
@@ -87,6 +88,7 @@ namespace squad_dma
             btnKeybindZoomIn = new Button();
             lblKeybindZoomOut = new Label();
             btnKeybindZoomOut = new Button();
+            lblStatusQuickZoom = new Label();
             tabRadar = new TabPage();
             ticketsPanel = new Panel();
             grpMapSetup = new GroupBox();
@@ -265,7 +267,7 @@ namespace squad_dma
             tabSettings.Location = new Point(4, 24);
             tabSettings.Name = "tabSettings";
             tabSettings.Padding = new Padding(3);
-            tabSettings.Size = new Size(1592, 872);
+            tabSettings.Size = new Size(1256, 653);
             tabSettings.TabIndex = 1;
             tabSettings.Text = "Settings";
             tabSettings.UseVisualStyleBackColor = true;
@@ -281,7 +283,7 @@ namespace squad_dma
             grpConfig.Margin = new Padding(15);
             grpConfig.Name = "grpConfig";
             grpConfig.Padding = new Padding(15);
-            grpConfig.Size = new Size(1586, 866);
+            grpConfig.Size = new Size(1250, 647);
             grpConfig.TabIndex = 8;
             grpConfig.TabStop = false;
             grpConfig.Text = "Radar Config";
@@ -343,10 +345,15 @@ namespace squad_dma
             grpLocalSoldier.Controls.Add(chkAllowShootingInMainBase);
             grpLocalSoldier.Controls.Add(chkSpeedHack);
             grpLocalSoldier.Controls.Add(chkAirStuck);
+            grpLocalSoldier.Controls.Add(chkDisableCollision);
             grpLocalSoldier.Controls.Add(chkHideActor);
+            grpLocalSoldier.Controls.Add(chkQuickZoom);
+            grpLocalSoldier.Controls.Add(chkRapidFire);
+            grpLocalSoldier.Controls.Add(chkInfiniteAmmo);
+            grpLocalSoldier.Controls.Add(chkQuickSwap);
             grpLocalSoldier.Location = new Point(15, 406);
             grpLocalSoldier.Name = "grpLocalSoldier";
-            grpLocalSoldier.Size = new Size(500, 174);
+            grpLocalSoldier.Size = new Size(500, 223);
             grpLocalSoldier.TabIndex = 27;
             grpLocalSoldier.TabStop = false;
             grpLocalSoldier.Text = "Local Soldier Features";
@@ -401,36 +408,83 @@ namespace squad_dma
             chkAirStuck.Text = "Air Stuck";
             chkAirStuck.UseVisualStyleBackColor = true;
             // 
+            // chkDisableCollision
+            // 
+            chkDisableCollision.AutoSize = true;
+            chkDisableCollision.Enabled = false;
+            chkDisableCollision.Location = new Point(10, 145);
+            chkDisableCollision.Name = "chkDisableCollision";
+            chkDisableCollision.Size = new Size(113, 19);
+            chkDisableCollision.TabIndex = 10;
+            chkDisableCollision.Text = "Disable Collision";
+            chkDisableCollision.UseVisualStyleBackColor = true;
+            // 
             // chkHideActor
             // 
             chkHideActor.AutoSize = true;
-            chkHideActor.Location = new Point(10, 145);
+            chkHideActor.Location = new Point(10, 170);
             chkHideActor.Name = "chkHideActor";
             chkHideActor.Size = new Size(83, 19);
             chkHideActor.TabIndex = 5;
             chkHideActor.Text = "Hide Actor";
             chkHideActor.UseVisualStyleBackColor = true;
             // 
+            // chkQuickZoom
+            // 
+            chkQuickZoom.AutoSize = true;
+            chkQuickZoom.Location = new Point(10, 195);
+            chkQuickZoom.Name = "chkQuickZoom";
+            chkQuickZoom.Size = new Size(92, 19);
+            chkQuickZoom.TabIndex = 6;
+            chkQuickZoom.Text = "Quick Zoom";
+            chkQuickZoom.UseVisualStyleBackColor = true;
+            // 
+            // chkRapidFire
+            // 
+            chkRapidFire.AutoSize = true;
+            chkRapidFire.Location = new Point(210, 70);
+            chkRapidFire.Name = "chkRapidFire";
+            chkRapidFire.Size = new Size(78, 19);
+            chkRapidFire.TabIndex = 7;
+            chkRapidFire.Text = "Rapid Fire";
+            chkRapidFire.UseVisualStyleBackColor = true;
+            // 
+            // chkInfiniteAmmo
+            // 
+            chkInfiniteAmmo.AutoSize = true;
+            chkInfiniteAmmo.Location = new Point(210, 45);
+            chkInfiniteAmmo.Name = "chkInfiniteAmmo";
+            chkInfiniteAmmo.Size = new Size(103, 19);
+            chkInfiniteAmmo.TabIndex = 8;
+            chkInfiniteAmmo.Text = "Infinite Ammo";
+            chkInfiniteAmmo.UseVisualStyleBackColor = true;
+            // 
+            // chkQuickSwap
+            // 
+            chkQuickSwap.AutoSize = true;
+            chkQuickSwap.Location = new Point(210, 20);
+            chkQuickSwap.Name = "chkQuickSwap";
+            chkQuickSwap.Size = new Size(88, 19);
+            chkQuickSwap.TabIndex = 9;
+            chkQuickSwap.Text = "Quick Swap";
+            chkQuickSwap.UseVisualStyleBackColor = true;
+            // 
             // grpKeybinds
             // 
-            grpKeybinds.Controls.Add(lblKeybindSetInteractionDistances);
-            grpKeybinds.Controls.Add(btnKeybindSetInteractionDistances);
-            grpKeybinds.Controls.Add(lblKeybindAllowShootingInMainBase);
-            grpKeybinds.Controls.Add(btnKeybindAllowShootingInMainBase);
             grpKeybinds.Controls.Add(lblKeybindSpeedHack);
             grpKeybinds.Controls.Add(btnKeybindSpeedHack);
             grpKeybinds.Controls.Add(lblKeybindAirStuck);
             grpKeybinds.Controls.Add(btnKeybindAirStuck);
             grpKeybinds.Controls.Add(lblKeybindHideActor);
             grpKeybinds.Controls.Add(btnKeybindHideActor);
+            grpKeybinds.Controls.Add(lblKeybindQuickZoom);
+            grpKeybinds.Controls.Add(btnKeybindQuickZoom);
             grpKeybinds.Controls.Add(lblKeybindToggleEnemyDistance);
             grpKeybinds.Controls.Add(btnKeybindToggleEnemyDistance);
             grpKeybinds.Controls.Add(lblKeybindToggleMap);
             grpKeybinds.Controls.Add(btnKeybindToggleMap);
             grpKeybinds.Controls.Add(lblKeybindToggleFullscreen);
             grpKeybinds.Controls.Add(btnKeybindToggleFullscreen);
-            grpKeybinds.Controls.Add(lblStatusSetInteractionDistances);
-            grpKeybinds.Controls.Add(lblStatusAllowShootingInMainBase);
             grpKeybinds.Controls.Add(lblStatusSpeedHack);
             grpKeybinds.Controls.Add(lblStatusAirStuck);
             grpKeybinds.Controls.Add(lblStatusHideActor);
@@ -441,172 +495,138 @@ namespace squad_dma
             grpKeybinds.Controls.Add(btnKeybindZoomIn);
             grpKeybinds.Controls.Add(lblKeybindZoomOut);
             grpKeybinds.Controls.Add(btnKeybindZoomOut);
+            grpKeybinds.Controls.Add(lblStatusQuickZoom);
             grpKeybinds.Location = new Point(530, 24);
             grpKeybinds.Name = "grpKeybinds";
             grpKeybinds.Padding = new Padding(15);
-            grpKeybinds.Size = new Size(528, 383);
+            grpKeybinds.Size = new Size(528, 409);
             grpKeybinds.TabIndex = 28;
             grpKeybinds.TabStop = false;
             grpKeybinds.Text = "Keybinds";
             // 
-            // lblKeybindSetInteractionDistances
-            // 
-            lblKeybindSetInteractionDistances.Location = new Point(15, 50);
-            lblKeybindSetInteractionDistances.Name = "lblKeybindSetInteractionDistances";
-            lblKeybindSetInteractionDistances.Size = new Size(200, 20);
-            lblKeybindSetInteractionDistances.TabIndex = 2;
-            lblKeybindSetInteractionDistances.Text = "Set Interaction Distances";
-            // 
-            // btnKeybindSetInteractionDistances
-            // 
-            btnKeybindSetInteractionDistances.Location = new Point(220, 50);
-            btnKeybindSetInteractionDistances.Name = "btnKeybindSetInteractionDistances";
-            btnKeybindSetInteractionDistances.Size = new Size(100, 20);
-            btnKeybindSetInteractionDistances.TabIndex = 3;
-            btnKeybindSetInteractionDistances.Text = "None";
-            btnKeybindSetInteractionDistances.Click += BtnKeybindSetInteractionDistances_Click;
-            // 
-            // lblKeybindAllowShootingInMainBase
-            // 
-            lblKeybindAllowShootingInMainBase.Location = new Point(15, 80);
-            lblKeybindAllowShootingInMainBase.Name = "lblKeybindAllowShootingInMainBase";
-            lblKeybindAllowShootingInMainBase.Size = new Size(200, 20);
-            lblKeybindAllowShootingInMainBase.TabIndex = 4;
-            lblKeybindAllowShootingInMainBase.Text = "Allow Shooting in Main Base";
-            // 
-            // btnKeybindAllowShootingInMainBase
-            // 
-            btnKeybindAllowShootingInMainBase.Location = new Point(220, 80);
-            btnKeybindAllowShootingInMainBase.Name = "btnKeybindAllowShootingInMainBase";
-            btnKeybindAllowShootingInMainBase.Size = new Size(100, 20);
-            btnKeybindAllowShootingInMainBase.TabIndex = 5;
-            btnKeybindAllowShootingInMainBase.Text = "None";
-            btnKeybindAllowShootingInMainBase.Click += BtnKeybindAllowShootingInMainBase_Click;
-            // 
             // lblKeybindSpeedHack
             // 
-            lblKeybindSpeedHack.Location = new Point(15, 110);
+            lblKeybindSpeedHack.Location = new Point(15, 30);
             lblKeybindSpeedHack.Name = "lblKeybindSpeedHack";
             lblKeybindSpeedHack.Size = new Size(200, 20);
-            lblKeybindSpeedHack.TabIndex = 6;
+            lblKeybindSpeedHack.TabIndex = 2;
             lblKeybindSpeedHack.Text = "Speed Hack";
             // 
             // btnKeybindSpeedHack
             // 
-            btnKeybindSpeedHack.Location = new Point(220, 110);
+            btnKeybindSpeedHack.Location = new Point(220, 30);
             btnKeybindSpeedHack.Name = "btnKeybindSpeedHack";
             btnKeybindSpeedHack.Size = new Size(100, 20);
-            btnKeybindSpeedHack.TabIndex = 7;
+            btnKeybindSpeedHack.TabIndex = 3;
             btnKeybindSpeedHack.Text = "None";
             btnKeybindSpeedHack.Click += BtnKeybindSpeedHack_Click;
             // 
             // lblKeybindAirStuck
             // 
-            lblKeybindAirStuck.Location = new Point(15, 140);
+            lblKeybindAirStuck.Location = new Point(15, 60);
             lblKeybindAirStuck.Name = "lblKeybindAirStuck";
             lblKeybindAirStuck.Size = new Size(200, 20);
-            lblKeybindAirStuck.TabIndex = 8;
+            lblKeybindAirStuck.TabIndex = 4;
             lblKeybindAirStuck.Text = "Air Stuck";
             // 
             // btnKeybindAirStuck
             // 
-            btnKeybindAirStuck.Location = new Point(220, 140);
+            btnKeybindAirStuck.Location = new Point(220, 60);
             btnKeybindAirStuck.Name = "btnKeybindAirStuck";
             btnKeybindAirStuck.Size = new Size(100, 20);
-            btnKeybindAirStuck.TabIndex = 9;
+            btnKeybindAirStuck.TabIndex = 5;
             btnKeybindAirStuck.Text = "None";
             btnKeybindAirStuck.Click += BtnKeybindAirStuck_Click;
             // 
             // lblKeybindHideActor
             // 
-            lblKeybindHideActor.Location = new Point(15, 170);
+            lblKeybindHideActor.Location = new Point(15, 90);
             lblKeybindHideActor.Name = "lblKeybindHideActor";
             lblKeybindHideActor.Size = new Size(200, 20);
-            lblKeybindHideActor.TabIndex = 10;
+            lblKeybindHideActor.TabIndex = 6;
             lblKeybindHideActor.Text = "Hide Actor";
             // 
             // btnKeybindHideActor
             // 
-            btnKeybindHideActor.Location = new Point(220, 170);
+            btnKeybindHideActor.Location = new Point(220, 90);
             btnKeybindHideActor.Name = "btnKeybindHideActor";
             btnKeybindHideActor.Size = new Size(100, 20);
-            btnKeybindHideActor.TabIndex = 11;
+            btnKeybindHideActor.TabIndex = 7;
             btnKeybindHideActor.Text = "None";
             btnKeybindHideActor.Click += BtnKeybindHideActor_Click;
             // 
+            // lblKeybindQuickZoom
+            // 
+            lblKeybindQuickZoom.Location = new Point(15, 120);
+            lblKeybindQuickZoom.Name = "lblKeybindQuickZoom";
+            lblKeybindQuickZoom.Size = new Size(200, 20);
+            lblKeybindQuickZoom.TabIndex = 8;
+            lblKeybindQuickZoom.Text = "Quick Zoom";
+            // 
+            // btnKeybindQuickZoom
+            // 
+            btnKeybindQuickZoom.Location = new Point(220, 120);
+            btnKeybindQuickZoom.Name = "btnKeybindQuickZoom";
+            btnKeybindQuickZoom.Size = new Size(100, 20);
+            btnKeybindQuickZoom.TabIndex = 9;
+            btnKeybindQuickZoom.Text = "None";
+            btnKeybindQuickZoom.Click += BtnKeybindQuickZoom_Click;
+            // 
             // lblKeybindToggleEnemyDistance
             // 
-            lblKeybindToggleEnemyDistance.Location = new Point(15, 200);
+            lblKeybindToggleEnemyDistance.Location = new Point(15, 150);
             lblKeybindToggleEnemyDistance.Name = "lblKeybindToggleEnemyDistance";
             lblKeybindToggleEnemyDistance.Size = new Size(200, 20);
-            lblKeybindToggleEnemyDistance.TabIndex = 12;
+            lblKeybindToggleEnemyDistance.TabIndex = 10;
             lblKeybindToggleEnemyDistance.Text = "Toggle Enemy Distance";
             // 
             // btnKeybindToggleEnemyDistance
             // 
-            btnKeybindToggleEnemyDistance.Location = new Point(220, 200);
+            btnKeybindToggleEnemyDistance.Location = new Point(220, 150);
             btnKeybindToggleEnemyDistance.Name = "btnKeybindToggleEnemyDistance";
             btnKeybindToggleEnemyDistance.Size = new Size(100, 20);
-            btnKeybindToggleEnemyDistance.TabIndex = 13;
+            btnKeybindToggleEnemyDistance.TabIndex = 11;
             btnKeybindToggleEnemyDistance.Text = "F4";
             btnKeybindToggleEnemyDistance.Click += BtnKeybindToggleEnemyDistance_Click;
             // 
             // lblKeybindToggleMap
             // 
-            lblKeybindToggleMap.Location = new Point(15, 230);
+            lblKeybindToggleMap.Location = new Point(15, 180);
             lblKeybindToggleMap.Name = "lblKeybindToggleMap";
             lblKeybindToggleMap.Size = new Size(200, 20);
-            lblKeybindToggleMap.TabIndex = 14;
+            lblKeybindToggleMap.TabIndex = 12;
             lblKeybindToggleMap.Text = "Toggle Map";
             // 
             // btnKeybindToggleMap
             // 
-            btnKeybindToggleMap.Location = new Point(220, 230);
+            btnKeybindToggleMap.Location = new Point(220, 180);
             btnKeybindToggleMap.Name = "btnKeybindToggleMap";
             btnKeybindToggleMap.Size = new Size(100, 20);
-            btnKeybindToggleMap.TabIndex = 15;
+            btnKeybindToggleMap.TabIndex = 13;
             btnKeybindToggleMap.Text = "F5";
             btnKeybindToggleMap.Click += BtnKeybindToggleMap_Click;
             // 
             // lblKeybindToggleFullscreen
             // 
-            lblKeybindToggleFullscreen.Location = new Point(15, 260);
+            lblKeybindToggleFullscreen.Location = new Point(15, 300);
             lblKeybindToggleFullscreen.Name = "lblKeybindToggleFullscreen";
             lblKeybindToggleFullscreen.Size = new Size(200, 20);
-            lblKeybindToggleFullscreen.TabIndex = 16;
+            lblKeybindToggleFullscreen.TabIndex = 18;
             lblKeybindToggleFullscreen.Text = "Toggle Fullscreen";
             // 
             // btnKeybindToggleFullscreen
             // 
-            btnKeybindToggleFullscreen.Location = new Point(220, 260);
+            btnKeybindToggleFullscreen.Location = new Point(220, 300);
             btnKeybindToggleFullscreen.Name = "btnKeybindToggleFullscreen";
             btnKeybindToggleFullscreen.Size = new Size(100, 20);
-            btnKeybindToggleFullscreen.TabIndex = 17;
+            btnKeybindToggleFullscreen.TabIndex = 19;
             btnKeybindToggleFullscreen.Text = "F11";
             btnKeybindToggleFullscreen.Click += BtnKeybindToggleFullscreen_Click;
-            // 
-            // lblStatusSetInteractionDistances
-            // 
-            lblStatusSetInteractionDistances.AutoSize = true;
-            lblStatusSetInteractionDistances.Location = new Point(330, 50);
-            lblStatusSetInteractionDistances.Name = "lblStatusSetInteractionDistances";
-            lblStatusSetInteractionDistances.Size = new Size(28, 15);
-            lblStatusSetInteractionDistances.TabIndex = 19;
-            lblStatusSetInteractionDistances.Text = "OFF";
-            // 
-            // lblStatusAllowShootingInMainBase
-            // 
-            lblStatusAllowShootingInMainBase.AutoSize = true;
-            lblStatusAllowShootingInMainBase.Location = new Point(330, 80);
-            lblStatusAllowShootingInMainBase.Name = "lblStatusAllowShootingInMainBase";
-            lblStatusAllowShootingInMainBase.Size = new Size(28, 15);
-            lblStatusAllowShootingInMainBase.TabIndex = 20;
-            lblStatusAllowShootingInMainBase.Text = "OFF";
             // 
             // lblStatusSpeedHack
             // 
             lblStatusSpeedHack.AutoSize = true;
-            lblStatusSpeedHack.Location = new Point(330, 110);
+            lblStatusSpeedHack.Location = new Point(330, 30);
             lblStatusSpeedHack.Name = "lblStatusSpeedHack";
             lblStatusSpeedHack.Size = new Size(28, 15);
             lblStatusSpeedHack.TabIndex = 21;
@@ -615,7 +635,7 @@ namespace squad_dma
             // lblStatusAirStuck
             // 
             lblStatusAirStuck.AutoSize = true;
-            lblStatusAirStuck.Location = new Point(330, 140);
+            lblStatusAirStuck.Location = new Point(330, 60);
             lblStatusAirStuck.Name = "lblStatusAirStuck";
             lblStatusAirStuck.Size = new Size(28, 15);
             lblStatusAirStuck.TabIndex = 22;
@@ -624,7 +644,7 @@ namespace squad_dma
             // lblStatusHideActor
             // 
             lblStatusHideActor.AutoSize = true;
-            lblStatusHideActor.Location = new Point(330, 170);
+            lblStatusHideActor.Location = new Point(330, 90);
             lblStatusHideActor.Name = "lblStatusHideActor";
             lblStatusHideActor.Size = new Size(28, 15);
             lblStatusHideActor.TabIndex = 23;
@@ -633,7 +653,7 @@ namespace squad_dma
             // lblStatusToggleEnemyDistance
             // 
             lblStatusToggleEnemyDistance.AutoSize = true;
-            lblStatusToggleEnemyDistance.Location = new Point(330, 200);
+            lblStatusToggleEnemyDistance.Location = new Point(330, 150);
             lblStatusToggleEnemyDistance.Name = "lblStatusToggleEnemyDistance";
             lblStatusToggleEnemyDistance.Size = new Size(28, 15);
             lblStatusToggleEnemyDistance.TabIndex = 24;
@@ -641,7 +661,7 @@ namespace squad_dma
             // 
             // lblKeybindDumpNames
             // 
-            lblKeybindDumpNames.Location = new Point(15, 290);
+            lblKeybindDumpNames.Location = new Point(15, 210);
             lblKeybindDumpNames.Name = "lblKeybindDumpNames";
             lblKeybindDumpNames.Size = new Size(200, 20);
             lblKeybindDumpNames.TabIndex = 18;
@@ -649,7 +669,7 @@ namespace squad_dma
             // 
             // btnKeybindDumpNames
             // 
-            btnKeybindDumpNames.Location = new Point(220, 290);
+            btnKeybindDumpNames.Location = new Point(220, 210);
             btnKeybindDumpNames.Name = "btnKeybindDumpNames";
             btnKeybindDumpNames.Size = new Size(100, 20);
             btnKeybindDumpNames.TabIndex = 19;
@@ -658,7 +678,7 @@ namespace squad_dma
             // 
             // lblKeybindZoomIn
             // 
-            lblKeybindZoomIn.Location = new Point(15, 320);
+            lblKeybindZoomIn.Location = new Point(15, 240);
             lblKeybindZoomIn.Name = "lblKeybindZoomIn";
             lblKeybindZoomIn.Size = new Size(200, 20);
             lblKeybindZoomIn.TabIndex = 20;
@@ -666,7 +686,7 @@ namespace squad_dma
             // 
             // btnKeybindZoomIn
             // 
-            btnKeybindZoomIn.Location = new Point(220, 320);
+            btnKeybindZoomIn.Location = new Point(220, 240);
             btnKeybindZoomIn.Name = "btnKeybindZoomIn";
             btnKeybindZoomIn.Size = new Size(100, 20);
             btnKeybindZoomIn.TabIndex = 21;
@@ -675,7 +695,7 @@ namespace squad_dma
             // 
             // lblKeybindZoomOut
             // 
-            lblKeybindZoomOut.Location = new Point(15, 350);
+            lblKeybindZoomOut.Location = new Point(15, 270);
             lblKeybindZoomOut.Name = "lblKeybindZoomOut";
             lblKeybindZoomOut.Size = new Size(200, 20);
             lblKeybindZoomOut.TabIndex = 22;
@@ -683,12 +703,21 @@ namespace squad_dma
             // 
             // btnKeybindZoomOut
             // 
-            btnKeybindZoomOut.Location = new Point(220, 350);
+            btnKeybindZoomOut.Location = new Point(220, 270);
             btnKeybindZoomOut.Name = "btnKeybindZoomOut";
             btnKeybindZoomOut.Size = new Size(100, 20);
             btnKeybindZoomOut.TabIndex = 23;
             btnKeybindZoomOut.Text = "Down";
             btnKeybindZoomOut.Click += BtnKeybindZoomOut_Click;
+            // 
+            // lblStatusQuickZoom
+            // 
+            lblStatusQuickZoom.AutoSize = true;
+            lblStatusQuickZoom.Location = new Point(330, 120);
+            lblStatusQuickZoom.Name = "lblStatusQuickZoom";
+            lblStatusQuickZoom.Size = new Size(28, 15);
+            lblStatusQuickZoom.TabIndex = 25;
+            lblStatusQuickZoom.Text = "OFF";
             // 
             // tabRadar
             // 
@@ -698,7 +727,7 @@ namespace squad_dma
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
             tabRadar.Padding = new Padding(3);
-            tabRadar.Size = new Size(1592, 872);
+            tabRadar.Size = new Size(1256, 653);
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
@@ -769,14 +798,14 @@ namespace squad_dma
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1600, 900);
+            tabControl.Size = new Size(1264, 681);
             tabControl.TabIndex = 8;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1600, 900);
+            ClientSize = new Size(1264, 681);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
             Name = "MainForm";
@@ -835,26 +864,25 @@ namespace squad_dma
         private CheckBox chkAllowShootingInMainBase;
         private CheckBox chkSpeedHack;
         private CheckBox chkAirStuck;
+        private CheckBox chkDisableCollision;
         private CheckBox chkHideActor;
+        private CheckBox chkQuickZoom;
+        private CheckBox chkRapidFire;
+        private CheckBox chkInfiniteAmmo;
+        private CheckBox chkQuickSwap;
         private GroupBox grpKeybinds;
-        private Button btnKeybindSetInteractionDistances;
-        private Button btnKeybindAllowShootingInMainBase;
         private Button btnKeybindSpeedHack;
         private Button btnKeybindAirStuck;
         private Button btnKeybindHideActor;
         private Button btnKeybindToggleEnemyDistance;
         private Button btnKeybindToggleMap;
         private Button btnKeybindToggleFullscreen;
-        private Label lblKeybindSetInteractionDistances;
-        private Label lblKeybindAllowShootingInMainBase;
         private Label lblKeybindSpeedHack;
         private Label lblKeybindAirStuck;
         private Label lblKeybindHideActor;
         private Label lblKeybindToggleEnemyDistance;
         private Label lblKeybindToggleMap;
         private Label lblKeybindToggleFullscreen;
-        private Label lblStatusSetInteractionDistances;
-        private Label lblStatusAllowShootingInMainBase;
         private Label lblStatusSpeedHack;
         private Label lblStatusAirStuck;
         private Label lblStatusHideActor;
@@ -865,6 +893,9 @@ namespace squad_dma
         private Button btnKeybindZoomIn;
         private Label lblKeybindZoomOut;
         private Button btnKeybindZoomOut;
+        private Label lblKeybindQuickZoom;
+        private Button btnKeybindQuickZoom;
+        private Label lblStatusQuickZoom;
 
         private void BtnKeybindZoomIn_Click(object sender, EventArgs e)
         {
@@ -874,6 +905,11 @@ namespace squad_dma
         private void BtnKeybindZoomOut_Click(object sender, EventArgs e)
         {
             StartKeybindCapture(btnKeybindZoomOut);
+        }
+
+        private void BtnKeybindQuickZoom_Click(object sender, EventArgs e)
+        {
+            StartKeybindCapture(btnKeybindQuickZoom);
         }
     }
 }
