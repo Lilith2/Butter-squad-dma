@@ -126,9 +126,26 @@ namespace squad_dma.Source.Squad.Features
             }, _cancellationTokenSource.Token);
         }
 
+        /// <summary>
+        /// Checks if the local player is valid (has a valid player state and soldier actor)
+        /// </summary>
+        /// <returns>True if local player is valid, false otherwise</returns>
+        private bool IsLocalPlayerValid()
+        {
+            if (!_inGame || _playerController == 0) return false;
+            
+            ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
+            if (playerState == 0) return false;
+
+            ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
+            if (soldierActor == 0) return false;
+            
+            return true;
+        }
+
         public void SetSuppression(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isSuppressionEnabled = enable;
             ApplySuppression();
         }
@@ -137,9 +154,9 @@ namespace squad_dma.Source.Squad.Features
         {
             try
             {
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -182,7 +199,7 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetInteractionDistances(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isInteractionDistancesEnabled = enable;
             ApplyInteractionDistances();
         }
@@ -191,9 +208,9 @@ namespace squad_dma.Source.Squad.Features
         {
             try
             {
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -232,7 +249,7 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetShootingInMainBase(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isShootingInMainBaseEnabled = enable;
             ApplyShootingInMainBase();
         }
@@ -246,9 +263,9 @@ namespace squad_dma.Source.Squad.Features
                 if (!_isShootingInMainBaseEnabled && !_originalUsableInMainBase)
                     return;
                 
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -290,7 +307,7 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetSpeedHack(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isSpeedHackEnabled = enable;
             ApplySpeedHack();
         }
@@ -304,9 +321,9 @@ namespace squad_dma.Source.Squad.Features
                 if (!_isSpeedHackEnabled && _originalTimeDilation == 0.0f)
                     return;
                 
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -342,7 +359,7 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetAirStuck(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isAirStuckEnabled = enable;
             ApplyAirStuck();
         }
@@ -357,9 +374,9 @@ namespace squad_dma.Source.Squad.Features
                 if (!_isAirStuckEnabled && _originalMovementMode == 0)
                     return;
                 
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -419,7 +436,7 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetQuickZoom(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isQuickZoomEnabled = enable;
             ApplyQuickZoom();
         }
@@ -428,6 +445,8 @@ namespace squad_dma.Source.Squad.Features
         {
             try
             {
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong cameraManager = Memory.ReadPtr(_playerController + PlayerController.PlayerCameraManager);
                 if (cameraManager == 0) return;
                 
@@ -448,7 +467,7 @@ namespace squad_dma.Source.Squad.Features
         }
         public void SetHideActor(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isHideActorEnabled = enable;
             HideActor();
         }
@@ -460,9 +479,9 @@ namespace squad_dma.Source.Squad.Features
                 if (!_isHideActorEnabled && _originalHideActorReplicateMovement == 0)
                     return;
                 
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -506,7 +525,7 @@ namespace squad_dma.Source.Squad.Features
         /// <param name="disable">True to disable collision, false to restore normal collision</param>
         public void DisableCollision(bool disable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             
             // Only allow enabling if AirStuck is enabled
             if (disable && !_isAirStuckEnabled)
@@ -520,9 +539,9 @@ namespace squad_dma.Source.Squad.Features
             
             try
             {
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -559,7 +578,7 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetRapidFire(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isRapidFireEnabled = enable;
             ApplyRapidFire();
         }
@@ -573,9 +592,9 @@ namespace squad_dma.Source.Squad.Features
                 if (!_isRapidFireEnabled && _originalTimeBetweenShots == 0.0f)
                     return;
                 
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -623,7 +642,7 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetInfiniteAmmo(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isInfiniteAmmoEnabled = enable;
             ApplyInfiniteAmmo();
         }
@@ -637,9 +656,9 @@ namespace squad_dma.Source.Squad.Features
                 if (!_isInfiniteAmmoEnabled && _originalInfiniteAmmo == 0)
                     return;
                 
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
 
@@ -695,7 +714,7 @@ namespace squad_dma.Source.Squad.Features
         /// <param name="enable">Whether to enable quick weapon swapping</param>
         public void SetQuickSwap(bool enable)
         {
-            if (!_inGame || _playerController == 0) return;
+            if (!IsLocalPlayerValid()) return;
             _isQuickSwapEnabled = enable;
             ApplyQuickSwap();
         }
@@ -712,9 +731,9 @@ namespace squad_dma.Source.Squad.Features
                 if (!_isQuickSwapEnabled && _originalEquipDuration == 0.0f)
                     return;
                 
+                if (!IsLocalPlayerValid()) return;
+                
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
                 
@@ -835,12 +854,12 @@ namespace squad_dma.Source.Squad.Features
         {
             try
             {
+                if (!IsLocalPlayerValid()) return;
+                
                 Program.Log("=== READING CURRENT WEAPONS ===");
                 
                 // Get local player's weapon
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
-
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
                 if (soldierActor == 0) return;
                 

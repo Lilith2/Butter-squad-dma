@@ -772,7 +772,7 @@ namespace squad_dma
             _mapCanvas.GRContext.SetResourceCacheLimit(1610612736); // Fixes low FPS on big maps
 
             // Apply settings once game is ready
-            if (Memory.Ready && Memory.InGame)
+            if (Memory.Ready && Memory.InGame && Memory._game?.LocalPlayer != null)
             {
                 if (_config.DisableSuppression)
                     Memory._game?.SetSuppression(true);
