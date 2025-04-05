@@ -38,6 +38,11 @@
         public const uint Instigator = 0x120;
         public const uint RootComponent = 0x138;
         public const uint ID = 0x18;
+        public const uint CustomTimeDilation = 0x98; // float
+        public const uint bReplicateMovement = 0x58; // uint8
+        public const uint bHidden = 0x58; // uint8
+        public const uint bCanBeDamaged = 0x5a; // uint8
+        public const uint bActorEnableCollision = 0x5c; // uint8
     }
 
     public struct USceneComponent
@@ -105,6 +110,7 @@
         public const uint TeamID = 0x400; // per player
         public const uint SquadState = 0x760; // ASQSquadState*
         public const uint PlayerStateData = 0x6D0;
+        public const uint Soldier = 0x768; // ASQSoldier*
     }
 
     public struct ASQTeamState
@@ -130,7 +136,17 @@
 
     public struct ASQSoldier
     {
-        public const uint Health = 0x1DF8;
+        public const uint Health = 0x1DF8; // float
+        public const uint UnderSuppressionPercentage = 0x15e4; // float
+        public const uint MaxSuppressionPercentage = 0x15e8; // float
+        public const uint SuppressionMultiplier = 0x15f0; // float
+        public const uint UseInteractDistance = 0x16ec; // float
+        public const uint InteractableRadiusMultiplier = 0x1708; // float
+        public const uint InventoryComponent = 0x2108; // USQPawnInventoryComponent*
+        public const uint CurrentItemStaticInfo = 0x140; // USQItemStaticInfo*
+        public const uint bUsableInMainBase = 0x5b0; // bool
+        public const uint SecondsOfSpawnProtection = 0x167c; // float
+        public const uint InvulnerableDelay = 0x1680; // float
     }
 
     public struct SQVehicle
@@ -148,5 +164,20 @@
     public struct FString
     {
         public const uint Length = 0x8;
+    }
+
+    public struct Character
+    {
+        public const uint CharacterMovement = 0x290; // UCharacterMovementComponent*
+        public const uint ReplicatedMovementMode = 0x328; // uint8
+    }
+
+    public struct CharacterMovementComponent
+    {
+        public const uint MovementMode = 0x168; // Engine::EMovementMode
+        public const uint MaxFlySpeed = 0x198; // float
+        public const uint MaxCustomMovementSpeed = 0x19c; // float
+        public const uint MaxAcceleration = 0x1a0; // float
+        public const uint bCheatFlying = 0x388; // uint8
     }
 }
