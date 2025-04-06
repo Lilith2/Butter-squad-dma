@@ -132,15 +132,20 @@ namespace squad_dma.Source.Squad.Features
         /// <returns>True if local player is valid, false otherwise</returns>
         private bool IsLocalPlayerValid()
         {
-            if (!_inGame || _playerController == 0) return false;
-            
-            ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-            if (playerState == 0) return false;
-
-            ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
-            if (soldierActor == 0) return false;
-            
-            return true;
+            try
+            {
+                if (!_inGame || _playerController == 0) return false;
+                
+                ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
+                if (playerState == 0) return false;
+                
+                ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
+                if (soldierActor == 0) return false;
+                
+                return true;
+            }
+            catch
+            { return false; }
         }
 
         public void SetSuppression(bool enable)

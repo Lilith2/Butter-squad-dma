@@ -772,31 +772,50 @@ namespace squad_dma
             _mapCanvas.GRContext.SetResourceCacheLimit(1610612736); // Fixes low FPS on big maps
 
             // Apply settings once game is ready
-            if (Memory.Ready && Memory.InGame && Memory._game?.LocalPlayer != null)
+            if (Memory.Ready && Memory.InGame)
             {
-                if (_config.DisableSuppression)
-                    Memory._game?.SetSuppression(true);
-                
-                if (_config.SetInteractionDistances)
-                    Memory._game?.SetInteractionDistances(true);
-                
-                if (_config.AllowShootingInMainBase)
-                    Memory._game?.SetShootingInMainBase(true);
-                
-                if (_config.SetSpeedHack)
-                    Memory._game?.SetSpeedHack(true);
-                
-                if (_config.SetAirStuck)
-                    Memory._game?.SetAirStuck(true);
-                
-                if (_config.SetHideActor)
-                    Memory._game?.SetHideActor(true);
-                    
-                if (_config.RapidFire)
-                    Memory._game?.SetRapidFire(true);
-                    
-                if (_config.InfiniteAmmo)
-                    Memory._game?.SetInfiniteAmmo(true);
+                // Wait for the local player to be fully initialized
+                for (int i = 0; i < 10; i++) // Try for a few seconds
+                {
+                    if (Memory._game != null)
+                    {
+                        // Make sure features are applied after the player is fully loaded
+                        await Task.Delay(1000); // Give a bit more time for everything to initialize
+                        
+                        if (_config.DisableSuppression)
+                            Memory._game?.SetSuppression(true);
+                        
+                        if (_config.SetInteractionDistances)
+                            Memory._game?.SetInteractionDistances(true);
+                        
+                        if (_config.AllowShootingInMainBase)
+                            Memory._game?.SetShootingInMainBase(true);
+                        
+                        if (_config.SetSpeedHack)
+                            Memory._game?.SetSpeedHack(true);
+                        
+                        if (_config.SetAirStuck)
+                            Memory._game?.SetAirStuck(true);
+                        
+                        if (_config.SetHideActor)
+                            Memory._game?.SetHideActor(true);
+                            
+                        if (_config.RapidFire)
+                            Memory._game?.SetRapidFire(true);
+                            
+                        if (_config.InfiniteAmmo)
+                            Memory._game?.SetInfiniteAmmo(true);
+                            
+                        if (_config.QuickSwap)
+                            Memory._game?.SetQuickSwap(true);
+                            
+                        if (_config.DisableCollision)
+                            Memory._game?.DisableCollision(true);
+                            
+                            break;
+                    }
+                    await Task.Delay(500);
+                }
             }
 
             while (true)

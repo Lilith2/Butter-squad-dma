@@ -267,7 +267,7 @@ namespace squad_dma
             tabSettings.Location = new Point(4, 24);
             tabSettings.Name = "tabSettings";
             tabSettings.Padding = new Padding(3);
-            tabSettings.Size = new Size(1256, 653);
+            tabSettings.Size = new Size(1888, 911);
             tabSettings.TabIndex = 1;
             tabSettings.Text = "Settings";
             tabSettings.UseVisualStyleBackColor = true;
@@ -283,7 +283,7 @@ namespace squad_dma
             grpConfig.Margin = new Padding(15);
             grpConfig.Name = "grpConfig";
             grpConfig.Padding = new Padding(15);
-            grpConfig.Size = new Size(1250, 647);
+            grpConfig.Size = new Size(1882, 905);
             grpConfig.TabIndex = 8;
             grpConfig.TabStop = false;
             grpConfig.Text = "Radar Config";
@@ -727,7 +727,7 @@ namespace squad_dma
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
             tabRadar.Padding = new Padding(3);
-            tabRadar.Size = new Size(1256, 653);
+            tabRadar.Size = new Size(1888, 911);
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
@@ -737,7 +737,7 @@ namespace squad_dma
             ticketsPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ticketsPanel.BackColor = SystemColors.ScrollBar;
             ticketsPanel.BorderStyle = BorderStyle.FixedSingle;
-            ticketsPanel.Location = new Point(9, 836);
+            ticketsPanel.Location = new Point(8, 875);
             ticketsPanel.Name = "ticketsPanel";
             ticketsPanel.Size = new Size(285, 30);
             ticketsPanel.TabIndex = 12;
@@ -798,14 +798,14 @@ namespace squad_dma
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1264, 681);
+            tabControl.Size = new Size(1896, 939);
             tabControl.TabIndex = 8;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1264, 681);
+            ClientSize = new Size(1896, 939);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
             Name = "MainForm";
