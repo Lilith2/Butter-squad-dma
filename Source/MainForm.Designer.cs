@@ -37,6 +37,7 @@ namespace squad_dma
             btnDumpNames = new Button();
             trkUIScale = new TrackBar();
             trkAimLength = new TrackBar();
+            trkTechMarkerScale = new TrackBar();
             chkShowMapSetup = new CheckBox();
             btnToggleMap = new Button();
             btnRestartRadar = new Button();
@@ -50,6 +51,7 @@ namespace squad_dma
             grpUserInterface = new GroupBox();
             lblAimline = new Label();
             lblUIScale = new Label();
+            lblTechMarkerScale = new Label();
             grpRadar = new GroupBox();
             grpLocalSoldier = new GroupBox();
             chkDisableSuppression = new CheckBox();
@@ -98,6 +100,7 @@ namespace squad_dma
             tabControl = new TabControl();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkTechMarkerScale).BeginInit();
             tabSettings.SuspendLayout();
             grpConfig.SuspendLayout();
             grpUserInterface.SuspendLayout();
@@ -117,7 +120,7 @@ namespace squad_dma
             // 
             chkShowEnemyDistance.AutoSize = true;
             chkShowEnemyDistance.Font = new Font("Segoe UI", 9F);
-            chkShowEnemyDistance.Location = new Point(265, 86);
+            chkShowEnemyDistance.Location = new Point(265, 50);
             chkShowEnemyDistance.Name = "chkShowEnemyDistance";
             chkShowEnemyDistance.Size = new Size(165, 19);
             chkShowEnemyDistance.TabIndex = 15;
@@ -128,7 +131,7 @@ namespace squad_dma
             // btnDumpNames
             // 
             btnDumpNames.Font = new Font("Segoe UI", 9F);
-            btnDumpNames.Location = new Point(265, 50);
+            btnDumpNames.Location = new Point(265, 80);
             btnDumpNames.Name = "btnDumpNames";
             btnDumpNames.Size = new Size(200, 30);
             btnDumpNames.TabIndex = 16;
@@ -140,7 +143,7 @@ namespace squad_dma
             // trkUIScale
             // 
             trkUIScale.LargeChange = 10;
-            trkUIScale.Location = new Point(15, 50);
+            trkUIScale.Location = new Point(15, 48);
             trkUIScale.Maximum = 200;
             trkUIScale.Minimum = 50;
             trkUIScale.Name = "trkUIScale";
@@ -156,7 +159,7 @@ namespace squad_dma
             // trkAimLength
             // 
             trkAimLength.LargeChange = 50;
-            trkAimLength.Location = new Point(15, 125);
+            trkAimLength.Location = new Point(15, 113);
             trkAimLength.Margin = new Padding(4, 3, 4, 3);
             trkAimLength.Maximum = 2000;
             trkAimLength.Minimum = 10;
@@ -169,6 +172,22 @@ namespace squad_dma
             toolTip.SetToolTip(trkAimLength, "Adjust the length of the aimline");
             trkAimLength.Value = 500;
             trkAimLength.Scroll += trkAimLength_Scroll;
+            // 
+            // trkTechMarkerScale
+            // 
+            trkTechMarkerScale.LargeChange = 10;
+            trkTechMarkerScale.Location = new Point(15, 178);
+            trkTechMarkerScale.Maximum = 200;
+            trkTechMarkerScale.Minimum = 50;
+            trkTechMarkerScale.Name = "trkTechMarkerScale";
+            trkTechMarkerScale.Size = new Size(200, 45);
+            trkTechMarkerScale.SmallChange = 5;
+            trkTechMarkerScale.TabIndex = 17;
+            trkTechMarkerScale.TickFrequency = 10;
+            trkTechMarkerScale.TickStyle = TickStyle.None;
+            toolTip.SetToolTip(trkTechMarkerScale, "Adjust the size of vehicle and tech markers");
+            trkTechMarkerScale.Value = 100;
+            trkTechMarkerScale.Scroll += trkTechMarkerScale_Scroll;
             // 
             // chkShowMapSetup
             // 
@@ -290,10 +309,12 @@ namespace squad_dma
             // 
             // grpUserInterface
             // 
-            grpUserInterface.Controls.Add(trkAimLength);
-            grpUserInterface.Controls.Add(lblAimline);
             grpUserInterface.Controls.Add(lblUIScale);
             grpUserInterface.Controls.Add(trkUIScale);
+            grpUserInterface.Controls.Add(lblAimline);
+            grpUserInterface.Controls.Add(trkAimLength);
+            grpUserInterface.Controls.Add(lblTechMarkerScale);
+            grpUserInterface.Controls.Add(trkTechMarkerScale);
             grpUserInterface.Controls.Add(chkShowEnemyDistance);
             grpUserInterface.Controls.Add(btnDumpNames);
             grpUserInterface.Location = new Point(15, 24);
@@ -308,7 +329,7 @@ namespace squad_dma
             // 
             lblAimline.AutoSize = true;
             lblAimline.Font = new Font("Segoe UI", 9F);
-            lblAimline.Location = new Point(15, 107);
+            lblAimline.Location = new Point(15, 95);
             lblAimline.Name = "lblAimline";
             lblAimline.Size = new Size(88, 15);
             lblAimline.TabIndex = 12;
@@ -324,6 +345,16 @@ namespace squad_dma
             lblUIScale.Size = new Size(48, 15);
             lblUIScale.TabIndex = 13;
             lblUIScale.Text = "UI Scale";
+            // 
+            // lblTechMarkerScale
+            // 
+            lblTechMarkerScale.AutoSize = true;
+            lblTechMarkerScale.Font = new Font("Segoe UI", 9F);
+            lblTechMarkerScale.Location = new Point(15, 160);
+            lblTechMarkerScale.Name = "lblTechMarkerScale";
+            lblTechMarkerScale.Size = new Size(103, 15);
+            lblTechMarkerScale.TabIndex = 18;
+            lblTechMarkerScale.Text = "Vehicle/Tech Scale";
             // 
             // grpRadar
             // 
@@ -812,6 +843,7 @@ namespace squad_dma
             Text = "Squad DMA";
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkTechMarkerScale).EndInit();
             tabSettings.ResumeLayout(false);
             grpConfig.ResumeLayout(false);
             grpUserInterface.ResumeLayout(false);
@@ -896,6 +928,8 @@ namespace squad_dma
         private Label lblKeybindQuickZoom;
         private Button btnKeybindQuickZoom;
         private Label lblStatusQuickZoom;
+        private Label lblTechMarkerScale;
+        private TrackBar trkTechMarkerScale;
 
         private void BtnKeybindZoomIn_Click(object sender, EventArgs e)
         {

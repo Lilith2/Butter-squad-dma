@@ -721,6 +721,7 @@ namespace squad_dma
             chkShowEnemyDistance.CheckedChanged += ChkShowEnemyDistance_CheckedChanged;
             trkAimLength.Value = _config.PlayerAimLineLength;
             trkUIScale.Value = _config.UIScale;
+            trkTechMarkerScale.Value = _config.TechMarkerScale;
             #endregion
 
             #region Local Soldier Features
@@ -1080,6 +1081,7 @@ namespace squad_dma
             return new MapParameters
             {
                 UIScale = _uiScale,
+                TechScale = (.01f * _config.TechMarkerScale),
                 MapLayerIndex = mapLayerIndex,
                 Bounds = bounds,
                 XScale = (float)_mapCanvas.Width / bounds.Width, // Set scale for this frame
@@ -1097,7 +1099,13 @@ namespace squad_dma
 
                 if (_isFreeMapToggled)
                 {
-                    _mapPanPosition.Height = localPlayerMapPos.Height;
+                    _mapPanPosition = new MapPosition()
+                    {
+                        X = localPlayerMapPos.X,
+                        Y = localPlayerMapPos.Y,
+                        Height = localPlayerMapPos.Height,
+                        TechScale = (.01f * _config.TechMarkerScale)
+                    };
                     return GetMapParameters(_mapPanPosition);
                 }
                 else
@@ -1716,7 +1724,8 @@ namespace squad_dma
                         {
                             X = localPlayerMapPos.X,
                             Y = localPlayerMapPos.Y,
-                            Height = localPlayerMapPos.Height
+                            Height = localPlayerMapPos.Height,
+                            TechScale = (.01f * _config.TechMarkerScale)
                         };
                     }
                 }
@@ -1832,6 +1841,20 @@ namespace squad_dma
             _uiScale = (.01f * trkUIScale.Value);
 
             InitiateUIScaling();
+        }
+
+        private void trkTechMarkerScale_Scroll(object sender, EventArgs e)
+        {
+            _config.TechMarkerScale = trkTechMarkerScale.Value;
+            
+            // Update the MapPanPosition for free map mode
+            if (_isFreeMapToggled)
+            {
+                _mapPanPosition.TechScale = .01f * _config.TechMarkerScale;
+            }
+            
+            _mapCanvas.Invalidate();
+            Config.SaveConfig(_config);
         }
 
         private void ChkDisableSuppression_CheckedChanged(object sender, EventArgs e)
