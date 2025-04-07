@@ -23,12 +23,11 @@ namespace squad_dma
         private static uint _pid;
         private static ulong _squadBase;
         public static Game _game;
-        private static int _ticksCounter = 0;
         private static volatile int _ticks = 0;
         private static readonly Stopwatch _tickSw = new();
         private static readonly ManualResetEvent _syncProcessRunning = new(false);
         private static readonly Stopwatch _processCheckTimer = new();
-        private const int PROCESS_CHECK_INTERVAL = 2000;
+        private const int PROCESS_CHECK_INTERVAL = 1000;
 
         public static GameStatus GameStatus = GameStatus.NotFound;
 
@@ -259,30 +258,30 @@ namespace squad_dma
         {
             try
             {
-                if (!GetModuleBase())
+                if (!GetPid() || !GetModuleBase())
                 {
-                    Program.Log($"Process {_pid} is no longer running!");
+                    Program.Log("Process or module base no longer available!");
                     return false;
                 }
 
-                var scatterMap = new ScatterReadMap(2);
+                var scatterMap = new ScatterReadMap(1);
                 var baseCheckRound = scatterMap.AddRound();
-                baseCheckRound.AddEntry<ulong>(0, 0, _squadBase);
-                baseCheckRound.AddEntry<string>(0, 1, _squadBase, 32); // Read module header
+                baseCheckRound.AddEntry<string>(0, 0, _squadBase, 8);
 
                 scatterMap.Execute();
 
-                if (!scatterMap.Results[0][1].TryGetResult<string>(out var moduleHeader) ||
+                if (!scatterMap.Results[0][0].TryGetResult<string>(out var moduleHeader) ||
                     !moduleHeader.StartsWith("MZ"))
                 {
-                    Program.Log("Module header verification failed!");
+                    Program.Log("Module header verification failed - game may have terminated!");
                     return false;
                 }
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Program.Log($"Process verification error: {ex.Message}");
                 return false;
             }
         }
@@ -297,15 +296,13 @@ namespace squad_dma
                 while (true)
                 {
                     Program.Log("Attempting to find Squad Process...");
-                    bool firstAttempt = true;
+                    
                     while (!Memory.GetPid() || !Memory.GetModuleBase())
                     {
                         Memory.GameStatus = GameStatus.NotFound;
                         _syncProcessRunning.Reset();
-                        var delay = firstAttempt ? 15000 : 5000;
-                        Program.Log($"Squad startup failed, trying again in {delay / 1000} seconds...");
-                        Thread.Sleep(delay);
-                        firstAttempt = false;
+                        Program.Log("Squad not found, checking again in 1 second...");
+                        Thread.Sleep(1000);
                     }
 
                     Program.Log("Squad process located! Startup successful.");
@@ -324,7 +321,6 @@ namespace squad_dma
 
                             while (Memory.GameStatus == GameStatus.InGame && _running)
                             {
-                                // Periodic process verification
                                 if (_processCheckTimer.ElapsedMilliseconds > PROCESS_CHECK_INTERVAL)
                                 {
                                     if (!VerifyRunningProcess())

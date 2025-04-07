@@ -49,8 +49,8 @@ namespace squad_dma
             tabSettings = new TabPage();
             grpConfig = new GroupBox();
             grpUserInterface = new GroupBox();
-            lblAimline = new Label();
             lblUIScale = new Label();
+            lblAimline = new Label();
             lblTechMarkerScale = new Label();
             grpRadar = new GroupBox();
             grpLocalSoldier = new GroupBox();
@@ -90,7 +90,6 @@ namespace squad_dma
             btnKeybindZoomIn = new Button();
             lblKeybindZoomOut = new Label();
             btnKeybindZoomOut = new Button();
-            lblStatusQuickZoom = new Label();
             tabRadar = new TabPage();
             ticketsPanel = new Panel();
             grpMapSetup = new GroupBox();
@@ -325,6 +324,16 @@ namespace squad_dma
             grpUserInterface.TabStop = false;
             grpUserInterface.Text = "User Interface";
             // 
+            // lblUIScale
+            // 
+            lblUIScale.AutoSize = true;
+            lblUIScale.Font = new Font("Segoe UI", 9F);
+            lblUIScale.Location = new Point(15, 30);
+            lblUIScale.Name = "lblUIScale";
+            lblUIScale.Size = new Size(48, 15);
+            lblUIScale.TabIndex = 13;
+            lblUIScale.Text = "UI Scale";
+            // 
             // lblAimline
             // 
             lblAimline.AutoSize = true;
@@ -335,16 +344,6 @@ namespace squad_dma
             lblAimline.TabIndex = 12;
             lblAimline.Text = "Aimline Length";
             lblAimline.Click += lblAimline_Click;
-            // 
-            // lblUIScale
-            // 
-            lblUIScale.AutoSize = true;
-            lblUIScale.Font = new Font("Segoe UI", 9F);
-            lblUIScale.Location = new Point(15, 30);
-            lblUIScale.Name = "lblUIScale";
-            lblUIScale.Size = new Size(48, 15);
-            lblUIScale.TabIndex = 13;
-            lblUIScale.Text = "UI Scale";
             // 
             // lblTechMarkerScale
             // 
@@ -526,7 +525,6 @@ namespace squad_dma
             grpKeybinds.Controls.Add(btnKeybindZoomIn);
             grpKeybinds.Controls.Add(lblKeybindZoomOut);
             grpKeybinds.Controls.Add(btnKeybindZoomOut);
-            grpKeybinds.Controls.Add(lblStatusQuickZoom);
             grpKeybinds.Location = new Point(530, 24);
             grpKeybinds.Name = "grpKeybinds";
             grpKeybinds.Padding = new Padding(15);
@@ -588,7 +586,7 @@ namespace squad_dma
             // 
             // lblKeybindQuickZoom
             // 
-            lblKeybindQuickZoom.Location = new Point(15, 120);
+            lblKeybindQuickZoom.Location = new Point(15, 150);
             lblKeybindQuickZoom.Name = "lblKeybindQuickZoom";
             lblKeybindQuickZoom.Size = new Size(200, 20);
             lblKeybindQuickZoom.TabIndex = 8;
@@ -596,7 +594,7 @@ namespace squad_dma
             // 
             // btnKeybindQuickZoom
             // 
-            btnKeybindQuickZoom.Location = new Point(220, 120);
+            btnKeybindQuickZoom.Location = new Point(220, 150);
             btnKeybindQuickZoom.Name = "btnKeybindQuickZoom";
             btnKeybindQuickZoom.Size = new Size(100, 20);
             btnKeybindQuickZoom.TabIndex = 9;
@@ -605,7 +603,7 @@ namespace squad_dma
             // 
             // lblKeybindToggleEnemyDistance
             // 
-            lblKeybindToggleEnemyDistance.Location = new Point(15, 150);
+            lblKeybindToggleEnemyDistance.Location = new Point(15, 120);
             lblKeybindToggleEnemyDistance.Name = "lblKeybindToggleEnemyDistance";
             lblKeybindToggleEnemyDistance.Size = new Size(200, 20);
             lblKeybindToggleEnemyDistance.TabIndex = 10;
@@ -613,7 +611,7 @@ namespace squad_dma
             // 
             // btnKeybindToggleEnemyDistance
             // 
-            btnKeybindToggleEnemyDistance.Location = new Point(220, 150);
+            btnKeybindToggleEnemyDistance.Location = new Point(220, 120);
             btnKeybindToggleEnemyDistance.Name = "btnKeybindToggleEnemyDistance";
             btnKeybindToggleEnemyDistance.Size = new Size(100, 20);
             btnKeybindToggleEnemyDistance.TabIndex = 11;
@@ -684,7 +682,7 @@ namespace squad_dma
             // lblStatusToggleEnemyDistance
             // 
             lblStatusToggleEnemyDistance.AutoSize = true;
-            lblStatusToggleEnemyDistance.Location = new Point(330, 150);
+            lblStatusToggleEnemyDistance.Location = new Point(330, 120);
             lblStatusToggleEnemyDistance.Name = "lblStatusToggleEnemyDistance";
             lblStatusToggleEnemyDistance.Size = new Size(28, 15);
             lblStatusToggleEnemyDistance.TabIndex = 24;
@@ -740,15 +738,6 @@ namespace squad_dma
             btnKeybindZoomOut.TabIndex = 23;
             btnKeybindZoomOut.Text = "Down";
             btnKeybindZoomOut.Click += BtnKeybindZoomOut_Click;
-            // 
-            // lblStatusQuickZoom
-            // 
-            lblStatusQuickZoom.AutoSize = true;
-            lblStatusQuickZoom.Location = new Point(330, 120);
-            lblStatusQuickZoom.Name = "lblStatusQuickZoom";
-            lblStatusQuickZoom.Size = new Size(28, 15);
-            lblStatusQuickZoom.TabIndex = 25;
-            lblStatusQuickZoom.Text = "OFF";
             // 
             // tabRadar
             // 
@@ -927,7 +916,6 @@ namespace squad_dma
         private Button btnKeybindZoomOut;
         private Label lblKeybindQuickZoom;
         private Button btnKeybindQuickZoom;
-        private Label lblStatusQuickZoom;
         private Label lblTechMarkerScale;
         private TrackBar trkTechMarkerScale;
 

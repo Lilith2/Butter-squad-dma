@@ -70,6 +70,7 @@ namespace squad_dma
         public void SetInfiniteAmmo(bool enable) => _localSoldier?.SetInfiniteAmmo(enable);
         public void SetQuickSwap(bool enable) => _localSoldier?.SetQuickSwap(enable);
         public void ReadCurrentWeapons(bool includeOtherPlayers = false) => _localSoldier?.ReadCurrentWeapons(includeOtherPlayers);
+        public void LogCurrentValues() => _localSoldier?.LogCurrentValues();
         public void WaitForGame()
         {
             while (true)
@@ -121,11 +122,6 @@ namespace squad_dma
                 UpdateLocalPlayerInfo();
                 this._actors.UpdateList();
                 this._actors.UpdateAllPlayers();
-
-                //LogTeamInfo();
-                if (DateTime.Now.Second % 10 == 0) // Adjust as needed
-                {
-                }
             }
             catch (DMAShutdown)
             {
