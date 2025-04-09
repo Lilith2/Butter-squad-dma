@@ -1,8 +1,6 @@
-﻿using Offsets;
-using squad_dma.Source.Squad.Features;
-using System;
+﻿using squad_dma.Source.Squad.Features;
+using squad_dma.Source.Squad.Debug;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace squad_dma
@@ -25,12 +23,14 @@ namespace squad_dma
         private string _currentLevel = string.Empty;
         private DateTime _lastTeamCheck = DateTime.MinValue;
         private const int TeamCheckInterval = 1000;
-        
+
+        private Source.Squad.Manager _soldierManager;
+
         private GameTickets _gameTickets;
         private PlayerStats _gameStats;
         private DebugVehicles _debugVehicles;
         private DebugTeam _debugTeam;
-        private LocalSoldier _localSoldier;
+        private DebugSoldier _debugSoldier;
         #endregion
 
         #region Properties
@@ -58,19 +58,19 @@ namespace squad_dma
         public void LogVehicles(bool force = false) => _debugVehicles?.LogVehicles(force);
         public void VehicleTeam() => _debugVehicles?.VehicleTeam();
         public void LogTeamInfo() => _debugTeam?.LogTeamInfo();
-        public void SetSuppression(bool enable) => _localSoldier?.SetSuppression(enable);
-        public void SetInteractionDistances(bool enable) => _localSoldier?.SetInteractionDistances(enable);
-        public void SetShootingInMainBase(bool enable) => _localSoldier?.SetShootingInMainBase(enable);
-        public void SetSpeedHack(bool enable) => _localSoldier?.SetSpeedHack(enable);
-        public void SetAirStuck(bool enable) => _localSoldier?.SetAirStuck(enable);
-        public void SetHideActor(bool enable) => _localSoldier?.SetHideActor(enable);
-        public void DisableCollision(bool disable) => _localSoldier?.DisableCollision(disable);
-        public void SetQuickZoom(bool enable) => _localSoldier?.SetQuickZoom(enable);
-        public void SetRapidFire(bool enable) => _localSoldier?.SetRapidFire(enable);
-        public void SetInfiniteAmmo(bool enable) => _localSoldier?.SetInfiniteAmmo(enable);
-        public void SetQuickSwap(bool enable) => _localSoldier?.SetQuickSwap(enable);
-        public void ReadCurrentWeapons(bool includeOtherPlayers = false) => _localSoldier?.ReadCurrentWeapons(includeOtherPlayers);
-        public void LogCurrentValues() => _localSoldier?.LogCurrentValues();
+        public void SetSuppression(bool enable) => _soldierManager?.SetSuppression(enable);
+        public void SetInteractionDistances(bool enable) => _soldierManager?.SetInteractionDistances(enable);
+        public void SetShootingInMainBase(bool enable) => _soldierManager?.SetShootingInMainBase(enable);
+        public void SetSpeedHack(bool enable) => _soldierManager?.SetSpeedHack(enable);
+        public void SetAirStuck(bool enable) => _soldierManager?.SetAirStuck(enable);
+        public void SetHideActor(bool enable) => _soldierManager?.SetHideActor(enable);
+        public void DisableCollision(bool disable) => _soldierManager?.DisableCollision(disable);
+        public void SetQuickZoom(bool enable) => _soldierManager?.SetQuickZoom(enable);
+        public void SetRapidFire(bool enable) => _soldierManager?.SetRapidFire(enable);
+        public void SetInfiniteAmmo(bool enable) => _soldierManager?.SetInfiniteAmmo(enable);
+        public void SetQuickSwap(bool enable) => _soldierManager?.SetQuickSwap(enable);
+        public void ReadCurrentWeapons(bool includeOtherPlayers = false) => _debugSoldier?.ReadCurrentWeapons(includeOtherPlayers);
+        public void LogCurrentValues() => _debugSoldier?.LogCurrentValues();
         public void WaitForGame()
         {
             while (true)
@@ -141,9 +141,11 @@ namespace squad_dma
         #region Private Methods
         private void InitializeManagers()
         {
+            _soldierManager = new Source.Squad.Manager(_playerController, _inGame, _actors);
+
             _debugVehicles = new DebugVehicles(_playerController, _inGame, _actors);
             _debugTeam = new DebugTeam(_inGame, _localUPlayer, _actors?.Actors);
-            _localSoldier = new LocalSoldier(_playerController, _inGame, _actors);
+            _debugSoldier = new DebugSoldier(_playerController, _inGame);
         }
 
         private bool TryExecute(Action action)
@@ -176,32 +178,41 @@ namespace squad_dma
             this._inGame = false;
         }
 
-        private bool GetGameWorld() => TryExecute(() => _gameWorld = Memory.ReadPtr(_squadBase + Offsets.GameObjects.GWorld));
+        private bool GetGameWorld() => 
+            TryExecute(() => _gameWorld = Memory.ReadPtr(_squadBase + Offsets.GameObjects.GWorld));
   
-        private bool GetGameInstance() => TryExecute(() => _gameInstance = Memory.ReadPtr(_gameWorld + Offsets.World.OwningGameInstance));
+        private bool GetGameInstance() => 
+            TryExecute(() => _gameInstance = Memory.ReadPtr(_gameWorld + Offsets.World.OwningGameInstance));
 
-        private bool GetCurrentLevel() => TryExecute(() => {
-            var currentLayer = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.CurrentLayer);
-            var currentLevelIdPtr = currentLayer + Offsets.SQLayer.LevelID;
-            var currentLevelId = Memory.ReadValue<uint>(currentLevelIdPtr);
-            _currentLevel = Memory.GetNamesById([currentLevelId])[currentLevelId];
-            Program.Log("Current level is " + _currentLevel);
-        });
+        private bool GetCurrentLevel() => 
+            TryExecute(() => 
+            {
+                var currentLayer = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.CurrentLayer);
+                var currentLevelIdPtr = currentLayer + Offsets.SQLayer.LevelID;
+                var currentLevelId = Memory.ReadValue<uint>(currentLevelIdPtr);
+                _currentLevel = Memory.GetNamesById([currentLevelId])[currentLevelId];
+                Program.Log($"Current level is {_currentLevel}");
+            });
 
-        private bool InitActors() => TryExecute(() => {
-            var persistentLevel = Memory.ReadPtr(_gameWorld + Offsets.World.PersistentLevel);
-            _actors = new RegistredActors(persistentLevel);
-        });
+        private bool InitActors() => 
+            TryExecute(() => 
+            {
+                var persistentLevel = Memory.ReadPtr(_gameWorld + Offsets.World.PersistentLevel);
+                _actors = new RegistredActors(persistentLevel);
+            });
   
-        private bool GetLocalPlayer() => TryExecute(() => {
-            var localPlayers = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.LocalPlayers);
-            _localPlayer = Memory.ReadPtr(localPlayers);
-            _localUPlayer = new UActor(_localPlayer);
-            _localUPlayer.Team = Team.Unknown;
-            GetPlayerController();
-        });
+        private bool GetLocalPlayer() => 
+            TryExecute(() => 
+            {
+                var localPlayers = Memory.ReadPtr(_gameInstance + Offsets.GameInstance.LocalPlayers);
+                _localPlayer = Memory.ReadPtr(localPlayers);
+                _localUPlayer = new UActor(_localPlayer);
+                _localUPlayer.Team = Team.Unknown;
+                GetPlayerController();
+            });
 
-        private bool GetPlayerController() => TryExecute(() => _playerController = Memory.ReadPtr(_localPlayer + Offsets.UPlayer.PlayerController));
+        private bool GetPlayerController() => 
+            TryExecute(() => _playerController = Memory.ReadPtr(_localPlayer + Offsets.UPlayer.PlayerController));
 
         private bool UpdateLocalPlayerInfo()
         {
