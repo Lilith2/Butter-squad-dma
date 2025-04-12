@@ -54,6 +54,7 @@ namespace squad_dma
             return new MapPosition()
             {
                 UIScale = mapParams.UIScale,
+                TechScale = mapParams.TechScale,
                 X = (location.X - mapParams.Bounds.Left) * mapParams.XScale,
                 Y = (location.Y - mapParams.Bounds.Top) * mapParams.YScale,
                 Height = location.Height
@@ -74,7 +75,6 @@ namespace squad_dma
 
             SKPaint newPaint = SKPaints.PaintBase.Clone();
             newPaint.Color = color;
-            teamEntityPaints[actor.Team] = newPaint;
             return newPaint;
         }
 

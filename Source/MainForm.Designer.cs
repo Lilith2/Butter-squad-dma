@@ -33,37 +33,79 @@ namespace squad_dma
             components = new System.ComponentModel.Container();
             colDialog = new ColorDialog();
             toolTip = new ToolTip(components);
-            btnToggleMap = new Button();
-            chkShowMapSetup = new CheckBox();
-            btnRestartRadar = new Button();
-            btnDumpNames = new Button();
             chkShowEnemyDistance = new CheckBox();
+            btnDumpNames = new Button();
             trkUIScale = new TrackBar();
             trkAimLength = new TrackBar();
+            trkTechMarkerScale = new TrackBar();
+            chkShowMapSetup = new CheckBox();
+            btnToggleMap = new Button();
+            btnRestartRadar = new Button();
+            txtMapSetupX = new TextBox();
+            txtMapSetupY = new TextBox();
+            txtMapSetupScale = new TextBox();
+            chkMapFree = new CheckBox();
+            btnApplyMapScale = new Button();
             tabSettings = new TabPage();
             grpConfig = new GroupBox();
             grpUserInterface = new GroupBox();
-            lblAimline = new Label();
             lblUIScale = new Label();
+            lblAimline = new Label();
+            lblTechMarkerScale = new Label();
             grpRadar = new GroupBox();
+            grpLocalSoldier = new GroupBox();
+            chkDisableSuppression = new CheckBox();
+            chkSetInteractionDistances = new CheckBox();
+            chkAllowShootingInMainBase = new CheckBox();
+            chkSpeedHack = new CheckBox();
+            chkAirStuck = new CheckBox();
+            chkDisableCollision = new CheckBox();
+            chkHideActor = new CheckBox();
+            chkQuickZoom = new CheckBox();
+            chkRapidFire = new CheckBox();
+            chkInfiniteAmmo = new CheckBox();
+            chkQuickSwap = new CheckBox();
+            grpKeybinds = new GroupBox();
+            lblKeybindSpeedHack = new Label();
+            btnKeybindSpeedHack = new Button();
+            lblKeybindAirStuck = new Label();
+            btnKeybindAirStuck = new Button();
+            lblKeybindHideActor = new Label();
+            btnKeybindHideActor = new Button();
+            lblKeybindQuickZoom = new Label();
+            btnKeybindQuickZoom = new Button();
+            lblKeybindToggleEnemyDistance = new Label();
+            btnKeybindToggleEnemyDistance = new Button();
+            lblKeybindToggleMap = new Label();
+            btnKeybindToggleMap = new Button();
+            lblKeybindToggleFullscreen = new Label();
+            btnKeybindToggleFullscreen = new Button();
+            lblStatusSpeedHack = new Label();
+            lblStatusAirStuck = new Label();
+            lblStatusHideActor = new Label();
+            lblStatusToggleEnemyDistance = new Label();
+            lblKeybindDumpNames = new Label();
+            btnKeybindDumpNames = new Button();
+            lblKeybindZoomIn = new Label();
+            btnKeybindZoomIn = new Button();
+            lblKeybindZoomOut = new Label();
+            btnKeybindZoomOut = new Button();
             tabRadar = new TabPage();
             ticketsPanel = new Panel();
             grpMapSetup = new GroupBox();
-            btnApplyMapScale = new Button();
-            chkMapFree = new CheckBox();
-            txtMapSetupScale = new TextBox();
             lblMapScale = new Label();
-            txtMapSetupY = new TextBox();
             lblMapXY = new Label();
-            txtMapSetupX = new TextBox();
             lblMapCoords = new Label();
             tabControl = new TabControl();
             ((System.ComponentModel.ISupportInitialize)trkUIScale).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)trkTechMarkerScale).BeginInit();
             tabSettings.SuspendLayout();
             grpConfig.SuspendLayout();
             grpUserInterface.SuspendLayout();
             grpRadar.SuspendLayout();
+            grpLocalSoldier.SuspendLayout();
+            grpKeybinds.SuspendLayout();
             tabRadar.SuspendLayout();
             grpMapSetup.SuspendLayout();
             tabControl.SuspendLayout();
@@ -73,94 +115,169 @@ namespace squad_dma
             // 
             colDialog.FullOpen = true;
             // 
-            // btnToggleMap
-            // 
-            btnToggleMap.Location = new Point(236, 22);
-            btnToggleMap.Margin = new Padding(4, 3, 4, 3);
-            btnToggleMap.Name = "btnToggleMap";
-            btnToggleMap.Size = new Size(107, 27);
-            btnToggleMap.TabIndex = 7;
-            btnToggleMap.Text = "Toggle Map (F5)";
-            toolTip.SetToolTip(btnToggleMap, "Manually toggles active map");
-            btnToggleMap.UseVisualStyleBackColor = true;
-            btnToggleMap.Click += btnToggleMap_Click;
-            // 
-            // chkShowMapSetup
-            // 
-            chkShowMapSetup.AutoSize = true;
-            chkShowMapSetup.Location = new Point(7, 22);
-            chkShowMapSetup.Name = "chkShowMapSetup";
-            chkShowMapSetup.Size = new Size(153, 19);
-            chkShowMapSetup.TabIndex = 9;
-            chkShowMapSetup.Text = "Show Map Setup Helper";
-            toolTip.SetToolTip(chkShowMapSetup, "Shows the 'Map Setup' panel");
-            chkShowMapSetup.UseVisualStyleBackColor = true;
-            chkShowMapSetup.CheckedChanged += chkShowMapSetup_CheckedChanged;
-            // 
-            // btnRestartRadar
-            // 
-            btnRestartRadar.Font = new Font("Segoe UI", 9.75F);
-            btnRestartRadar.Location = new Point(350, 22);
-            btnRestartRadar.Name = "btnRestartRadar";
-            btnRestartRadar.Size = new Size(107, 27);
-            btnRestartRadar.TabIndex = 18;
-            btnRestartRadar.Text = "Restart Radar";
-            toolTip.SetToolTip(btnRestartRadar, "Manually triggers radar restart");
-            btnRestartRadar.UseVisualStyleBackColor = true;
-            btnRestartRadar.Click += btnRestartRadar_Click;
-            // 
-            // btnDumpNames
-            // 
-            btnDumpNames.AutoSize = true;
-            btnDumpNames.Location = new Point(310, 22);
-            btnDumpNames.Name = "btnDumpNames";
-            btnDumpNames.Size = new Size(114, 25);
-            btnDumpNames.TabIndex = 26;
-            btnDumpNames.Text = "Dump Names (F6)";
-            toolTip.SetToolTip(btnDumpNames, "Dumps entity names in the game instance");
-            btnDumpNames.UseVisualStyleBackColor = true;
-            btnDumpNames.Click += btnDumpNames_Click;
-            // 
             // chkShowEnemyDistance
             // 
             chkShowEnemyDistance.AutoSize = true;
-            chkShowEnemyDistance.Location = new Point(162, 26);
+            chkShowEnemyDistance.Font = new Font("Segoe UI", 9F);
+            chkShowEnemyDistance.Location = new Point(265, 50);
             chkShowEnemyDistance.Name = "chkShowEnemyDistance";
-            chkShowEnemyDistance.Size = new Size(126, 19);
-            chkShowEnemyDistance.TabIndex = 19;
-            chkShowEnemyDistance.Text = "Show Distance (F4)";
-            toolTip.SetToolTip(chkShowEnemyDistance, "Displays the distance for the enemy players");
+            chkShowEnemyDistance.Size = new Size(165, 19);
+            chkShowEnemyDistance.TabIndex = 15;
+            chkShowEnemyDistance.Text = "Show Enemy Distance (F4)";
+            toolTip.SetToolTip(chkShowEnemyDistance, "Toggle display of enemy distance on the radar");
             chkShowEnemyDistance.UseVisualStyleBackColor = true;
+            // 
+            // btnDumpNames
+            // 
+            btnDumpNames.Font = new Font("Segoe UI", 9F);
+            btnDumpNames.Location = new Point(265, 80);
+            btnDumpNames.Name = "btnDumpNames";
+            btnDumpNames.Size = new Size(200, 30);
+            btnDumpNames.TabIndex = 16;
+            btnDumpNames.Text = "Dump Names (F6)";
+            toolTip.SetToolTip(btnDumpNames, "Dump entity names in the game instance");
+            btnDumpNames.UseVisualStyleBackColor = true;
+            btnDumpNames.Click += btnDumpNames_Click;
             // 
             // trkUIScale
             // 
             trkUIScale.LargeChange = 10;
-            trkUIScale.Location = new Point(25, 142);
+            trkUIScale.Location = new Point(15, 48);
             trkUIScale.Maximum = 200;
             trkUIScale.Minimum = 50;
             trkUIScale.Name = "trkUIScale";
-            trkUIScale.Size = new Size(116, 45);
-            trkUIScale.TabIndex = 27;
+            trkUIScale.Size = new Size(200, 45);
+            trkUIScale.SmallChange = 5;
+            trkUIScale.TabIndex = 14;
+            trkUIScale.TickFrequency = 10;
             trkUIScale.TickStyle = TickStyle.None;
-            toolTip.SetToolTip(trkUIScale, "Scales the UI fonts etc, useful for larger screen resolutions");
+            toolTip.SetToolTip(trkUIScale, "Adjust the overall UI scale");
             trkUIScale.Value = 100;
             trkUIScale.Scroll += trkUIScale_Scroll;
             // 
             // trkAimLength
             // 
             trkAimLength.LargeChange = 50;
-            trkAimLength.Location = new Point(175, 142);
+            trkAimLength.Location = new Point(15, 113);
             trkAimLength.Margin = new Padding(4, 3, 4, 3);
             trkAimLength.Maximum = 2000;
             trkAimLength.Minimum = 10;
             trkAimLength.Name = "trkAimLength";
-            trkAimLength.Size = new Size(114, 45);
+            trkAimLength.Size = new Size(200, 45);
             trkAimLength.SmallChange = 5;
             trkAimLength.TabIndex = 11;
+            trkAimLength.TickFrequency = 50;
             trkAimLength.TickStyle = TickStyle.None;
-            toolTip.SetToolTip(trkAimLength, "Length of the 'bar' or 'aim line' on the localplayer");
+            toolTip.SetToolTip(trkAimLength, "Adjust the length of the aimline");
             trkAimLength.Value = 500;
             trkAimLength.Scroll += trkAimLength_Scroll;
+            // 
+            // trkTechMarkerScale
+            // 
+            trkTechMarkerScale.LargeChange = 10;
+            trkTechMarkerScale.Location = new Point(15, 178);
+            trkTechMarkerScale.Maximum = 200;
+            trkTechMarkerScale.Minimum = 50;
+            trkTechMarkerScale.Name = "trkTechMarkerScale";
+            trkTechMarkerScale.Size = new Size(200, 45);
+            trkTechMarkerScale.SmallChange = 5;
+            trkTechMarkerScale.TabIndex = 17;
+            trkTechMarkerScale.TickFrequency = 10;
+            trkTechMarkerScale.TickStyle = TickStyle.None;
+            toolTip.SetToolTip(trkTechMarkerScale, "Adjust the size of vehicle and tech markers");
+            trkTechMarkerScale.Value = 100;
+            trkTechMarkerScale.Scroll += trkTechMarkerScale_Scroll;
+            // 
+            // chkShowMapSetup
+            // 
+            chkShowMapSetup.AutoSize = true;
+            chkShowMapSetup.Font = new Font("Segoe UI", 9F);
+            chkShowMapSetup.Location = new Point(15, 30);
+            chkShowMapSetup.Name = "chkShowMapSetup";
+            chkShowMapSetup.Size = new Size(115, 19);
+            chkShowMapSetup.TabIndex = 1;
+            chkShowMapSetup.Text = "Show Map Setup";
+            toolTip.SetToolTip(chkShowMapSetup, "Show/hide the map setup panel");
+            chkShowMapSetup.UseVisualStyleBackColor = true;
+            chkShowMapSetup.CheckedChanged += chkShowMapSetup_CheckedChanged;
+            // 
+            // btnToggleMap
+            // 
+            btnToggleMap.Font = new Font("Segoe UI", 9F);
+            btnToggleMap.Location = new Point(15, 60);
+            btnToggleMap.Name = "btnToggleMap";
+            btnToggleMap.Size = new Size(200, 30);
+            btnToggleMap.TabIndex = 2;
+            btnToggleMap.Text = "Toggle Map (F5)";
+            toolTip.SetToolTip(btnToggleMap, "Switch between available maps");
+            btnToggleMap.UseVisualStyleBackColor = true;
+            btnToggleMap.Click += btnToggleMap_Click;
+            // 
+            // btnRestartRadar
+            // 
+            btnRestartRadar.Font = new Font("Segoe UI", 9F);
+            btnRestartRadar.Location = new Point(230, 60);
+            btnRestartRadar.Name = "btnRestartRadar";
+            btnRestartRadar.Size = new Size(200, 30);
+            btnRestartRadar.TabIndex = 0;
+            btnRestartRadar.Text = "Restart Radar";
+            toolTip.SetToolTip(btnRestartRadar, "Restart the radar functionality");
+            btnRestartRadar.UseVisualStyleBackColor = true;
+            btnRestartRadar.Click += btnRestartRadar_Click;
+            // 
+            // txtMapSetupX
+            // 
+            txtMapSetupX.Font = new Font("Segoe UI", 9F);
+            txtMapSetupX.Location = new Point(70, 57);
+            txtMapSetupX.Name = "txtMapSetupX";
+            txtMapSetupX.Size = new Size(100, 23);
+            txtMapSetupX.TabIndex = 11;
+            toolTip.SetToolTip(txtMapSetupX, "X coordinate for map positioning");
+            // 
+            // txtMapSetupY
+            // 
+            txtMapSetupY.Font = new Font("Segoe UI", 9F);
+            txtMapSetupY.Location = new Point(180, 57);
+            txtMapSetupY.Name = "txtMapSetupY";
+            txtMapSetupY.Size = new Size(100, 23);
+            txtMapSetupY.TabIndex = 13;
+            toolTip.SetToolTip(txtMapSetupY, "Y coordinate for map positioning");
+            // 
+            // txtMapSetupScale
+            // 
+            txtMapSetupScale.Font = new Font("Segoe UI", 9F);
+            txtMapSetupScale.Location = new Point(70, 87);
+            txtMapSetupScale.Name = "txtMapSetupScale";
+            txtMapSetupScale.Size = new Size(100, 23);
+            txtMapSetupScale.TabIndex = 15;
+            toolTip.SetToolTip(txtMapSetupScale, "Map scale factor");
+            // 
+            // chkMapFree
+            // 
+            chkMapFree.Appearance = Appearance.Button;
+            chkMapFree.AutoSize = true;
+            chkMapFree.Font = new Font("Segoe UI", 9F);
+            chkMapFree.Location = new Point(3, 3);
+            chkMapFree.Name = "chkMapFree";
+            chkMapFree.Size = new Size(79, 25);
+            chkMapFree.TabIndex = 17;
+            chkMapFree.Text = "Map Follow";
+            chkMapFree.TextAlign = ContentAlignment.MiddleCenter;
+            toolTip.SetToolTip(chkMapFree, "Toggle between map following player and free movement");
+            chkMapFree.UseVisualStyleBackColor = true;
+            chkMapFree.CheckedChanged += chkMapFree_CheckedChanged;
+            // 
+            // btnApplyMapScale
+            // 
+            btnApplyMapScale.Font = new Font("Segoe UI", 9F);
+            btnApplyMapScale.Location = new Point(180, 120);
+            btnApplyMapScale.Name = "btnApplyMapScale";
+            btnApplyMapScale.Size = new Size(100, 30);
+            btnApplyMapScale.TabIndex = 18;
+            btnApplyMapScale.Text = "Apply";
+            toolTip.SetToolTip(btnApplyMapScale, "Apply the map setup changes");
+            btnApplyMapScale.UseVisualStyleBackColor = true;
+            btnApplyMapScale.Click += btnApplyMapScale_Click;
             // 
             // tabSettings
             // 
@@ -168,7 +285,7 @@ namespace squad_dma
             tabSettings.Location = new Point(4, 24);
             tabSettings.Name = "tabSettings";
             tabSettings.Padding = new Padding(3);
-            tabSettings.Size = new Size(1592, 872);
+            tabSettings.Size = new Size(1888, 911);
             tabSettings.TabIndex = 1;
             tabSettings.Text = "Settings";
             tabSettings.UseVisualStyleBackColor = true;
@@ -177,72 +294,460 @@ namespace squad_dma
             // 
             grpConfig.Controls.Add(grpUserInterface);
             grpConfig.Controls.Add(grpRadar);
+            grpConfig.Controls.Add(grpLocalSoldier);
+            grpConfig.Controls.Add(grpKeybinds);
             grpConfig.Dock = DockStyle.Fill;
             grpConfig.Location = new Point(3, 3);
-            grpConfig.Margin = new Padding(4, 3, 4, 3);
+            grpConfig.Margin = new Padding(15);
             grpConfig.Name = "grpConfig";
-            grpConfig.Padding = new Padding(4, 3, 4, 3);
-            grpConfig.Size = new Size(1586, 866);
+            grpConfig.Padding = new Padding(15);
+            grpConfig.Size = new Size(1882, 905);
             grpConfig.TabIndex = 8;
             grpConfig.TabStop = false;
             grpConfig.Text = "Radar Config";
             // 
             // grpUserInterface
             // 
-            grpUserInterface.Controls.Add(trkAimLength);
-            grpUserInterface.Controls.Add(lblAimline);
             grpUserInterface.Controls.Add(lblUIScale);
             grpUserInterface.Controls.Add(trkUIScale);
+            grpUserInterface.Controls.Add(lblAimline);
+            grpUserInterface.Controls.Add(trkAimLength);
+            grpUserInterface.Controls.Add(lblTechMarkerScale);
+            grpUserInterface.Controls.Add(trkTechMarkerScale);
             grpUserInterface.Controls.Add(chkShowEnemyDistance);
             grpUserInterface.Controls.Add(btnDumpNames);
-            grpUserInterface.Location = new Point(5, 93);
+            grpUserInterface.Location = new Point(15, 24);
             grpUserInterface.Name = "grpUserInterface";
-            grpUserInterface.Size = new Size(463, 203);
+            grpUserInterface.Padding = new Padding(15);
+            grpUserInterface.Size = new Size(500, 250);
             grpUserInterface.TabIndex = 26;
             grpUserInterface.TabStop = false;
-            grpUserInterface.Text = "UI";
-            // 
-            // lblAimline
-            // 
-            lblAimline.AutoSize = true;
-            lblAimline.Location = new Point(188, 124);
-            lblAimline.Margin = new Padding(4, 0, 4, 0);
-            lblAimline.Name = "lblAimline";
-            lblAimline.Size = new Size(88, 15);
-            lblAimline.TabIndex = 13;
-            lblAimline.Text = "Aimline Length";
-            lblAimline.TextAlign = ContentAlignment.MiddleCenter;
+            grpUserInterface.Text = "User Interface";
             // 
             // lblUIScale
             // 
             lblUIScale.AutoSize = true;
-            lblUIScale.Location = new Point(56, 124);
+            lblUIScale.Font = new Font("Segoe UI", 9F);
+            lblUIScale.Location = new Point(15, 30);
             lblUIScale.Name = "lblUIScale";
             lblUIScale.Size = new Size(48, 15);
-            lblUIScale.TabIndex = 28;
+            lblUIScale.TabIndex = 13;
             lblUIScale.Text = "UI Scale";
-            lblUIScale.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // lblAimline
+            // 
+            lblAimline.AutoSize = true;
+            lblAimline.Font = new Font("Segoe UI", 9F);
+            lblAimline.Location = new Point(15, 95);
+            lblAimline.Name = "lblAimline";
+            lblAimline.Size = new Size(88, 15);
+            lblAimline.TabIndex = 12;
+            lblAimline.Text = "Aimline Length";
+            lblAimline.Click += lblAimline_Click;
+            // 
+            // lblTechMarkerScale
+            // 
+            lblTechMarkerScale.AutoSize = true;
+            lblTechMarkerScale.Font = new Font("Segoe UI", 9F);
+            lblTechMarkerScale.Location = new Point(15, 160);
+            lblTechMarkerScale.Name = "lblTechMarkerScale";
+            lblTechMarkerScale.Size = new Size(103, 15);
+            lblTechMarkerScale.TabIndex = 18;
+            lblTechMarkerScale.Text = "Vehicle/Tech Scale";
             // 
             // grpRadar
             // 
             grpRadar.Controls.Add(btnRestartRadar);
             grpRadar.Controls.Add(chkShowMapSetup);
             grpRadar.Controls.Add(btnToggleMap);
-            grpRadar.Location = new Point(5, 22);
+            grpRadar.Location = new Point(15, 280);
             grpRadar.Name = "grpRadar";
-            grpRadar.Size = new Size(463, 65);
+            grpRadar.Padding = new Padding(15);
+            grpRadar.Size = new Size(500, 120);
             grpRadar.TabIndex = 26;
             grpRadar.TabStop = false;
             grpRadar.Text = "Radar";
             // 
+            // grpLocalSoldier
+            // 
+            grpLocalSoldier.Controls.Add(chkDisableSuppression);
+            grpLocalSoldier.Controls.Add(chkSetInteractionDistances);
+            grpLocalSoldier.Controls.Add(chkAllowShootingInMainBase);
+            grpLocalSoldier.Controls.Add(chkSpeedHack);
+            grpLocalSoldier.Controls.Add(chkAirStuck);
+            grpLocalSoldier.Controls.Add(chkDisableCollision);
+            grpLocalSoldier.Controls.Add(chkHideActor);
+            grpLocalSoldier.Controls.Add(chkQuickZoom);
+            grpLocalSoldier.Controls.Add(chkRapidFire);
+            grpLocalSoldier.Controls.Add(chkInfiniteAmmo);
+            grpLocalSoldier.Controls.Add(chkQuickSwap);
+            grpLocalSoldier.Location = new Point(15, 406);
+            grpLocalSoldier.Name = "grpLocalSoldier";
+            grpLocalSoldier.Size = new Size(500, 223);
+            grpLocalSoldier.TabIndex = 27;
+            grpLocalSoldier.TabStop = false;
+            grpLocalSoldier.Text = "Local Soldier Features";
+            // 
+            // chkDisableSuppression
+            // 
+            chkDisableSuppression.AutoSize = true;
+            chkDisableSuppression.Location = new Point(10, 20);
+            chkDisableSuppression.Name = "chkDisableSuppression";
+            chkDisableSuppression.Size = new Size(131, 19);
+            chkDisableSuppression.TabIndex = 0;
+            chkDisableSuppression.Text = "Disable Suppression";
+            chkDisableSuppression.UseVisualStyleBackColor = true;
+            // 
+            // chkSetInteractionDistances
+            // 
+            chkSetInteractionDistances.AutoSize = true;
+            chkSetInteractionDistances.Location = new Point(10, 45);
+            chkSetInteractionDistances.Name = "chkSetInteractionDistances";
+            chkSetInteractionDistances.Size = new Size(177, 19);
+            chkSetInteractionDistances.TabIndex = 1;
+            chkSetInteractionDistances.Text = "Increase Interaction Distance";
+            chkSetInteractionDistances.UseVisualStyleBackColor = true;
+            // 
+            // chkAllowShootingInMainBase
+            // 
+            chkAllowShootingInMainBase.AutoSize = true;
+            chkAllowShootingInMainBase.Location = new Point(10, 70);
+            chkAllowShootingInMainBase.Name = "chkAllowShootingInMainBase";
+            chkAllowShootingInMainBase.Size = new Size(177, 19);
+            chkAllowShootingInMainBase.TabIndex = 2;
+            chkAllowShootingInMainBase.Text = "Allow Shooting in Main Base";
+            chkAllowShootingInMainBase.UseVisualStyleBackColor = true;
+            // 
+            // chkSpeedHack
+            // 
+            chkSpeedHack.AutoSize = true;
+            chkSpeedHack.Location = new Point(10, 95);
+            chkSpeedHack.Name = "chkSpeedHack";
+            chkSpeedHack.Size = new Size(88, 19);
+            chkSpeedHack.TabIndex = 3;
+            chkSpeedHack.Text = "Speed Hack";
+            chkSpeedHack.UseVisualStyleBackColor = true;
+            // 
+            // chkAirStuck
+            // 
+            chkAirStuck.AutoSize = true;
+            chkAirStuck.Location = new Point(10, 120);
+            chkAirStuck.Name = "chkAirStuck";
+            chkAirStuck.Size = new Size(73, 19);
+            chkAirStuck.TabIndex = 4;
+            chkAirStuck.Text = "Air Stuck";
+            chkAirStuck.UseVisualStyleBackColor = true;
+            // 
+            // chkDisableCollision
+            // 
+            chkDisableCollision.AutoSize = true;
+            chkDisableCollision.Enabled = false;
+            chkDisableCollision.Location = new Point(10, 145);
+            chkDisableCollision.Name = "chkDisableCollision";
+            chkDisableCollision.Size = new Size(113, 19);
+            chkDisableCollision.TabIndex = 10;
+            chkDisableCollision.Text = "Disable Collision";
+            chkDisableCollision.UseVisualStyleBackColor = true;
+            // 
+            // chkHideActor
+            // 
+            chkHideActor.AutoSize = true;
+            chkHideActor.Location = new Point(10, 170);
+            chkHideActor.Name = "chkHideActor";
+            chkHideActor.Size = new Size(83, 19);
+            chkHideActor.TabIndex = 5;
+            chkHideActor.Text = "Hide Actor";
+            chkHideActor.UseVisualStyleBackColor = true;
+            // 
+            // chkQuickZoom
+            // 
+            chkQuickZoom.AutoSize = true;
+            chkQuickZoom.Location = new Point(10, 195);
+            chkQuickZoom.Name = "chkQuickZoom";
+            chkQuickZoom.Size = new Size(92, 19);
+            chkQuickZoom.TabIndex = 6;
+            chkQuickZoom.Text = "Quick Zoom";
+            chkQuickZoom.UseVisualStyleBackColor = true;
+            // 
+            // chkRapidFire
+            // 
+            chkRapidFire.AutoSize = true;
+            chkRapidFire.Location = new Point(210, 70);
+            chkRapidFire.Name = "chkRapidFire";
+            chkRapidFire.Size = new Size(78, 19);
+            chkRapidFire.TabIndex = 7;
+            chkRapidFire.Text = "Rapid Fire";
+            chkRapidFire.UseVisualStyleBackColor = true;
+            // 
+            // chkInfiniteAmmo
+            // 
+            chkInfiniteAmmo.AutoSize = true;
+            chkInfiniteAmmo.Location = new Point(210, 45);
+            chkInfiniteAmmo.Name = "chkInfiniteAmmo";
+            chkInfiniteAmmo.Size = new Size(103, 19);
+            chkInfiniteAmmo.TabIndex = 8;
+            chkInfiniteAmmo.Text = "Infinite Ammo";
+            chkInfiniteAmmo.UseVisualStyleBackColor = true;
+            // 
+            // chkQuickSwap
+            // 
+            chkQuickSwap.AutoSize = true;
+            chkQuickSwap.Location = new Point(210, 20);
+            chkQuickSwap.Name = "chkQuickSwap";
+            chkQuickSwap.Size = new Size(88, 19);
+            chkQuickSwap.TabIndex = 9;
+            chkQuickSwap.Text = "Quick Swap";
+            chkQuickSwap.UseVisualStyleBackColor = true;
+            // 
+            // grpKeybinds
+            // 
+            grpKeybinds.Controls.Add(lblKeybindSpeedHack);
+            grpKeybinds.Controls.Add(btnKeybindSpeedHack);
+            grpKeybinds.Controls.Add(lblKeybindAirStuck);
+            grpKeybinds.Controls.Add(btnKeybindAirStuck);
+            grpKeybinds.Controls.Add(lblKeybindHideActor);
+            grpKeybinds.Controls.Add(btnKeybindHideActor);
+            grpKeybinds.Controls.Add(lblKeybindQuickZoom);
+            grpKeybinds.Controls.Add(btnKeybindQuickZoom);
+            grpKeybinds.Controls.Add(lblKeybindToggleEnemyDistance);
+            grpKeybinds.Controls.Add(btnKeybindToggleEnemyDistance);
+            grpKeybinds.Controls.Add(lblKeybindToggleMap);
+            grpKeybinds.Controls.Add(btnKeybindToggleMap);
+            grpKeybinds.Controls.Add(lblKeybindToggleFullscreen);
+            grpKeybinds.Controls.Add(btnKeybindToggleFullscreen);
+            grpKeybinds.Controls.Add(lblStatusSpeedHack);
+            grpKeybinds.Controls.Add(lblStatusAirStuck);
+            grpKeybinds.Controls.Add(lblStatusHideActor);
+            grpKeybinds.Controls.Add(lblStatusToggleEnemyDistance);
+            grpKeybinds.Controls.Add(lblKeybindDumpNames);
+            grpKeybinds.Controls.Add(btnKeybindDumpNames);
+            grpKeybinds.Controls.Add(lblKeybindZoomIn);
+            grpKeybinds.Controls.Add(btnKeybindZoomIn);
+            grpKeybinds.Controls.Add(lblKeybindZoomOut);
+            grpKeybinds.Controls.Add(btnKeybindZoomOut);
+            grpKeybinds.Location = new Point(530, 24);
+            grpKeybinds.Name = "grpKeybinds";
+            grpKeybinds.Padding = new Padding(15);
+            grpKeybinds.Size = new Size(528, 409);
+            grpKeybinds.TabIndex = 28;
+            grpKeybinds.TabStop = false;
+            grpKeybinds.Text = "Keybinds";
+            // 
+            // lblKeybindSpeedHack
+            // 
+            lblKeybindSpeedHack.Location = new Point(15, 30);
+            lblKeybindSpeedHack.Name = "lblKeybindSpeedHack";
+            lblKeybindSpeedHack.Size = new Size(200, 20);
+            lblKeybindSpeedHack.TabIndex = 2;
+            lblKeybindSpeedHack.Text = "Speed Hack";
+            // 
+            // btnKeybindSpeedHack
+            // 
+            btnKeybindSpeedHack.Location = new Point(220, 30);
+            btnKeybindSpeedHack.Name = "btnKeybindSpeedHack";
+            btnKeybindSpeedHack.Size = new Size(100, 20);
+            btnKeybindSpeedHack.TabIndex = 3;
+            btnKeybindSpeedHack.Text = "None";
+            btnKeybindSpeedHack.Click += BtnKeybindSpeedHack_Click;
+            // 
+            // lblKeybindAirStuck
+            // 
+            lblKeybindAirStuck.Location = new Point(15, 60);
+            lblKeybindAirStuck.Name = "lblKeybindAirStuck";
+            lblKeybindAirStuck.Size = new Size(200, 20);
+            lblKeybindAirStuck.TabIndex = 4;
+            lblKeybindAirStuck.Text = "Air Stuck";
+            // 
+            // btnKeybindAirStuck
+            // 
+            btnKeybindAirStuck.Location = new Point(220, 60);
+            btnKeybindAirStuck.Name = "btnKeybindAirStuck";
+            btnKeybindAirStuck.Size = new Size(100, 20);
+            btnKeybindAirStuck.TabIndex = 5;
+            btnKeybindAirStuck.Text = "None";
+            btnKeybindAirStuck.Click += BtnKeybindAirStuck_Click;
+            // 
+            // lblKeybindHideActor
+            // 
+            lblKeybindHideActor.Location = new Point(15, 90);
+            lblKeybindHideActor.Name = "lblKeybindHideActor";
+            lblKeybindHideActor.Size = new Size(200, 20);
+            lblKeybindHideActor.TabIndex = 6;
+            lblKeybindHideActor.Text = "Hide Actor";
+            // 
+            // btnKeybindHideActor
+            // 
+            btnKeybindHideActor.Location = new Point(220, 90);
+            btnKeybindHideActor.Name = "btnKeybindHideActor";
+            btnKeybindHideActor.Size = new Size(100, 20);
+            btnKeybindHideActor.TabIndex = 7;
+            btnKeybindHideActor.Text = "None";
+            btnKeybindHideActor.Click += BtnKeybindHideActor_Click;
+            // 
+            // lblKeybindQuickZoom
+            // 
+            lblKeybindQuickZoom.Location = new Point(15, 150);
+            lblKeybindQuickZoom.Name = "lblKeybindQuickZoom";
+            lblKeybindQuickZoom.Size = new Size(200, 20);
+            lblKeybindQuickZoom.TabIndex = 8;
+            lblKeybindQuickZoom.Text = "Quick Zoom";
+            // 
+            // btnKeybindQuickZoom
+            // 
+            btnKeybindQuickZoom.Location = new Point(220, 150);
+            btnKeybindQuickZoom.Name = "btnKeybindQuickZoom";
+            btnKeybindQuickZoom.Size = new Size(100, 20);
+            btnKeybindQuickZoom.TabIndex = 9;
+            btnKeybindQuickZoom.Text = "None";
+            btnKeybindQuickZoom.Click += BtnKeybindQuickZoom_Click;
+            // 
+            // lblKeybindToggleEnemyDistance
+            // 
+            lblKeybindToggleEnemyDistance.Location = new Point(15, 120);
+            lblKeybindToggleEnemyDistance.Name = "lblKeybindToggleEnemyDistance";
+            lblKeybindToggleEnemyDistance.Size = new Size(200, 20);
+            lblKeybindToggleEnemyDistance.TabIndex = 10;
+            lblKeybindToggleEnemyDistance.Text = "Toggle Enemy Distance";
+            // 
+            // btnKeybindToggleEnemyDistance
+            // 
+            btnKeybindToggleEnemyDistance.Location = new Point(220, 120);
+            btnKeybindToggleEnemyDistance.Name = "btnKeybindToggleEnemyDistance";
+            btnKeybindToggleEnemyDistance.Size = new Size(100, 20);
+            btnKeybindToggleEnemyDistance.TabIndex = 11;
+            btnKeybindToggleEnemyDistance.Text = "F4";
+            btnKeybindToggleEnemyDistance.Click += BtnKeybindToggleEnemyDistance_Click;
+            // 
+            // lblKeybindToggleMap
+            // 
+            lblKeybindToggleMap.Location = new Point(15, 180);
+            lblKeybindToggleMap.Name = "lblKeybindToggleMap";
+            lblKeybindToggleMap.Size = new Size(200, 20);
+            lblKeybindToggleMap.TabIndex = 12;
+            lblKeybindToggleMap.Text = "Toggle Map";
+            // 
+            // btnKeybindToggleMap
+            // 
+            btnKeybindToggleMap.Location = new Point(220, 180);
+            btnKeybindToggleMap.Name = "btnKeybindToggleMap";
+            btnKeybindToggleMap.Size = new Size(100, 20);
+            btnKeybindToggleMap.TabIndex = 13;
+            btnKeybindToggleMap.Text = "F5";
+            btnKeybindToggleMap.Click += BtnKeybindToggleMap_Click;
+            // 
+            // lblKeybindToggleFullscreen
+            // 
+            lblKeybindToggleFullscreen.Location = new Point(15, 300);
+            lblKeybindToggleFullscreen.Name = "lblKeybindToggleFullscreen";
+            lblKeybindToggleFullscreen.Size = new Size(200, 20);
+            lblKeybindToggleFullscreen.TabIndex = 18;
+            lblKeybindToggleFullscreen.Text = "Toggle Fullscreen";
+            // 
+            // btnKeybindToggleFullscreen
+            // 
+            btnKeybindToggleFullscreen.Location = new Point(220, 300);
+            btnKeybindToggleFullscreen.Name = "btnKeybindToggleFullscreen";
+            btnKeybindToggleFullscreen.Size = new Size(100, 20);
+            btnKeybindToggleFullscreen.TabIndex = 19;
+            btnKeybindToggleFullscreen.Text = "F11";
+            btnKeybindToggleFullscreen.Click += BtnKeybindToggleFullscreen_Click;
+            // 
+            // lblStatusSpeedHack
+            // 
+            lblStatusSpeedHack.AutoSize = true;
+            lblStatusSpeedHack.Location = new Point(330, 30);
+            lblStatusSpeedHack.Name = "lblStatusSpeedHack";
+            lblStatusSpeedHack.Size = new Size(28, 15);
+            lblStatusSpeedHack.TabIndex = 21;
+            lblStatusSpeedHack.Text = "OFF";
+            // 
+            // lblStatusAirStuck
+            // 
+            lblStatusAirStuck.AutoSize = true;
+            lblStatusAirStuck.Location = new Point(330, 60);
+            lblStatusAirStuck.Name = "lblStatusAirStuck";
+            lblStatusAirStuck.Size = new Size(28, 15);
+            lblStatusAirStuck.TabIndex = 22;
+            lblStatusAirStuck.Text = "OFF";
+            // 
+            // lblStatusHideActor
+            // 
+            lblStatusHideActor.AutoSize = true;
+            lblStatusHideActor.Location = new Point(330, 90);
+            lblStatusHideActor.Name = "lblStatusHideActor";
+            lblStatusHideActor.Size = new Size(28, 15);
+            lblStatusHideActor.TabIndex = 23;
+            lblStatusHideActor.Text = "OFF";
+            // 
+            // lblStatusToggleEnemyDistance
+            // 
+            lblStatusToggleEnemyDistance.AutoSize = true;
+            lblStatusToggleEnemyDistance.Location = new Point(330, 120);
+            lblStatusToggleEnemyDistance.Name = "lblStatusToggleEnemyDistance";
+            lblStatusToggleEnemyDistance.Size = new Size(28, 15);
+            lblStatusToggleEnemyDistance.TabIndex = 24;
+            lblStatusToggleEnemyDistance.Text = "OFF";
+            // 
+            // lblKeybindDumpNames
+            // 
+            lblKeybindDumpNames.Location = new Point(15, 210);
+            lblKeybindDumpNames.Name = "lblKeybindDumpNames";
+            lblKeybindDumpNames.Size = new Size(200, 20);
+            lblKeybindDumpNames.TabIndex = 18;
+            lblKeybindDumpNames.Text = "Dump Names";
+            // 
+            // btnKeybindDumpNames
+            // 
+            btnKeybindDumpNames.Location = new Point(220, 210);
+            btnKeybindDumpNames.Name = "btnKeybindDumpNames";
+            btnKeybindDumpNames.Size = new Size(100, 20);
+            btnKeybindDumpNames.TabIndex = 19;
+            btnKeybindDumpNames.Text = "F6";
+            btnKeybindDumpNames.Click += BtnKeybindDumpNames_Click;
+            // 
+            // lblKeybindZoomIn
+            // 
+            lblKeybindZoomIn.Location = new Point(15, 240);
+            lblKeybindZoomIn.Name = "lblKeybindZoomIn";
+            lblKeybindZoomIn.Size = new Size(200, 20);
+            lblKeybindZoomIn.TabIndex = 20;
+            lblKeybindZoomIn.Text = "Zoom In";
+            // 
+            // btnKeybindZoomIn
+            // 
+            btnKeybindZoomIn.Location = new Point(220, 240);
+            btnKeybindZoomIn.Name = "btnKeybindZoomIn";
+            btnKeybindZoomIn.Size = new Size(100, 20);
+            btnKeybindZoomIn.TabIndex = 21;
+            btnKeybindZoomIn.Text = "Up";
+            btnKeybindZoomIn.Click += BtnKeybindZoomIn_Click;
+            // 
+            // lblKeybindZoomOut
+            // 
+            lblKeybindZoomOut.Location = new Point(15, 270);
+            lblKeybindZoomOut.Name = "lblKeybindZoomOut";
+            lblKeybindZoomOut.Size = new Size(200, 20);
+            lblKeybindZoomOut.TabIndex = 22;
+            lblKeybindZoomOut.Text = "Zoom Out";
+            // 
+            // btnKeybindZoomOut
+            // 
+            btnKeybindZoomOut.Location = new Point(220, 270);
+            btnKeybindZoomOut.Name = "btnKeybindZoomOut";
+            btnKeybindZoomOut.Size = new Size(100, 20);
+            btnKeybindZoomOut.TabIndex = 23;
+            btnKeybindZoomOut.Text = "Down";
+            btnKeybindZoomOut.Click += BtnKeybindZoomOut_Click;
+            // 
             // tabRadar
             // 
             tabRadar.Controls.Add(ticketsPanel);
+            tabRadar.Controls.Add(chkMapFree);
             tabRadar.Controls.Add(grpMapSetup);
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
             tabRadar.Padding = new Padding(3);
-            tabRadar.Size = new Size(1592, 872);
+            tabRadar.Size = new Size(1888, 911);
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
@@ -252,7 +757,7 @@ namespace squad_dma
             ticketsPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ticketsPanel.BackColor = SystemColors.ScrollBar;
             ticketsPanel.BorderStyle = BorderStyle.FixedSingle;
-            ticketsPanel.Location = new Point(9, 836);
+            ticketsPanel.Location = new Point(8, 875);
             ticketsPanel.Name = "ticketsPanel";
             ticketsPanel.Size = new Size(285, 30);
             ticketsPanel.TabIndex = 12;
@@ -260,92 +765,50 @@ namespace squad_dma
             // grpMapSetup
             // 
             grpMapSetup.Controls.Add(btnApplyMapScale);
-            grpMapSetup.Controls.Add(chkMapFree);
             grpMapSetup.Controls.Add(txtMapSetupScale);
             grpMapSetup.Controls.Add(lblMapScale);
             grpMapSetup.Controls.Add(txtMapSetupY);
             grpMapSetup.Controls.Add(lblMapXY);
             grpMapSetup.Controls.Add(txtMapSetupX);
             grpMapSetup.Controls.Add(lblMapCoords);
-            grpMapSetup.Location = new Point(8, 6);
+            grpMapSetup.Location = new Point(9, 45);
             grpMapSetup.Name = "grpMapSetup";
-            grpMapSetup.Size = new Size(327, 175);
+            grpMapSetup.Padding = new Padding(15);
+            grpMapSetup.Size = new Size(400, 250);
             grpMapSetup.TabIndex = 11;
             grpMapSetup.TabStop = false;
             grpMapSetup.Text = "Map Setup";
             grpMapSetup.Visible = false;
             // 
-            // btnApplyMapScale
-            // 
-            btnApplyMapScale.Location = new Point(7, 130);
-            btnApplyMapScale.Name = "btnApplyMapScale";
-            btnApplyMapScale.Size = new Size(89, 30);
-            btnApplyMapScale.TabIndex = 18;
-            btnApplyMapScale.Text = "Apply";
-            btnApplyMapScale.UseVisualStyleBackColor = true;
-            btnApplyMapScale.Click += btnApplyMapScale_Click;
-            // 
-            // chkMapFree
-            // 
-            chkMapFree.Appearance = Appearance.Button;
-            chkMapFree.AutoSize = true;
-            chkMapFree.Location = new Point(0, 0);
-            chkMapFree.Name = "chkMapFree";
-            chkMapFree.Size = new Size(79, 25);
-            chkMapFree.TabIndex = 17;
-            chkMapFree.Text = "Map Follow";
-            chkMapFree.TextAlign = ContentAlignment.MiddleCenter;
-            chkMapFree.UseVisualStyleBackColor = true;
-            chkMapFree.CheckedChanged += chkMapFree_CheckedChanged;
-            // 
-            // txtMapSetupScale
-            // 
-            txtMapSetupScale.Location = new Point(46, 101);
-            txtMapSetupScale.Name = "txtMapSetupScale";
-            txtMapSetupScale.Size = new Size(50, 23);
-            txtMapSetupScale.TabIndex = 15;
-            // 
             // lblMapScale
             // 
             lblMapScale.AutoSize = true;
-            lblMapScale.Location = new Point(6, 104);
+            lblMapScale.Font = new Font("Segoe UI", 9F);
+            lblMapScale.Location = new Point(15, 90);
             lblMapScale.Name = "lblMapScale";
             lblMapScale.Size = new Size(34, 15);
-            lblMapScale.TabIndex = 14;
+            lblMapScale.TabIndex = 19;
             lblMapScale.Text = "Scale";
-            // 
-            // txtMapSetupY
-            // 
-            txtMapSetupY.Location = new Point(102, 67);
-            txtMapSetupY.Name = "txtMapSetupY";
-            txtMapSetupY.Size = new Size(50, 23);
-            txtMapSetupY.TabIndex = 13;
             // 
             // lblMapXY
             // 
             lblMapXY.AutoSize = true;
-            lblMapXY.Location = new Point(6, 70);
+            lblMapXY.Font = new Font("Segoe UI", 9F);
+            lblMapXY.Location = new Point(15, 60);
             lblMapXY.Name = "lblMapXY";
             lblMapXY.Size = new Size(24, 15);
-            lblMapXY.TabIndex = 12;
+            lblMapXY.TabIndex = 20;
             lblMapXY.Text = "X,Y";
-            // 
-            // txtMapSetupX
-            // 
-            txtMapSetupX.Location = new Point(46, 67);
-            txtMapSetupX.Name = "txtMapSetupX";
-            txtMapSetupX.Size = new Size(50, 23);
-            txtMapSetupX.TabIndex = 11;
             // 
             // lblMapCoords
             // 
             lblMapCoords.AutoSize = true;
-            lblMapCoords.Location = new Point(7, 19);
-            lblMapCoords.Margin = new Padding(4, 0, 4, 0);
+            lblMapCoords.Font = new Font("Segoe UI", 9F);
+            lblMapCoords.Location = new Point(15, 30);
             lblMapCoords.Name = "lblMapCoords";
-            lblMapCoords.Size = new Size(43, 15);
-            lblMapCoords.TabIndex = 10;
-            lblMapCoords.Text = "coords";
+            lblMapCoords.Size = new Size(98, 15);
+            lblMapCoords.TabIndex = 21;
+            lblMapCoords.Text = "Map Coordinates";
             // 
             // tabControl
             // 
@@ -355,27 +818,33 @@ namespace squad_dma
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1600, 900);
+            tabControl.Size = new Size(1896, 939);
             tabControl.TabIndex = 8;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1600, 900);
+            ClientSize = new Size(1896, 939);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
             Name = "MainForm";
-            Text = "I Love Squad";
+            Text = "Squad DMA";
             ((System.ComponentModel.ISupportInitialize)trkUIScale).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
+            ((System.ComponentModel.ISupportInitialize)trkTechMarkerScale).EndInit();
             tabSettings.ResumeLayout(false);
             grpConfig.ResumeLayout(false);
             grpUserInterface.ResumeLayout(false);
             grpUserInterface.PerformLayout();
             grpRadar.ResumeLayout(false);
             grpRadar.PerformLayout();
+            grpLocalSoldier.ResumeLayout(false);
+            grpLocalSoldier.PerformLayout();
+            grpKeybinds.ResumeLayout(false);
+            grpKeybinds.PerformLayout();
             tabRadar.ResumeLayout(false);
+            tabRadar.PerformLayout();
             grpMapSetup.ResumeLayout(false);
             grpMapSetup.PerformLayout();
             tabControl.ResumeLayout(false);
@@ -410,5 +879,59 @@ namespace squad_dma
         private Label lblMapCoords;
         private TabControl tabControl;
         private Panel ticketsPanel;
+        private GroupBox grpLocalSoldier;
+        private CheckBox chkDisableSuppression;
+        private CheckBox chkSetInteractionDistances;
+        private CheckBox chkAllowShootingInMainBase;
+        private CheckBox chkSpeedHack;
+        private CheckBox chkAirStuck;
+        private CheckBox chkDisableCollision;
+        private CheckBox chkHideActor;
+        private CheckBox chkQuickZoom;
+        private CheckBox chkRapidFire;
+        private CheckBox chkInfiniteAmmo;
+        private CheckBox chkQuickSwap;
+        private GroupBox grpKeybinds;
+        private Button btnKeybindSpeedHack;
+        private Button btnKeybindAirStuck;
+        private Button btnKeybindHideActor;
+        private Button btnKeybindToggleEnemyDistance;
+        private Button btnKeybindToggleMap;
+        private Button btnKeybindToggleFullscreen;
+        private Label lblKeybindSpeedHack;
+        private Label lblKeybindAirStuck;
+        private Label lblKeybindHideActor;
+        private Label lblKeybindToggleEnemyDistance;
+        private Label lblKeybindToggleMap;
+        private Label lblKeybindToggleFullscreen;
+        private Label lblStatusSpeedHack;
+        private Label lblStatusAirStuck;
+        private Label lblStatusHideActor;
+        private Label lblStatusToggleEnemyDistance;
+        private Label lblKeybindDumpNames;
+        private Button btnKeybindDumpNames;
+        private Label lblKeybindZoomIn;
+        private Button btnKeybindZoomIn;
+        private Label lblKeybindZoomOut;
+        private Button btnKeybindZoomOut;
+        private Label lblKeybindQuickZoom;
+        private Button btnKeybindQuickZoom;
+        private Label lblTechMarkerScale;
+        private TrackBar trkTechMarkerScale;
+
+        private void BtnKeybindZoomIn_Click(object sender, EventArgs e)
+        {
+            StartKeybindCapture(btnKeybindZoomIn);
+        }
+
+        private void BtnKeybindZoomOut_Click(object sender, EventArgs e)
+        {
+            StartKeybindCapture(btnKeybindZoomOut);
+        }
+
+        private void BtnKeybindQuickZoom_Click(object sender, EventArgs e)
+        {
+            StartKeybindCapture(btnKeybindQuickZoom);
+        }
     }
 }

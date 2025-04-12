@@ -38,6 +38,11 @@
         public const uint Instigator = 0x120;
         public const uint RootComponent = 0x138;
         public const uint ID = 0x18;
+        public const uint CustomTimeDilation = 0x98; // float
+        public const uint bReplicateMovement = 0x58; // uint8
+        public const uint bHidden = 0x58; // uint8
+        public const uint bCanBeDamaged = 0x5a; // uint8
+        public const uint bActorEnableCollision = 0x5c; // uint8
     }
 
     public struct USceneComponent
@@ -47,6 +52,16 @@
         public const uint ComponentToWorld = 0x11C; // Relative Offset Guess
         public const uint RelativeScale3D = 0x134;
         public const uint RelativeLocationComp2World = 0x1D0;
+    }
+
+    public struct UPrimitiveComponent
+    {
+        public const uint BodyInstance = 0x2C8; // FBodyInstance
+    }
+
+    public struct FBodyInstance
+    {
+        public const uint CollisionEnabled = 0x20; // uint8
     }
 
     public struct UPlayer
@@ -87,6 +102,11 @@
         public const uint TeamState = 0x590; // ASQTeamState*
     }
 
+    public struct PlayerCameraManager
+    {
+        public const uint DefaultFOV = 0x240;
+    }
+
     public struct Camera
     {
         public const uint PCOwner = 0x228;
@@ -105,6 +125,7 @@
         public const uint TeamID = 0x400; // per player
         public const uint SquadState = 0x760; // ASQSquadState*
         public const uint PlayerStateData = 0x6D0;
+        public const uint Soldier = 0x768; // ASQSoldier*
     }
 
     public struct ASQTeamState
@@ -130,7 +151,64 @@
 
     public struct ASQSoldier
     {
-        public const uint Health = 0x1DF8;
+        public const uint Health = 0x1DF8; // float
+        public const uint UnderSuppressionPercentage = 0x15e4; // float
+        public const uint MaxSuppressionPercentage = 0x15e8; // float
+        public const uint SuppressionMultiplier = 0x15f0; // float
+        public const uint UseInteractDistance = 0x16ec; // float
+        public const uint InteractableRadiusMultiplier = 0x1708; // float
+        public const uint InventoryComponent = 0x2108; // USQPawnInventoryComponent*
+        public const uint CurrentItemStaticInfo = 0x140; // USQItemStaticInfo*
+        public const uint bUsableInMainBase = 0x5b0; // bool
+        public const uint SecondsOfSpawnProtection = 0x167c; // float
+        public const uint InvulnerableDelay = 0x1680; // float
+    }
+
+    public struct USQPawnInventoryComponent
+    {
+        public const uint CurrentWeapon = 0x150; // ASQEquipableItem*
+        public const uint CurrentItemStaticInfo = 0x140; // USQItemStaticInfo*
+        public const uint CurrentWeaponSlot = 0x18c; // int32
+        public const uint CurrentWeaponOffset = 0x190; // int32
+        public const uint Inventory = 0x198; // TArray<FSQWeaponGroupData>
+    }
+
+    public struct ASQWeapon
+    {
+        public const uint WeaponConfig = 0x620; // FSQWeaponData
+    }
+
+    public struct FSQWeaponData
+    {
+        public const uint bInfiniteAmmo = 0x0; // bool
+        public const uint bInfiniteMags = 0x1; // bool
+        public const uint MaxMags = 0x4; // int32
+        public const uint RoundsPerMag = 0x8; // int32
+        public const uint bAllowRoundInChamber = 0xc; // bool
+        public const uint bAllowSingleLoad = 0xd; // bool
+        public const uint FireModes = 0x10; // TArray<int32>
+        public const uint TimeBetweenShots = 0x20; // float
+        public const uint TimeBetweenSingleShots = 0x24; // float
+        public const uint bCanReloadWhenEquipping = 0x28; // bool
+        public const uint bCreateProjectileOnServer = 0x29; // bool
+        public const uint TacticalReloadDuration = 0x2c; // float
+        public const uint DryReloadDuration = 0x34; // float
+        public const uint TacticalReloadBipodDuration = 0x38; // float
+        public const uint ReloadDryBipodDuration = 0x3c; // float
+        public const uint MaxDamageToApply = 0x64; // float
+    }
+
+    public struct ASQEquipableItem
+    {
+        public const uint ItemStaticInfo = 0x228; // USQItemStaticInfo*
+        public const uint ItemStaticInfoClass = 0x230; // TSubclassOf<USQItemStaticInfo*>
+        public const uint DisplayName = 0x270; // FText
+        public const uint ItemCount = 0x34c; // int32
+        public const uint MaxItemCount = 0x350; // int32
+        public const uint EquipDuration = 0x36c; // float
+        public const uint UnequipDuration = 0x370; // float
+        public const uint CachedEquipDuration = 0x448; // float
+        public const uint CachedUnequipDuration = 0x44c; // float
     }
 
     public struct SQVehicle
@@ -148,5 +226,20 @@
     public struct FString
     {
         public const uint Length = 0x8;
+    }
+
+    public struct Character
+    {
+        public const uint CharacterMovement = 0x290; // UCharacterMovementComponent*
+        public const uint ReplicatedMovementMode = 0x328; // uint8
+    }
+
+    public struct CharacterMovementComponent
+    {
+        public const uint MovementMode = 0x168; // Engine::EMovementMode
+        public const uint MaxFlySpeed = 0x198; // float
+        public const uint MaxCustomMovementSpeed = 0x19c; // float
+        public const uint MaxAcceleration = 0x1a0; // float
+        public const uint bCheatFlying = 0x388; // uint8
     }
 }

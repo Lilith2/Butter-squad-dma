@@ -23,14 +23,13 @@ namespace squad_dma
         private static uint _pid;
         private static ulong _squadBase;
         public static Game _game;
-        private static int _ticksCounter = 0;
         private static volatile int _ticks = 0;
         private static readonly Stopwatch _tickSw = new();
         private static readonly ManualResetEvent _syncProcessRunning = new(false);
         private static readonly Stopwatch _processCheckTimer = new();
-        private const int PROCESS_CHECK_INTERVAL = 2000;
+        private const int PROCESS_CHECK_INTERVAL = 1000;
 
-        public static Game.GameStatus GameStatus = Game.GameStatus.NotFound;
+        public static GameStatus GameStatus = GameStatus.NotFound;
 
         #region Getters
         public static int Ticks
@@ -259,30 +258,30 @@ namespace squad_dma
         {
             try
             {
-                if (!GetModuleBase())
+                if (!GetPid() || !GetModuleBase())
                 {
-                    Program.Log($"Process {_pid} is no longer running!");
+                    Program.Log("Process or module base no longer available!");
                     return false;
                 }
 
-                var scatterMap = new ScatterReadMap(2);
+                var scatterMap = new ScatterReadMap(1);
                 var baseCheckRound = scatterMap.AddRound();
-                baseCheckRound.AddEntry<ulong>(0, 0, _squadBase);
-                baseCheckRound.AddEntry<string>(0, 1, _squadBase, 32); // Read module header
+                baseCheckRound.AddEntry<string>(0, 0, _squadBase, 8);
 
                 scatterMap.Execute();
 
-                if (!scatterMap.Results[0][1].TryGetResult<string>(out var moduleHeader) ||
+                if (!scatterMap.Results[0][0].TryGetResult<string>(out var moduleHeader) ||
                     !moduleHeader.StartsWith("MZ"))
                 {
-                    Program.Log("Module header verification failed!");
+                    Program.Log("Module header verification failed - game may have terminated!");
                     return false;
                 }
 
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Program.Log($"Process verification error: {ex.Message}");
                 return false;
             }
         }
@@ -297,15 +296,13 @@ namespace squad_dma
                 while (true)
                 {
                     Program.Log("Attempting to find Squad Process...");
-                    bool firstAttempt = true;
+                    
                     while (!Memory.GetPid() || !Memory.GetModuleBase())
                     {
-                        Memory.GameStatus = Game.GameStatus.NotFound;
+                        Memory.GameStatus = GameStatus.NotFound;
                         _syncProcessRunning.Reset();
-                        var delay = firstAttempt ? 15000 : 5000;
-                        Program.Log($"Squad startup failed, trying again in {delay / 1000} seconds...");
-                        Thread.Sleep(delay);
-                        firstAttempt = false;
+                        Program.Log("Squad not found, checking again in 1 second...");
+                        Thread.Sleep(1000);
                     }
 
                     Program.Log("Squad process located! Startup successful.");
@@ -318,13 +315,12 @@ namespace squad_dma
                         try
                         {
                             Program.Log("Ready -- Waiting for game...");
-                            Memory.GameStatus = Game.GameStatus.Menu;
+                            Memory.GameStatus = GameStatus.Menu;
                             Memory._ready = true;
                             Memory._game.WaitForGame();
 
-                            while (Memory.GameStatus == Game.GameStatus.InGame && _running)
+                            while (Memory.GameStatus == GameStatus.InGame && _running)
                             {
-                                // Periodic process verification
                                 if (_processCheckTimer.ElapsedMilliseconds > PROCESS_CHECK_INTERVAL)
                                 {
                                     if (!VerifyRunningProcess())
@@ -477,9 +473,19 @@ namespace squad_dma
         /// </summary>
         public static ulong ReadPtr(ulong ptr)
         {
-            var addr = ReadValue<ulong>(ptr);
-            if (addr == 0x0) throw new NullPtrException();
-            else return addr;
+            try
+            {
+                // Check if input pointer is null
+                if (ptr == 0) return 0;
+                
+                var addr = ReadValue<ulong>(ptr);
+                // Just return the address even if it's zero
+                return addr;
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         /// <summary>
@@ -610,17 +616,17 @@ namespace squad_dma
         /// <param name="value"></param>
         /// <exception cref="DMAException"></exception>
         public static void WriteValue<T>(ulong addr, T value)
-            where T : unmanaged
-        {            
-             try
-             {
-                 if (!vmmInstance.MemWriteStruct( addr, value))
-                     throw new Exception("Memory Write Failed!");
-             }
-             catch (Exception ex)
-             {
-                 throw new DMAException($"[DMA] ERROR writing {typeof(T)} value at 0x{addr.ToString("X")}", ex);
-             }
+        where T : unmanaged
+        {
+            try
+            {
+                if (!_process.MemWriteStruct(addr, value))
+                    throw new Exception("Memory Write Failed!");
+            }
+            catch (Exception ex)
+            {
+                throw new DMAException($"[DMA] ERROR writing {typeof(T)} value at 0x{addr.ToString("X")}", ex);
+            }
         }
 
         /// <summary>
@@ -628,36 +634,36 @@ namespace squad_dma
         /// </summary>
         /// <param name="entries">A collection of entries defining the memory writes.</param>
         public static void WriteScatter(IEnumerable<IScatterWriteEntry> entries)
-        {            
-             using (var scatter = vmmInstance.Scatter_Initialize(Vmm.FLAG_NOCACHE))
-             {
-                 if (scatter == null)
-                     throw new InvalidOperationException("Failed to initialize scatter.");
+        {
+            using (var scatter = _process.Scatter_Initialize(Vmm.FLAG_NOCACHE))
+            {
+                if (scatter == null)
+                    throw new InvalidOperationException("Failed to initialize scatter.");
 
-                 foreach (var entry in entries)
-                 {
-                     bool success = entry switch
-                     {
-                         IScatterWriteDataEntry<int> intEntry => scatter.PrepareWriteStruct(intEntry.Address, intEntry.Data),
-                         IScatterWriteDataEntry<float> floatEntry => scatter.PrepareWriteStruct(floatEntry.Address, floatEntry.Data),
-                         IScatterWriteDataEntry<ulong> ulongEntry => scatter.PrepareWriteStruct(ulongEntry.Address, ulongEntry.Data),
-                         IScatterWriteDataEntry<bool> boolEntry => scatter.PrepareWriteStruct(boolEntry.Address, boolEntry.Data),
-                         IScatterWriteDataEntry<byte> byteEntry => scatter.PrepareWriteStruct(byteEntry.Address, byteEntry.Data),
-                         _ => throw new NotSupportedException($"Unsupported data type: {entry.GetType()}")
-                     };
+                foreach (var entry in entries)
+                {
+                    bool success = entry switch
+                    {
+                        IScatterWriteDataEntry<int> intEntry => scatter.PrepareWriteStruct(intEntry.Address, intEntry.Data),
+                        IScatterWriteDataEntry<float> floatEntry => scatter.PrepareWriteStruct(floatEntry.Address, floatEntry.Data),
+                        IScatterWriteDataEntry<ulong> ulongEntry => scatter.PrepareWriteStruct(ulongEntry.Address, ulongEntry.Data),
+                        IScatterWriteDataEntry<bool> boolEntry => scatter.PrepareWriteStruct(boolEntry.Address, boolEntry.Data),
+                        IScatterWriteDataEntry<byte> byteEntry => scatter.PrepareWriteStruct(byteEntry.Address, byteEntry.Data),
+                        _ => throw new NotSupportedException($"Unsupported data type: {entry.GetType()}")
+                    };
 
-                     if (!success)
-                     {
-                         Program.Log($"Failed to prepare scatter write for address: {entry.Address}");
-                         continue;
-                     }
-                 }
+                    if (!success)
+                    {
+                        Program.Log($"Failed to prepare scatter write for address: {entry.Address}");
+                        continue;
+                    }
+                }
 
-                 if (!scatter.Execute())
-                     throw new Exception("Scatter write execution failed.");
+                if (!scatter.Execute())
+                    throw new Exception("Scatter write execution failed.");
 
-                 scatter.Close();
-             }
+                scatter.Close();
+            }
         }
         #endregion
 
@@ -674,7 +680,7 @@ namespace squad_dma
         }
         private static void HandleRestart()
         {
-            Memory.GameStatus = Game.GameStatus.Menu;
+            Memory.GameStatus = GameStatus.Menu;
             Program.Log("Restarting game... getting fresh GameWorld instance");
             Memory._restart = false;
         }
