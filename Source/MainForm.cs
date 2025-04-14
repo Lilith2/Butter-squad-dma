@@ -356,12 +356,8 @@ namespace squad_dma
 
         private void HandleKeyboardInput()
         {
-            bool shift = ModifierKeys.HasFlag(Keys.Shift);
-            bool ctrl = ModifierKeys.HasFlag(Keys.Control);
-            bool alt = ModifierKeys.HasFlag(Keys.Alt);
-
             // Hold-to-activate features
-            if (_config.KeybindQuickZoom != Keys.None && InputManager.IsKeyDown(_config.KeybindQuickZoom) && chkQuickZoom.Checked)
+            if (_config.KeybindQuickZoom != Keys.None && InputManager.IsKeyDown((int)_config.KeybindQuickZoom) && chkQuickZoom.Checked)
             {
                 if (!_isHolding_QuickZoom)
                 {
@@ -376,20 +372,20 @@ namespace squad_dma
             }
 
             // Handle zoom controls
-            if (InputManager.IsKeyDown(_config.KeybindZoomIn))
+            if (InputManager.IsKeyDown((int)_config.KeybindZoomIn))
                 ZoomIn(_config.ZoomStep);
-            else if (InputManager.IsKeyDown(_config.KeybindZoomOut))
+            else if (InputManager.IsKeyDown((int)_config.KeybindZoomOut))
                 ZoomOut(_config.ZoomStep);
 
             // Handle feature toggles with keybinds
-            if (InputManager.IsKeyPressed(_config.KeybindSpeedHack) && chkSpeedHack.Checked)
+            if (InputManager.IsKeyPressed((int)_config.KeybindSpeedHack) && chkSpeedHack.Checked)
             {
                 _config.SetSpeedHack = !_config.SetSpeedHack;
                 Memory._game?.SetSpeedHack(_config.SetSpeedHack);
                 Config.SaveConfig(_config);
                 UpdateStatusIndicator(lblStatusSpeedHack, _config.SetSpeedHack);
             }
-            if (InputManager.IsKeyPressed(_config.KeybindAirStuck) && chkAirStuck.Checked)
+            if (InputManager.IsKeyPressed((int)_config.KeybindAirStuck) && chkAirStuck.Checked)
             {
                 _config.SetAirStuck = !_config.SetAirStuck;
                 Memory._game?.SetAirStuck(_config.SetAirStuck);
@@ -402,7 +398,7 @@ namespace squad_dma
                     Memory._game?.DisableCollision(_config.DisableCollision);
                 }
             }
-            if (InputManager.IsKeyPressed(_config.KeybindHideActor) && chkHideActor.Checked)
+            if (InputManager.IsKeyPressed((int)_config.KeybindHideActor) && chkHideActor.Checked)
             {
                 _config.SetHideActor = !_config.SetHideActor;
                 Memory._game?.SetHideActor(_config.SetHideActor);
@@ -411,15 +407,15 @@ namespace squad_dma
             }
 
             // Handle other keybinds
-            if (InputManager.IsKeyPressed(_config.KeybindToggleEnemyDistance))
+            if (InputManager.IsKeyPressed((int)_config.KeybindToggleEnemyDistance))
             {
                 ToggleEnemyDistance();
             }
-            if (InputManager.IsKeyPressed(_config.KeybindToggleMap))
+            if (InputManager.IsKeyPressed((int)_config.KeybindToggleMap))
                 ToggleMap();
-            if (InputManager.IsKeyPressed(_config.KeybindToggleFullscreen))
+            if (InputManager.IsKeyPressed((int)_config.KeybindToggleFullscreen))
                 ToggleFullscreen(FormBorderStyle is FormBorderStyle.Sizable);
-            if (InputManager.IsKeyPressed(_config.KeybindDumpNames))
+            if (InputManager.IsKeyPressed((int)_config.KeybindDumpNames))
                 DumpNames();
         }
 
@@ -2006,7 +2002,6 @@ namespace squad_dma
         #endregion
         #endregion
         #endregion
-        #endregion
 
         private void grpMapSetup_Enter(object sender, EventArgs e)
         {
@@ -2020,7 +2015,9 @@ namespace squad_dma
         {
 
         }
+        #endregion
 
+        #region keybinds
         private void StartKeybindCapture(Button button)
         {
             if (_isWaitingForKey) return;
@@ -2120,3 +2117,4 @@ namespace squad_dma
         }
     }
 }
+#endregion
