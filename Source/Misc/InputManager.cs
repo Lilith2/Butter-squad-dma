@@ -21,7 +21,7 @@ namespace squad_dma
         private static int _initAttempts = 0;
         private const int MAX_ATTEMPTS = 3;
         private const int DELAY = 500;
-        private const int KEY_CHECK_DELAY = 100; // in milliseconds
+        private const int KEY_CHECK_DELAY = 100;
 
         private static int _currentBuild;
         private static int _updateBuildRevision;
@@ -47,7 +47,7 @@ namespace squad_dma
         public static void Initialize()
         {
             if (InputManager.InitKeyboard())
-                Program.Log("[InputManager] Initialized");
+                Program.Log("InputManager Initialized");
             else
                 Program.Log("ERROR Initializing Input Manager");
         }
@@ -94,7 +94,6 @@ namespace squad_dma
             {
                 if (module.sFullName.ToLower().Contains(moduleLower))
                 {
-                    Program.Log($"Found module: {module.sFullName}");
                     return module;
                 }
             }
@@ -104,7 +103,6 @@ namespace squad_dma
 
         private static bool InitKeyboardForNewWindows()
         {
-            Program.Log("Windows version > 22000, attempting signature-based approach");
 
             var csrssProcesses = _hVMM.Processes.Where(p => p.Name.Equals("csrss.exe", StringComparison.OrdinalIgnoreCase)).ToList();
 
