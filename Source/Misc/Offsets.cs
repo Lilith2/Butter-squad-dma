@@ -104,15 +104,14 @@
 
     public struct PlayerCameraManager
     {
+        public const uint PCOwner = 0x228;
         public const uint DefaultFOV = 0x240;
+        public const uint ViewTarget = 0xEA0;
     }
 
-    public struct Camera
+    public struct FTViewTarget
     {
-        public const uint PCOwner = 0x228;
-        public const uint CameraCache = 0x1AF0; // 0x10 = FMinimalViewInfo
-        public const uint CameraLocation = 0x1B00;
-        public const uint CameraRotation = 0x1B0C;
+        public const uint POV = 0x10; // FMinimalViewInfo
     }
 
     public struct ASQGameState
@@ -122,10 +121,11 @@
 
     public struct ASQPlayerState
     {
-        public const uint TeamID = 0x400; // per player
+        public const uint TeamID = 0x400; // int32
+        public const uint CurrentSeat = 0x750; // USQVehicleSeatComponent*
         public const uint SquadState = 0x760; // ASQSquadState*
-        public const uint PlayerStateData = 0x6D0;
         public const uint Soldier = 0x768; // ASQSoldier*
+        public const uint PlayerStateData = 0x6D0; // FPlayerStateDataObject
     }
 
     public struct ASQTeamState
@@ -160,8 +160,7 @@
         public const uint InventoryComponent = 0x2108; // USQPawnInventoryComponent*
         public const uint CurrentItemStaticInfo = 0x140; // USQItemStaticInfo*
         public const uint bUsableInMainBase = 0x5b0; // bool
-        public const uint SecondsOfSpawnProtection = 0x167c; // float
-        public const uint InvulnerableDelay = 0x1680; // float
+        public const uint bIsCameraRecoilActive = 0x2192; // bool
     }
 
     public struct USQPawnInventoryComponent
@@ -176,26 +175,16 @@
     public struct ASQWeapon
     {
         public const uint WeaponConfig = 0x620; // FSQWeaponData
+        public const uint CurrentFireMode = 0x740; // int32
     }
 
     public struct FSQWeaponData
     {
         public const uint bInfiniteAmmo = 0x0; // bool
         public const uint bInfiniteMags = 0x1; // bool
-        public const uint MaxMags = 0x4; // int32
-        public const uint RoundsPerMag = 0x8; // int32
-        public const uint bAllowRoundInChamber = 0xc; // bool
-        public const uint bAllowSingleLoad = 0xd; // bool
         public const uint FireModes = 0x10; // TArray<int32>
         public const uint TimeBetweenShots = 0x20; // float
         public const uint TimeBetweenSingleShots = 0x24; // float
-        public const uint bCanReloadWhenEquipping = 0x28; // bool
-        public const uint bCreateProjectileOnServer = 0x29; // bool
-        public const uint TacticalReloadDuration = 0x2c; // float
-        public const uint DryReloadDuration = 0x34; // float
-        public const uint TacticalReloadBipodDuration = 0x38; // float
-        public const uint ReloadDryBipodDuration = 0x3c; // float
-        public const uint MaxDamageToApply = 0x64; // float
     }
 
     public struct ASQEquipableItem
@@ -209,6 +198,21 @@
         public const uint UnequipDuration = 0x370; // float
         public const uint CachedEquipDuration = 0x448; // float
         public const uint CachedUnequipDuration = 0x44c; // float
+    }
+
+    public struct ASQGrenade
+    {
+        public const uint GrenadeConfig = 0x480; // FSQGrenadeData
+    }
+
+    public struct FSQGrenadeData
+    {
+        public const uint bInfiniteAmmo = 0x0; // bool
+        public const uint ThrowReadyTime = 0x14; // float
+        public const uint OverhandThrowTime = 0x18; // float
+        public const uint UnderhandThrowTime = 0x1c; // float
+        public const uint ReloadTime = 0x34; // float
+        public const uint EquipTime = 0x38; // float
     }
 
     public struct SQVehicle
@@ -240,6 +244,25 @@
         public const uint MaxFlySpeed = 0x198; // float
         public const uint MaxCustomMovementSpeed = 0x19c; // float
         public const uint MaxAcceleration = 0x1a0; // float
-        public const uint bCheatFlying = 0x388; // uint8
+    }
+
+    public struct USQWeaponStaticInfo
+    {
+        public const uint bRequiresManualBolt = 0xd31; // bool
+    }
+
+    public struct USQVehicleSeatComponent
+    {
+        public const uint SeatPawn = 0x270; // ASQVehicleSeat*
+    }
+
+    public struct ASQVehicleSeat
+    {
+        public const uint VehicleInventory = 0x3a8; // USQVehicleInventoryComponent*
+    }
+
+    public struct USQVehicleComponent
+    {
+        public const uint Health = 0x5e0; // float
     }
 }

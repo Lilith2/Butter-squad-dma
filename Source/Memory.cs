@@ -20,8 +20,7 @@ namespace squad_dma
         private static volatile bool _ready = false;
         private static Thread _workerThread;
         private static CancellationTokenSource _workerCancellationTokenSource;
-        private static uint _pid;
-        private static ulong _squadBase;
+        public static ulong _squadBase;
         public static Game _game;
         private static volatile int _ticks = 0;
         private static readonly Stopwatch _tickSw = new();

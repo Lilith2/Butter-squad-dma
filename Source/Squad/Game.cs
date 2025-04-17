@@ -24,13 +24,14 @@ namespace squad_dma
         private DateTime _lastTeamCheck = DateTime.MinValue;
         private const int TeamCheckInterval = 1000;
 
-        private Source.Squad.Manager _soldierManager;
+        public Source.Squad.Manager _soldierManager;
 
         private GameTickets _gameTickets;
         private PlayerStats _gameStats;
         private DebugVehicles _debugVehicles;
         private DebugTeam _debugTeam;
         private DebugSoldier _debugSoldier;
+        private ForceFullAuto _forceFullAuto;
         #endregion
 
         #region Properties
@@ -54,10 +55,6 @@ namespace squad_dma
         #endregion
 
         #region Public Methods
-        public void SetInstantSeatSwitch() => _debugVehicles?.SetInstantSeatSwitch();
-        public void LogVehicles(bool force = false) => _debugVehicles?.LogVehicles(force);
-        public void VehicleTeam() => _debugVehicles?.VehicleTeam();
-        public void LogTeamInfo() => _debugTeam?.LogTeamInfo();
         public void SetSuppression(bool enable) => _soldierManager?.SetSuppression(enable);
         public void SetInteractionDistances(bool enable) => _soldierManager?.SetInteractionDistances(enable);
         public void SetShootingInMainBase(bool enable) => _soldierManager?.SetShootingInMainBase(enable);
@@ -69,8 +66,15 @@ namespace squad_dma
         public void SetRapidFire(bool enable) => _soldierManager?.SetRapidFire(enable);
         public void SetInfiniteAmmo(bool enable) => _soldierManager?.SetInfiniteAmmo(enable);
         public void SetQuickSwap(bool enable) => _soldierManager?.SetQuickSwap(enable);
+        public void SetForceFullAuto(bool enable) => _forceFullAuto?.SetEnabled(enable);
+
+        public void SetInstantSeatSwitch() => _debugVehicles?.SetInstantSeatSwitch();
+        public void LogVehicles(bool force = false) => _debugVehicles?.LogVehicles(force);
+        public void VehicleTeam() => _debugVehicles?.VehicleTeam();
+        public void LogTeamInfo() => _debugTeam?.LogTeamInfo();
         public void ReadCurrentWeapons(bool includeOtherPlayers = false) => _debugSoldier?.ReadCurrentWeapons(includeOtherPlayers);
-        public void LogCurrentValues() => _debugSoldier?.LogCurrentValues();
+        public void ModifyGrenadeProperties() => _debugSoldier?.ModifyGrenadeProperties();
+
         public void WaitForGame()
         {
             while (true)
@@ -146,6 +150,7 @@ namespace squad_dma
             _debugVehicles = new DebugVehicles(_playerController, _inGame, _actors);
             _debugTeam = new DebugTeam(_inGame, _localUPlayer, _actors?.Actors);
             _debugSoldier = new DebugSoldier(_playerController, _inGame);
+            _forceFullAuto = new ForceFullAuto(_playerController, _inGame);
         }
 
         private bool TryExecute(Action action)
@@ -231,13 +236,13 @@ namespace squad_dma
                             return false;
 
                         int teamId = Memory.ReadValue<int>(playerState + Offsets.ASQPlayerState.TeamID);
-                        int squadId = Memory.ReadValue<int>(squadState + Offsets.ASQSquadState.SquadId);
-
-                        if (_localUPlayer.TeamID != teamId || _localUPlayer.SquadID != squadId)
+                                                
+                        if (squadState != 0)
                         {
-                            _localUPlayer.TeamID = teamId;
+                            int squadId = Memory.ReadValue<int>(squadState + Offsets.ASQSquadState.SquadId);
                             _localUPlayer.SquadID = squadId;
                         }
+                        _localUPlayer.TeamID = teamId;
                     }
                     catch { return false; }
                 }
@@ -258,12 +263,19 @@ namespace squad_dma
                 var cameraManagerRound = cameraInfoScatterMap.AddRound();
                 var cameraInfoRound = cameraInfoScatterMap.AddRound();
 
-                var cameraManagerPtr = cameraManagerRound.AddEntry<ulong>(0, 0, _playerController + Offsets.PlayerController.PlayerCameraManager);
+                var cameraManagerPtr = Memory.ReadPtr(_playerController + Offsets.PlayerController.PlayerCameraManager);
+                if (cameraManagerPtr == 0)
+                    return false;
+
+                var viewTargetPtr = cameraManagerPtr + Offsets.PlayerCameraManager.ViewTarget;
+                var povPtr = viewTargetPtr + Offsets.FTViewTarget.POV;
+
+                cameraManagerRound.AddEntry<ulong>(0, 0, _playerController + Offsets.PlayerController.PlayerCameraManager);
                 cameraManagerRound.AddEntry<int>(0, 11, _gameWorld + Offsets.World.WorldOrigin);
                 cameraManagerRound.AddEntry<int>(0, 12, _gameWorld + Offsets.World.WorldOrigin + 0x4);
                 cameraManagerRound.AddEntry<int>(0, 13, _gameWorld + Offsets.World.WorldOrigin + 0x8);
-                cameraInfoRound.AddEntry<Vector3>(0, 1, cameraManagerPtr, null, Offsets.Camera.CameraLocation);
-                cameraInfoRound.AddEntry<Vector3>(0, 2, cameraManagerPtr, null, Offsets.Camera.CameraRotation);
+                cameraInfoRound.AddEntry<Vector3>(0, 1, povPtr, null, 0x0); // Location
+                cameraInfoRound.AddEntry<Vector3>(0, 2, povPtr, null, 0xc); // Rotation
 
                 cameraInfoScatterMap.Execute();
 

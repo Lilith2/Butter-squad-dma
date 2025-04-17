@@ -65,6 +65,7 @@ namespace squad_dma
             chkRapidFire = new CheckBox();
             chkInfiniteAmmo = new CheckBox();
             chkQuickSwap = new CheckBox();
+            chkForceFullAuto = new CheckBox();
             grpKeybinds = new GroupBox();
             lblKeybindSpeedHack = new Label();
             btnKeybindSpeedHack = new Button();
@@ -121,9 +122,9 @@ namespace squad_dma
             chkShowEnemyDistance.Font = new Font("Segoe UI", 9F);
             chkShowEnemyDistance.Location = new Point(265, 50);
             chkShowEnemyDistance.Name = "chkShowEnemyDistance";
-            chkShowEnemyDistance.Size = new Size(165, 19);
+            chkShowEnemyDistance.Size = new Size(142, 19);
             chkShowEnemyDistance.TabIndex = 15;
-            chkShowEnemyDistance.Text = "Show Enemy Distance (F4)";
+            chkShowEnemyDistance.Text = "Show Enemy Distance";
             toolTip.SetToolTip(chkShowEnemyDistance, "Toggle display of enemy distance on the radar");
             chkShowEnemyDistance.UseVisualStyleBackColor = true;
             // 
@@ -134,7 +135,7 @@ namespace squad_dma
             btnDumpNames.Name = "btnDumpNames";
             btnDumpNames.Size = new Size(200, 30);
             btnDumpNames.TabIndex = 16;
-            btnDumpNames.Text = "Dump Names (F6)";
+            btnDumpNames.Text = "Dump Names";
             toolTip.SetToolTip(btnDumpNames, "Dump entity names in the game instance");
             btnDumpNames.UseVisualStyleBackColor = true;
             btnDumpNames.Click += btnDumpNames_Click;
@@ -208,7 +209,7 @@ namespace squad_dma
             btnToggleMap.Name = "btnToggleMap";
             btnToggleMap.Size = new Size(200, 30);
             btnToggleMap.TabIndex = 2;
-            btnToggleMap.Text = "Toggle Map (F5)";
+            btnToggleMap.Text = "Toggle Map";
             toolTip.SetToolTip(btnToggleMap, "Switch between available maps");
             btnToggleMap.UseVisualStyleBackColor = true;
             btnToggleMap.Click += btnToggleMap_Click;
@@ -351,7 +352,7 @@ namespace squad_dma
             lblTechMarkerScale.Font = new Font("Segoe UI", 9F);
             lblTechMarkerScale.Location = new Point(15, 160);
             lblTechMarkerScale.Name = "lblTechMarkerScale";
-            lblTechMarkerScale.Size = new Size(103, 15);
+            lblTechMarkerScale.Size = new Size(104, 15);
             lblTechMarkerScale.TabIndex = 18;
             lblTechMarkerScale.Text = "Vehicle/Tech Scale";
             // 
@@ -381,6 +382,7 @@ namespace squad_dma
             grpLocalSoldier.Controls.Add(chkRapidFire);
             grpLocalSoldier.Controls.Add(chkInfiniteAmmo);
             grpLocalSoldier.Controls.Add(chkQuickSwap);
+            grpLocalSoldier.Controls.Add(chkForceFullAuto);
             grpLocalSoldier.Location = new Point(15, 406);
             grpLocalSoldier.Name = "grpLocalSoldier";
             grpLocalSoldier.Size = new Size(500, 223);
@@ -498,6 +500,17 @@ namespace squad_dma
             chkQuickSwap.TabIndex = 9;
             chkQuickSwap.Text = "Quick Swap";
             chkQuickSwap.UseVisualStyleBackColor = true;
+            // 
+            // chkForceFullAuto
+            // 
+            chkForceFullAuto.AutoSize = true;
+            chkForceFullAuto.Location = new Point(210, 95);
+            chkForceFullAuto.Name = "chkForceFullAuto";
+            chkForceFullAuto.Size = new Size(106, 19);
+            chkForceFullAuto.TabIndex = 10;
+            chkForceFullAuto.Text = "Force Full Auto";
+            chkForceFullAuto.UseVisualStyleBackColor = true;
+            chkForceFullAuto.CheckedChanged += ChkForceFullAuto_CheckedChanged;
             // 
             // grpKeybinds
             // 
@@ -891,6 +904,7 @@ namespace squad_dma
         private CheckBox chkRapidFire;
         private CheckBox chkInfiniteAmmo;
         private CheckBox chkQuickSwap;
+        private CheckBox chkForceFullAuto;
         private GroupBox grpKeybinds;
         private Button btnKeybindSpeedHack;
         private Button btnKeybindAirStuck;
