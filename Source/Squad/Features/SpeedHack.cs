@@ -1,9 +1,13 @@
+using System;
 using Offsets;
+using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
     public class SpeedHack : Manager
     {
+        public const string NAME = "SpeedHack";
+        
         public bool _isSpeedHackEnabled = false;
         
         public SpeedHack(ulong playerController, bool inGame)
@@ -13,8 +17,14 @@ namespace squad_dma.Source.Squad.Features
         
         public void SetEnabled(bool enable)
         {
-            if (!IsLocalPlayerValid()) return;
+            if (!IsLocalPlayerValid())
+            {
+                Logger.Error($"[{NAME}] Cannot enable/disable speed hack - local player is not valid");
+                return;
+            }
+            
             _isSpeedHackEnabled = enable;
+            Logger.Debug($"[{NAME}] Speed hack {(enable ? "enabled" : "disabled")}");
             Apply();
         }
         
@@ -22,24 +32,38 @@ namespace squad_dma.Source.Squad.Features
         {
             try
             {
-                if (!IsLocalPlayerValid()) return;
+                if (!IsLocalPlayerValid())
+                {
+                    Logger.Error($"[{NAME}] Cannot apply speed hack - local player is not valid");
+                    return;
+                }
                 
                 UpdateCachedPointers();
                 ulong soldierActor = _cachedSoldierActor;
-                if (soldierActor == 0) return;
+                if (soldierActor == 0)
+                {
+                    Logger.Error($"[{NAME}] Cannot apply speed hack - soldier actor is not valid");
+                    return;
+                }
+
+                Logger.Debug($"[{NAME}] Found soldier actor at 0x{soldierActor:X}");
 
                 if (_isSpeedHackEnabled)
                 {
-                    Memory.WriteValue<float>(soldierActor + Actor.CustomTimeDilation, 4.0f);
+                    const float SPEED_MULTIPLIER = 4.0f;
+                    Memory.WriteValue<float>(soldierActor + Actor.CustomTimeDilation, SPEED_MULTIPLIER);
+                    Logger.Debug($"[{NAME}] Set time dilation to {SPEED_MULTIPLIER}x");
                 }
                 else
                 {
-                    Memory.WriteValue<float>(soldierActor + Actor.CustomTimeDilation, 1);
+                    const float NORMAL_SPEED = 1.0f;
+                    Memory.WriteValue<float>(soldierActor + Actor.CustomTimeDilation, NORMAL_SPEED);
+                    Logger.Debug($"[{NAME}] Restored normal time dilation");
                 }
             }
             catch (Exception ex)
             {
-                Program.Log($"Error setting time dilation: {ex.Message}");
+                Logger.Error($"[{NAME}] Error setting time dilation: {ex.Message}");
             }
         }
     }

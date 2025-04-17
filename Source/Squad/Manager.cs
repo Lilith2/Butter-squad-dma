@@ -24,7 +24,6 @@ namespace squad_dma.Source.Squad
         private SpeedHack _speedHack;
         private Collision _collision;
         private AirStuck _airStuck;
-        private HideActor _hideActor;
         private QuickZoom _quickZoom;
         private RapidFire _rapidFire;
         private InfiniteAmmo _infiniteAmmo;
@@ -108,7 +107,6 @@ namespace squad_dma.Source.Squad
             _speedHack = new SpeedHack(_playerController, _inGame);
             _collision = new Collision(_playerController, _inGame);
             _airStuck = new AirStuck(_playerController, _inGame, _collision);
-            _hideActor = new HideActor(_playerController, _inGame);
             _quickZoom = new QuickZoom(_playerController, _inGame);
             _rapidFire = new RapidFire(_playerController, _inGame);
             _infiniteAmmo = new InfiniteAmmo(_playerController, _inGame);
@@ -169,8 +167,6 @@ namespace squad_dma.Source.Squad
                         
                         if (_collision.IsCollisionDisabled)
                             _collision.Apply();
-                        if (_hideActor._isHideActorEnabled)
-                            _hideActor.Apply();
                         if (_rapidFire._isRapidFireEnabled)
                             _rapidFire.Apply();
                         if (_infiniteAmmo._isInfiniteAmmoEnabled)
@@ -227,10 +223,7 @@ namespace squad_dma.Source.Squad
             _quickZoom.SetEnabled(enable);
         }
         
-        public void SetHideActor(bool enable)
-        {
-            _hideActor.SetEnabled(enable);
-        }
+
         
         public void DisableCollision(bool disable)
         {

@@ -1,16 +1,41 @@
+using System;
 using Offsets;
+using squad_dma;
+using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
     public class AirStuck : Manager
     {
+        public const string NAME = "AirStuck";
+        
         public bool _isAirStuckEnabled = false;
         private Collision _collision;
+        
+        // Original values
+        private byte _originalMovementMode = 1; // MOVE_Walking
+        private byte _originalReplicatedMovementMode = 1; // MOVE_Walking
+        private byte _originalReplicateMovement = 16;
+        private float _originalMaxFlySpeed = 200.0f;
+        private float _originalMaxCustomMovementSpeed = 600.0f;
+        private float _originalMaxAcceleration = 500.0f;
         
         public AirStuck(ulong playerController, bool inGame, Collision collisionMod)
             : base(playerController, inGame)
         {
             _collision = collisionMod;
+            
+            // Load original values from config if they exist
+            if (Config.TryLoadConfig(out var config))
+            {
+                _originalMovementMode = config.OriginalMovementMode;
+                _originalReplicatedMovementMode = config.OriginalReplicatedMovementMode;
+                _originalReplicateMovement = config.OriginalReplicateMovement;
+                _originalMaxFlySpeed = config.OriginalMaxFlySpeed;
+                _originalMaxCustomMovementSpeed = config.OriginalMaxCustomMovementSpeed;
+                _originalMaxAcceleration = config.OriginalMaxAcceleration;
+                Logger.Debug($"[{NAME}] Loaded original values from config: MovementMode={_originalMovementMode}, ReplicatedMode={_originalReplicatedMovementMode}, ReplicateMovement={_originalReplicateMovement}");
+            }
         }
 
         private enum EMovementMode : byte
@@ -29,11 +54,13 @@ namespace squad_dma.Source.Squad.Features
         {
             if (!IsLocalPlayerValid()) return;
             _isAirStuckEnabled = enable;
+            Logger.Debug($"[{NAME}] Air Stuck {(enable ? "enabled" : "disabled")}");
             
             // Ensure collision is disabled when AirStuck is disabled
             if (!_isAirStuckEnabled && _collision.IsCollisionDisabled)
             {
                 _collision.SetEnabled(false);
+                Logger.Debug($"[{NAME}] Disabled collision with Air Stuck");
             }
             
             Apply();
@@ -54,26 +81,58 @@ namespace squad_dma.Source.Squad.Features
 
                 if (_isAirStuckEnabled)
                 {
+                    // Store original values if we don't have them cached
+                    if (_originalMovementMode == 1 && _originalReplicatedMovementMode == 1 && 
+                        _originalReplicateMovement == 16 && _originalMaxFlySpeed == 200.0f &&
+                        _originalMaxCustomMovementSpeed == 600.0f && _originalMaxAcceleration == 500.0f)
+                    {
+                        _originalMovementMode = Memory.ReadValue<byte>(characterMovement + CharacterMovementComponent.MovementMode);
+                        _originalReplicatedMovementMode = Memory.ReadValue<byte>(characterMovement + Character.ReplicatedMovementMode);
+                        _originalReplicateMovement = Memory.ReadValue<byte>(soldierActor + Actor.bReplicateMovement);
+                        _originalMaxFlySpeed = Memory.ReadValue<float>(characterMovement + CharacterMovementComponent.MaxFlySpeed);
+                        _originalMaxCustomMovementSpeed = Memory.ReadValue<float>(characterMovement + CharacterMovementComponent.MaxCustomMovementSpeed);
+                        _originalMaxAcceleration = Memory.ReadValue<float>(characterMovement + CharacterMovementComponent.MaxAcceleration);
+
+                        Logger.Debug($"[{NAME}] Stored original values: MovementMode={_originalMovementMode}, ReplicatedMode={_originalReplicatedMovementMode}, ReplicateMovement={_originalReplicateMovement}");
+
+                        // Save original values to config
+                        if (Config.TryLoadConfig(out var config))
+                        {
+                            config.OriginalMovementMode = _originalMovementMode;
+                            config.OriginalReplicatedMovementMode = _originalReplicatedMovementMode;
+                            config.OriginalReplicateMovement = _originalReplicateMovement;
+                            config.OriginalMaxFlySpeed = _originalMaxFlySpeed;
+                            config.OriginalMaxCustomMovementSpeed = _originalMaxCustomMovementSpeed;
+                            config.OriginalMaxAcceleration = _originalMaxAcceleration;
+                            Config.SaveConfig(config);
+                            Logger.Debug($"[{NAME}] Saved original values to config");
+                        }
+                    }
+
                     Memory.WriteValue<byte>(characterMovement + CharacterMovementComponent.MovementMode, (byte)EMovementMode.MOVE_Flying);
                     Memory.WriteValue<byte>(characterMovement + Character.ReplicatedMovementMode, (byte)EMovementMode.MOVE_Flying);
                     Memory.WriteValue<byte>(soldierActor + Actor.bReplicateMovement, 0);
                     Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxFlySpeed, 2000.0f);
                     Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxCustomMovementSpeed, 2000.0f);
                     Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxAcceleration, 2000.0f);
+                    
+                    Logger.Debug($"[{NAME}] Applied Air Stuck values: MovementMode=Flying, MaxSpeed=2000, MaxAcceleration=2000");
                 }
                 else
                 {
-                    Memory.WriteValue<byte>(characterMovement + CharacterMovementComponent.MovementMode, (byte)EMovementMode.MOVE_Walking);
-                    Memory.WriteValue<byte>(characterMovement + Character.ReplicatedMovementMode, (byte)EMovementMode.MOVE_Walking);
-                    Memory.WriteValue<byte>(soldierActor + Actor.bReplicateMovement, 16);
-                    Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxFlySpeed, 200);
-                    Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxCustomMovementSpeed, 600);
-                    Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxAcceleration, 500);
+                    Memory.WriteValue<byte>(characterMovement + CharacterMovementComponent.MovementMode, _originalMovementMode);
+                    Memory.WriteValue<byte>(characterMovement + Character.ReplicatedMovementMode, _originalReplicatedMovementMode);
+                    Memory.WriteValue<byte>(soldierActor + Actor.bReplicateMovement, _originalReplicateMovement);
+                    Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxFlySpeed, _originalMaxFlySpeed);
+                    Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxCustomMovementSpeed, _originalMaxCustomMovementSpeed);
+                    Memory.WriteValue<float>(characterMovement + CharacterMovementComponent.MaxAcceleration, _originalMaxAcceleration);
+                    
+                    Logger.Debug($"[{NAME}] Restored original values: MovementMode={_originalMovementMode}, MaxSpeed={_originalMaxFlySpeed}, MaxAcceleration={_originalMaxAcceleration}");
                 }
             }
             catch (Exception ex)
             {
-                Program.Log($"Error setting air stuck: {ex.Message}");
+                Logger.Error($"[{NAME}] Error setting air stuck: {ex.Message}");
             }
         }
     }

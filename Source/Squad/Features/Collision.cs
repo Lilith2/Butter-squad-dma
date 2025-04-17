@@ -1,35 +1,30 @@
+using System;
 using Offsets;
 using System.Security.AccessControl;
+using squad_dma;
+using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
     public class Collision : Manager
     {
-        private new bool _isCollisionDisabled = false;
+        public const string NAME = "Collision";
+        
+        public bool IsCollisionDisabled { get; private set; } = false;
         
         public Collision(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
         }
-        
-        public bool IsCollisionDisabled => _isCollisionDisabled;
 
-        private enum ECollisionEnabled : byte
-        {
-            NoCollision = 0, 
-            QueryOnly = 1, 
-            PhysicsOnly = 2, 
-            QueryAndPhysics = 3, 
-            ECollisionEnabled_MAX = 4
-        };
-
-        public void SetEnabled(bool disable)
+        public void SetEnabled(bool enable)
         {
             if (!IsLocalPlayerValid()) return;
-            _isCollisionDisabled = disable;
+            IsCollisionDisabled = enable;
+            Logger.Debug($"[{NAME}] Collision {(enable ? "disabled" : "enabled")}");
             Apply();
         }
-        
+
         public override void Apply()
         {
             try
@@ -45,20 +40,20 @@ namespace squad_dma.Source.Squad.Features
 
                 ulong bodyInstanceAddr = rootComponent + UPrimitiveComponent.BodyInstance;
                 
-                if (_isCollisionDisabled)
-                {                  
-                    // Set to NoCollision (0)
-                    Memory.WriteValue<byte>(bodyInstanceAddr + FBodyInstance.CollisionEnabled, 0);
+                if (IsCollisionDisabled)
+                {
+                    Memory.WriteValue<byte>(bodyInstanceAddr + FBodyInstance.CollisionEnabled, 0); // NoCollision
+                    Logger.Debug($"[{NAME}] Set collision to NoCollision (0)");
                 }
                 else
                 {
-                    // Set to QueryOnly (1)
-                    Memory.WriteValue<byte>(bodyInstanceAddr + FBodyInstance.CollisionEnabled, 1);
+                    Memory.WriteValue<byte>(bodyInstanceAddr + FBodyInstance.CollisionEnabled, 1); // QueryOnly
+                    Logger.Debug($"[{NAME}] Set collision to QueryOnly (1)");
                 }
             }
             catch (Exception ex)
             {
-                Program.Log($"Error {(_isCollisionDisabled ? "disabling" : "enabling")} collision: {ex.Message}");
+                Logger.Error($"[{NAME}] Error setting collision: {ex.Message}");
             }
         }
     }

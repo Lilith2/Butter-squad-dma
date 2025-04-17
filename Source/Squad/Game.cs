@@ -1,5 +1,6 @@
-﻿using squad_dma.Source.Squad.Features;
+﻿using squad_dma.Source.Misc;
 using squad_dma.Source.Squad.Debug;
+using squad_dma.Source.Squad.Features;
 using System.Collections.ObjectModel;
 using System.Numerics;
 
@@ -60,7 +61,6 @@ namespace squad_dma
         public void SetShootingInMainBase(bool enable) => _soldierManager?.SetShootingInMainBase(enable);
         public void SetSpeedHack(bool enable) => _soldierManager?.SetSpeedHack(enable);
         public void SetAirStuck(bool enable) => _soldierManager?.SetAirStuck(enable);
-        public void SetHideActor(bool enable) => _soldierManager?.SetHideActor(enable);
         public void DisableCollision(bool disable) => _soldierManager?.DisableCollision(disable);
         public void SetQuickZoom(bool enable) => _soldierManager?.SetQuickZoom(enable);
         public void SetRapidFire(bool enable) => _soldierManager?.SetRapidFire(enable);
@@ -94,7 +94,7 @@ namespace squad_dma
                         }
 
                         Thread.Sleep(1000);
-                        Program.Log("Game has started!!");
+                        Logger.Info("Game has started!!");
                         this._inGame = true;
                         Memory.GameStatus = GameStatus.InGame;
                         
@@ -165,13 +165,13 @@ namespace squad_dma
 
         private void HandleDMAShutdown()
         {
-            Program.Log("DMA shutdown");
+            Logger.Info("DMA shutdown");
             this._inGame = false;
         }
 
         private void HandleGameEnded(GameEnded e)
         {
-            Program.Log("Game has ended!");
+            Logger.Info("Game has ended!");
             this._inGame = false;
             Memory.GameStatus = GameStatus.Menu;
             Memory.Restart();
@@ -179,7 +179,7 @@ namespace squad_dma
 
         private void HandleUnexpectedException(Exception ex)
         {
-            Program.Log($"CRITICAL ERROR - Game ended due to unhandled exception: {ex}");
+            Logger.Error($"CRITICAL ERROR - Game ended due to unhandled exception: {ex}");
             this._inGame = false;
         }
 
@@ -196,7 +196,7 @@ namespace squad_dma
                 var currentLevelIdPtr = currentLayer + Offsets.SQLayer.LevelID;
                 var currentLevelId = Memory.ReadValue<uint>(currentLevelIdPtr);
                 _currentLevel = Memory.GetNamesById([currentLevelId])[currentLevelId];
-                Program.Log($"Current level is {_currentLevel}");
+                Logger.Info($"Current level is {_currentLevel}");
             });
 
         private bool InitActors() => 

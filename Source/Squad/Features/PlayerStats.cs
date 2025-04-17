@@ -1,5 +1,6 @@
 using System;
 using Offsets;
+using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
@@ -8,7 +9,10 @@ namespace squad_dma.Source.Squad.Features
     /// </summary>
     public class PlayerStats
     {
+        public const string NAME = "PlayerStats";
+        
         private readonly ulong _playerController;
+        private readonly ulong _gameState;
 
         /// <summary>
         /// Constructor for GameStats
@@ -35,7 +39,10 @@ namespace squad_dma.Source.Squad.Features
                     ptrScatter.Execute();
 
                     if (!ptrScatter.Results[0][0].TryGetResult<ulong>(out var playerState) || playerState == 0)
+                    {
+                        Logger.Error($"[{NAME}] Failed to get player state for kills");
                         return 0;
+                    }
 
                     var dataScatter = new ScatterReadMap(1);
                     var dataRound = dataScatter.AddRound();
@@ -48,13 +55,15 @@ namespace squad_dma.Source.Squad.Features
 
                     if (!dataScatter.Results[0][0].TryGetResult<int>(out var kills))
                     {
+                        Logger.Error($"[{NAME}] Failed to read kills value");
                         return 0;
                     }
 
                     return kills;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Logger.Error($"[{NAME}] Error getting player kills: {ex.Message}");
                     return 0;
                 }
             }
@@ -76,7 +85,10 @@ namespace squad_dma.Source.Squad.Features
                     ptrScatter.Execute();
 
                     if (!ptrScatter.Results[0][0].TryGetResult<ulong>(out var playerState) || playerState == 0)
+                    {
+                        Logger.Error($"[{NAME}] Failed to get player state for woundeds");
                         return 0;
+                    }
 
                     var dataScatter = new ScatterReadMap(1);
                     var dataRound = dataScatter.AddRound();
@@ -89,13 +101,15 @@ namespace squad_dma.Source.Squad.Features
 
                     if (!dataScatter.Results[0][0].TryGetResult<int>(out var woundeds))
                     {
+                        Logger.Error($"[{NAME}] Failed to read woundeds value");
                         return 0;
                     }
 
                     return woundeds;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Logger.Error($"[{NAME}] Error getting player woundeds: {ex.Message}");
                     return 0;
                 }
             }

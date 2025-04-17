@@ -2,6 +2,7 @@
 using MaterialSkin.Controls;
 using SkiaSharp;
 using SkiaSharp.Views.Desktop;
+using squad_dma.Source.Misc;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
@@ -160,7 +161,6 @@ namespace squad_dma
             chkSpeedHack.CheckedChanged += ChkSetTimeDilation_CheckedChanged;
             chkAirStuck.CheckedChanged += ChkAirStuck_CheckedChanged;
             chkDisableCollision.CheckedChanged += ChkDisableCollision_CheckedChanged;
-            chkHideActor.CheckedChanged += ChkHideActor_CheckedChanged;
             chkQuickZoom.CheckedChanged += ChkQuickZoom_CheckedChanged;
             chkRapidFire.CheckedChanged += ChkRapidFire_CheckedChanged;
             chkShowEnemyDistance.CheckedChanged += ChkShowEnemyDistance_CheckedChanged;
@@ -212,13 +212,6 @@ namespace squad_dma
                 }
                 
                 Config.SaveConfig(_config);
-                return true;
-            }
-            else if (keyData == _config.KeybindHideActor && chkHideActor.Checked)
-            {
-                _config.SetHideActor = !_config.SetHideActor;
-                Memory._game?.SetHideActor(_config.SetHideActor);
-                UpdateStatusIndicator(lblStatusHideActor, _config.SetHideActor);
                 return true;
             }
             else if (keyData == _config.KeybindToggleEnemyDistance)
@@ -281,7 +274,6 @@ namespace squad_dma
             // Only update status for specified keybinds
             if (statusLabel == lblStatusSpeedHack ||
                 statusLabel == lblStatusAirStuck ||
-                statusLabel == lblStatusHideActor ||
                 statusLabel == lblStatusToggleEnemyDistance)
             {
                 statusLabel.Text = isEnabled ? "ON" : "OFF";
@@ -309,9 +301,6 @@ namespace squad_dma
             chkDisableCollision.Enabled = _config.SetAirStuck; // Only enable if AirStuck is checked
             chkDisableCollision.CheckedChanged += ChkDisableCollision_CheckedChanged;
 
-            chkHideActor.Checked = _config.SetHideActor;
-            chkHideActor.CheckedChanged += ChkHideActor_CheckedChanged;
-
             chkQuickZoom.Checked = _config.QuickZoom;
             chkQuickZoom.CheckedChanged += ChkQuickZoom_CheckedChanged;
 
@@ -333,7 +322,6 @@ namespace squad_dma
             // Keybind buttons
             btnKeybindSpeedHack.Text = _config.KeybindSpeedHack == Keys.None ? "None" : _config.KeybindSpeedHack.ToString();
             btnKeybindAirStuck.Text = _config.KeybindAirStuck == Keys.None ? "None" : _config.KeybindAirStuck.ToString();
-            btnKeybindHideActor.Text = _config.KeybindHideActor == Keys.None ? "None" : _config.KeybindHideActor.ToString();
             btnKeybindQuickZoom.Text = _config.KeybindQuickZoom == Keys.None ? "None" : _config.KeybindQuickZoom.ToString();
             btnKeybindToggleEnemyDistance.Text = _config.KeybindToggleEnemyDistance == Keys.None ? "None" : _config.KeybindToggleEnemyDistance.ToString();
             btnKeybindToggleMap.Text = _config.KeybindToggleMap == Keys.None ? "None" : _config.KeybindToggleMap.ToString();
@@ -344,7 +332,6 @@ namespace squad_dma
 
             UpdateStatusIndicator(lblStatusSpeedHack, _config.SetSpeedHack);
             UpdateStatusIndicator(lblStatusAirStuck, _config.SetAirStuck);
-            UpdateStatusIndicator(lblStatusHideActor, _config.SetHideActor);
             UpdateStatusIndicator(lblStatusToggleEnemyDistance, _config.ShowEnemyDistance);
         }
 
@@ -399,13 +386,6 @@ namespace squad_dma
                     _config.DisableCollision = _config.SetAirStuck;
                     Memory._game?.DisableCollision(_config.DisableCollision);
                 }
-            }
-            if (InputManager.IsKeyPressed((int)_config.KeybindHideActor) && chkHideActor.Checked)
-            {
-                _config.SetHideActor = !_config.SetHideActor;
-                Memory._game?.SetHideActor(_config.SetHideActor);
-                Config.SaveConfig(_config);
-                UpdateStatusIndicator(lblStatusHideActor, _config.SetHideActor);
             }
 
             // Handle other keybinds
@@ -655,7 +635,7 @@ namespace squad_dma
             tabRadar.Text = $"Radar ({_maps[_mapSelectionIndex].Name})";
             _mapChangeTimer.Restart(); // Start delay
             ClearPointsOfInterest();
-            Program.Log("Toggled Map");
+            Logger.Info("Toggled Map");
 
             return true;
         }
@@ -730,7 +710,6 @@ namespace squad_dma
             chkAllowShootingInMainBase.Checked = _config.AllowShootingInMainBase;
             chkSpeedHack.Checked = _config.SetSpeedHack;
             chkAirStuck.Checked = _config.SetAirStuck;
-            chkHideActor.Checked = _config.SetHideActor;
             #endregion
 
             #endregion
@@ -910,9 +889,6 @@ namespace squad_dma
                             
                             if (_config.SetAirStuck)
                                 Memory._game.SetAirStuck(true);
-                            
-                            if (_config.SetHideActor)
-                                Memory._game.SetHideActor(true);
                                 
                             if (_config.RapidFire)
                                 Memory._game.SetRapidFire(true);
@@ -1027,7 +1003,7 @@ namespace squad_dma
                 }
                 else
                 {
-                    Program.Log($"Map Error: Current map '{currentMap}' is not configured. Please add this map name to the corresponding map configuration file.");
+                    Logger.Error($"Map Error: Current map '{currentMap}' is not configured. Please add this map name to the corresponding map configuration file.");
                 }
             }
         }
@@ -1978,18 +1954,6 @@ namespace squad_dma
             Config.SaveConfig(_config);
         }
 
-        private void ChkHideActor_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!InGame) return;
-            if (!chkHideActor.Checked)
-            {
-                _config.SetHideActor = false;
-                Memory._game?.SetHideActor(false);
-                UpdateStatusIndicator(lblStatusHideActor, false);
-            }
-            Config.SaveConfig(_config);
-        }
-
         private void ChkQuickZoom_CheckedChanged(object sender, EventArgs e)
         {
             _config.QuickZoom = chkQuickZoom.Checked;
@@ -2079,10 +2043,6 @@ namespace squad_dma
             {
                 _config.KeybindAirStuck = key;
             }
-            else if (_currentKeybindButton == btnKeybindHideActor)
-            {
-                _config.KeybindHideActor = key;
-            }
             else if (_currentKeybindButton == btnKeybindQuickZoom)
             {
                 _config.KeybindQuickZoom = key;
@@ -2115,10 +2075,6 @@ namespace squad_dma
             StartKeybindCapture(btnKeybindAirStuck);
         }
 
-        private void BtnKeybindHideActor_Click(object sender, EventArgs e)
-        {
-            StartKeybindCapture(btnKeybindHideActor);
-        }
 
         private void BtnKeybindToggleEnemyDistance_Click(object sender, EventArgs e)
         {

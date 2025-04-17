@@ -10,8 +10,13 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Platforms>x64</Platforms>
 		<DebugType>embedded</DebugType>
+		<DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<DefineConstants>RELEASE</DefineConstants>
+		<OutputType>WinExe</OutputType>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<Content Include="dbghelp.dll">

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Offsets;
+using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
@@ -9,6 +10,8 @@ namespace squad_dma.Source.Squad.Features
     /// </summary>
     public class GameTickets
     {
+        public const string NAME = "GameTickets";
+        
         private readonly ulong _gameWorld;
         private readonly UActor _localUPlayer;
 
@@ -35,7 +38,10 @@ namespace squad_dma.Source.Squad.Features
             { 
                 ulong gameState = Memory.ReadPtr(_gameWorld + World.GameState);
                 if (gameState == 0)
+                {
+                    Logger.Error($"[{NAME}] Failed to get game state for tickets");
                     return teamTickets;
+                }
 
                 var scatterMap = new ScatterReadMap(1);
                 var round = scatterMap.AddRound();
@@ -46,9 +52,15 @@ namespace squad_dma.Source.Squad.Features
                 scatterMap.Execute();
 
                 if (!scatterMap.Results[0][0].TryGetResult<ulong>(out var teamStatesArray) || teamStatesArray == 0)
+                {
+                    Logger.Error($"[{NAME}] Failed to get team states array for tickets");
                     return teamTickets;
+                }
                 if (!scatterMap.Results[0][1].TryGetResult<int>(out var teamCount) || teamCount < 2)
+                {
+                    Logger.Error($"[{NAME}] Invalid team count for tickets: {teamCount}");
                     return teamTickets;
+                }
 
                 var teamScatter = new ScatterReadMap(2);
                 var teamRound = teamScatter.AddRound();
@@ -64,6 +76,10 @@ namespace squad_dma.Source.Squad.Features
                     int team1Tickets = Memory.ReadValue<int>(team1 + ASQTeamState.Tickets);
                     teamTickets[team1Id] = team1Tickets;
                 }
+                else
+                {
+                    Logger.Error($"[{NAME}] Failed to get team 1 state for tickets");
+                }
 
                 if (teamScatter.Results[1][1].TryGetResult<ulong>(out var team2) && team2 != 0)
                 {
@@ -71,8 +87,15 @@ namespace squad_dma.Source.Squad.Features
                     int team2Tickets = Memory.ReadValue<int>(team2 + ASQTeamState.Tickets);
                     teamTickets[team2Id] = team2Tickets;
                 }
+                else
+                {
+                    Logger.Error($"[{NAME}] Failed to get team 2 state for tickets");
+                }
             }
-            catch { /* Silently fail */ }
+            catch (Exception ex)
+            {
+                Logger.Error($"[{NAME}] Error getting team tickets: {ex.Message}");
+            }
 
             return teamTickets;
         }
@@ -84,13 +107,29 @@ namespace squad_dma.Source.Squad.Features
         {
             get
             {
-                var tickets = GetTickets();
-                int localTeamId = _localUPlayer?.TeamID ?? -1;
-                
-                if (tickets.Count == 0 || localTeamId == -1)
+                try
+                {
+                    var tickets = GetTickets();
+                    int localTeamId = _localUPlayer?.TeamID ?? -1;
+                    
+                    if (tickets.Count == 0)
+                    {
+                        Logger.Error($"[{NAME}] No team tickets found for friendly team");
+                        return 0;
+                    }
+                    if (localTeamId == -1)
+                    {
+                        Logger.Error($"[{NAME}] Invalid local team ID for friendly tickets");
+                        return 0;
+                    }
+                    
+                    return tickets.TryGetValue(localTeamId, out int friendlyTickets) ? friendlyTickets : 0;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"[{NAME}] Error getting friendly tickets: {ex.Message}");
                     return 0;
-                
-                return tickets.TryGetValue(localTeamId, out int friendlyTickets) ? friendlyTickets : 0;
+                }
             }
         }
         
@@ -101,19 +140,36 @@ namespace squad_dma.Source.Squad.Features
         {
             get
             {
-                var tickets = GetTickets();
-                int localTeamId = _localUPlayer?.TeamID ?? -1;
-                
-                if (tickets.Count == 0 || localTeamId == -1)
-                    return 0;
-                
-                foreach (var team in tickets)
+                try
                 {
-                    if (team.Key != localTeamId)
-                        return team.Value;
+                    var tickets = GetTickets();
+                    int localTeamId = _localUPlayer?.TeamID ?? -1;
+                    
+                    if (tickets.Count == 0)
+                    {
+                        Logger.Error($"[{NAME}] No team tickets found for enemy team");
+                        return 0;
+                    }
+                    if (localTeamId == -1)
+                    {
+                        Logger.Error($"[{NAME}] Invalid local team ID for enemy tickets");
+                        return 0;
+                    }
+                    
+                    foreach (var team in tickets)
+                    {
+                        if (team.Key != localTeamId)
+                            return team.Value;
+                    }
+                    
+                    Logger.Error($"[{NAME}] No enemy team found in tickets");
+                    return 0;
                 }
-                
-                return 0;
+                catch (Exception ex)
+                {
+                    Logger.Error($"[{NAME}] Error getting enemy tickets: {ex.Message}");
+                    return 0;
+                }
             }
         }
     }

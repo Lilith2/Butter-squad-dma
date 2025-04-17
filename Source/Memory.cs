@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using squad_dma.Source.Misc;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -73,19 +74,19 @@ namespace squad_dma
         {
             try
             {
-                Program.Log($"Startup sequence initializing");
+                Logger.Info($"Startup sequence initializing");
 
                 if (!File.Exists("mmap.txt"))
                 {
-                    Program.Log($"Memory map not found - generating new map");
+                    Logger.Error($"Memory map not found - generating new map");
                     GenerateMMap();
-                    Program.Log($"Memory map generation completed");
+                    Logger.Info($"Memory map generation completed");
                 }
                 else
                 {
-                    Program.Log($"Existing memory map found - loading");
+                    Logger.Info($"Existing memory map found - loading");
                     vmmInstance = new Vmm("-device", "fpga", "-memmap", "mmap.txt");
-                    Program.Log($"Memory map loaded successfully");
+                    Logger.Info($"Memory map loaded successfully");
                 }
 
                 InitiateMemoryWorker();
@@ -94,7 +95,7 @@ namespace squad_dma
             {
                 try
                 {
-                    Program.Log("attempting to regenerate mmap...");
+                    Logger.Info("attempting to regenerate mmap...");
 
                     if (File.Exists("mmap.txt"))
                         File.Delete("mmap.txt");
@@ -112,7 +113,7 @@ namespace squad_dma
 
         private static void InitiateMemoryWorker()
         {
-            Program.Log("Starting Memory worker thread...");
+            Logger.Info("Starting Memory worker thread...");
             Memory.StartMemoryWorker();
             Program.HideConsole();
             Memory._tickSw.Start();
@@ -163,7 +164,7 @@ namespace squad_dma
                     throw new DMAException("Unable to obtain PID. Game is not running.");
                 else
                 {
-                    //Program.Log($"SquadGame.exe is running at PID {_process.PID}");
+                    //Logger.Info($"SquadGame.exe is running at PID {_process.PID}");
                     return true;
                 }
             }
@@ -186,7 +187,7 @@ namespace squad_dma
                 if (_squadBase == 0) throw new DMAException("Unable to obtain Base Module Address. Game may not be running");
                 // else
                 // {
-                //     Program.Log($"Found SquadGame.exe at 0x{_squadBase.ToString("x")}");
+                //     Logger.Info($"Found SquadGame.exe at 0x{_squadBase.ToString("x")}");
                 //     return true;
                 // }
                 return true;
@@ -249,7 +250,7 @@ namespace squad_dma
                 catch { }
 
             }
-            Program.Log("[Memory] Refresh thread stopped.");
+            Logger.Info("[Memory] Refresh thread stopped.");
         }
 
         private static bool VerifyRunningProcess()
@@ -258,7 +259,7 @@ namespace squad_dma
             {
                 if (!GetPid() || !GetModuleBase())
                 {
-                    Program.Log("Process or module base no longer available!");
+                    Logger.Error("Process or module base no longer available!");
                     return false;
                 }
 
@@ -271,7 +272,7 @@ namespace squad_dma
                 if (!scatterMap.Results[0][0].TryGetResult<string>(out var moduleHeader) ||
                     !moduleHeader.StartsWith("MZ"))
                 {
-                    Program.Log("Module header verification failed - game may have terminated!");
+                    Logger.Error("Module header verification failed - game may have terminated!");
                     return false;
                 }
 
@@ -279,7 +280,7 @@ namespace squad_dma
             }
             catch (Exception ex)
             {
-                Program.Log($"Process verification error: {ex.Message}");
+                Logger.Error($"Process verification error: {ex.Message}");
                 return false;
             }
         }
@@ -293,17 +294,19 @@ namespace squad_dma
             {
                 while (true)
                 {
-                    Program.Log("Attempting to find Squad Process...");
+                    Logger.Info("Attempting to find Squad Process...");
                     
                     while (!Memory.GetPid() || !Memory.GetModuleBase())
                     {
                         Memory.GameStatus = GameStatus.NotFound;
                         _syncProcessRunning.Reset();
-                        Program.Log("Squad not found, checking again in 1 second...");
+                        // Clear cached values when game is lost
+                        Config.ClearAndSaveCaches();
+                        Logger.Error("Squad not found, checking again in 1 second...");
                         Thread.Sleep(1000);
                     }
 
-                    Program.Log("Squad process located! Startup successful.");
+                    Logger.Info("Squad process located! Startup successful.");
                     _syncProcessRunning.Set();
                     _processCheckTimer.Restart();
 
@@ -312,7 +315,7 @@ namespace squad_dma
                         Memory._game = new Game(Memory._squadBase);
                         try
                         {
-                            Program.Log("Ready -- Waiting for game...");
+                            Logger.Info("Ready -- Waiting for game...");
                             Memory.GameStatus = GameStatus.Menu;
                             Memory._ready = true;
                             Memory._game.WaitForGame();
@@ -323,7 +326,7 @@ namespace squad_dma
                                 {
                                     if (!VerifyRunningProcess())
                                     {
-                                        Program.Log("Game process verification failed!");
+                                        Logger.Error("Game process verification failed!");
                                         throw new GameNotRunningException();
                                     }
                                     _processCheckTimer.Restart();
@@ -344,7 +347,7 @@ namespace squad_dma
                         catch (DMAShutdown) { throw; }
                         catch (Exception ex)
                         {
-                            Program.Log($"Game loop error: {ex.Message}");
+                            Logger.Error($"Game loop error: {ex.Message}");
                         }
                         finally
                         {
@@ -352,7 +355,7 @@ namespace squad_dma
                             Thread.Sleep(100);
                         }
                     }
-                    Program.Log("Game is no longer running! Attempting to restart...");
+                    Logger.Error("Game is no longer running! Attempting to restart...");
                 }
             }
             catch (ThreadInterruptedException) { }
@@ -363,9 +366,9 @@ namespace squad_dma
             }
             finally
             {
-                Program.Log("Uninitializing DMA Device...");
+                Logger.Info("Uninitializing DMA Device...");
                 Memory.vmmInstance.Dispose();
-                Program.Log("Memory Thread closing down gracefully...");
+                Logger.Info("Memory Thread closing down gracefully...");
             }
         }
         #endregion
@@ -652,7 +655,7 @@ namespace squad_dma
 
                     if (!success)
                     {
-                        Program.Log($"Failed to prepare scatter write for address: {entry.Address}");
+                        Logger.Error($"Failed to prepare scatter write for address: {entry.Address}");
                         continue;
                     }
                 }
@@ -713,11 +716,11 @@ namespace squad_dma
             }
             catch (VmmException ex)
             {
-                Program.Log($"[DMA] Error in FindSignature: {ex.Message}");
+                Logger.Error($"[DMA] Error in FindSignature: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Program.Log($"[DMA] Error in FindSignature: {ex.Message}");
+                Logger.Error($"[DMA] Error in FindSignature: {ex.Message}");
             }
 
             return 0;
@@ -749,7 +752,7 @@ namespace squad_dma
         private static void HandleRestart()
         {
             Memory.GameStatus = GameStatus.Menu;
-            Program.Log("Restarting game... getting fresh GameWorld instance");
+            Logger.Info("Restarting game... getting fresh GameWorld instance");
             Memory._restart = false;
         }
         /// <summary>
@@ -759,9 +762,11 @@ namespace squad_dma
         {
             if (_running)
             {
-                Program.Log("Closing down Memory Thread...");
+                Logger.Info("Closing down Memory Thread...");
                 _running = false;
                 Memory.StopMemoryWorker();
+                // Clear caches when shutting down
+                Config.ClearAndSaveCaches();
             }
         }
 

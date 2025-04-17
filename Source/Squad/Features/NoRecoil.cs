@@ -1,5 +1,6 @@
-using Offsets;
-/*
+/*using Offsets;
+using squad_dma.Source.Misc;
+
 namespace squad_dma.Source.Squad.Features
 {
     public class NoRecoil : Manager
@@ -101,12 +102,19 @@ namespace squad_dma.Source.Squad.Features
         public NoRecoil(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
+            Logger.Debug($"NoRecoil initialized with playerController: 0x{playerController:X}, inGame: {inGame}");
         }
 
         public void SetEnabled(bool enable)
         {
-            if (!IsLocalPlayerValid()) return;
+            if (!IsLocalPlayerValid())
+            {
+                Logger.Error("Cannot enable/disable no recoil - local player is not valid");
+                return;
+            }
+            
             _isNoRecoilEnabled = enable;
+            Logger.Debug($"No recoil {(enable ? "enabled" : "disabled")}");
             Apply();
         }
 
@@ -114,31 +122,60 @@ namespace squad_dma.Source.Squad.Features
         {
             try
             {
-                if (!IsLocalPlayerValid()) return;
+                if (!IsLocalPlayerValid())
+                {
+                    Logger.Error("Cannot apply no recoil - local player is not valid");
+                    return;
+                }
 
-                Program.Log($"=== {'ENABLING' if _isNoRecoilEnabled else 'DISABLING'} NO RECOIL ===");
+                Logger.Debug($"=== {'ENABLING' if _isNoRecoilEnabled else 'DISABLING'} NO RECOIL ===");
 
                 // Get soldier actor
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0) return;
+                if (playerState == 0)
+                {
+                    Logger.Error("Cannot apply no recoil - player state is not valid");
+                    return;
+                }
 
                 ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
-                if (soldierActor == 0) return;
+                if (soldierActor == 0)
+                {
+                    Logger.Error("Cannot apply no recoil - soldier actor is not valid");
+                    return;
+                }
 
                 // Get anim instance
                 ulong animInstance = Memory.ReadPtr(soldierActor + ASQSoldier.CachedAnimInstance1p);
-                if (animInstance == 0) return;
+                if (animInstance == 0)
+                {
+                    Logger.Error("Cannot apply no recoil - animation instance is not valid");
+                    return;
+                }
 
                 // Get current weapon
                 ulong inventoryComponent = Memory.ReadPtr(soldierActor + ASQSoldier.InventoryComponent);
-                if (inventoryComponent == 0) return;
+                if (inventoryComponent == 0)
+                {
+                    Logger.Error("Cannot apply no recoil - inventory component is not valid");
+                    return;
+                }
 
                 ulong currentWeapon = Memory.ReadPtr(inventoryComponent + USQPawnInventoryComponent.CurrentWeapon);
-                if (currentWeapon == 0) return;
+                if (currentWeapon == 0)
+                {
+                    Logger.Error("Cannot apply no recoil - current weapon is not valid");
+                    return;
+                }
 
                 ulong weaponStaticInfo = Memory.ReadPtr(currentWeapon + ASQEquipableItem.ItemStaticInfo);
-                if (weaponStaticInfo == 0) return;
+                if (weaponStaticInfo == 0)
+                {
+                    Logger.Error("Cannot apply no recoil - weapon static info is not valid");
+                    return;
+                }
 
+                Logger.Debug($"Applying no recoil to anim instance at 0x{animInstance:X}");
                 // Apply no recoil to anim instance
                 foreach (var entry in _noRecoilAnimEntries)
                 {
@@ -149,6 +186,7 @@ namespace squad_dma.Source.Squad.Features
                     }
                 }
 
+                Logger.Debug($"Applying no recoil to weapon static info at 0x{weaponStaticInfo:X}");
                 // Apply no recoil to weapon static info
                 foreach (var entry in _noRecoilWeaponEntries)
                 {
@@ -161,14 +199,15 @@ namespace squad_dma.Source.Squad.Features
 
                 // Disable camera recoil
                 Memory.WriteValue(soldierActor + ASQSoldier.bIsCameraRecoilActive, !_isNoRecoilEnabled);
+                Logger.Debug($"Camera recoil {( _isNoRecoilEnabled ? "disabled" : "enabled")}");
 
-                Program.Log($"Successfully {'enabled' if _isNoRecoilEnabled else 'disabled'} no recoil");
-                Program.Log("=============================");
+                Logger.Debug($"Successfully {'enabled' if _isNoRecoilEnabled else 'disabled'} no recoil");
+                Logger.Debug("=============================");
             }
             catch (Exception ex)
             {
-                Program.Log($"Error setting no recoil: {ex.Message}");
+                Logger.Error($"Error setting no recoil: {ex.Message}");
             }
         }
     }
-} */
+}*/

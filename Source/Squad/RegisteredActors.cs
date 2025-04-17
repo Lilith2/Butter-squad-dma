@@ -1,4 +1,5 @@
 ﻿using Offsets;
+using squad_dma.Source.Misc;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
@@ -49,7 +50,7 @@ namespace squad_dma
                     }
                     catch (Exception ex) when (attempt < maxAttempts - 1)
                     {
-                        Program.Log($"ERROR - PlayerCount attempt {attempt + 1} failed: {ex}");
+                        Logger.Error($"PlayerCount attempt {attempt + 1} failed: {ex}");
                         Thread.Sleep(1000);
                     }
                 }
@@ -166,10 +167,10 @@ namespace squad_dma
                     }
                     if (_actors.TryGetValue(actorAddr, out var actor)) {
                         if (actor.ErrorCount > 50) {
-                            Program.Log($"Existing player '{actor.Base}' being reallocated due to excessive errors...");
+                            Logger.Error($"Existing player '{actor.Base}' being reallocated due to excessive errors...");
                             reallocateActor(actorAddr, team, actorType, nameId);
                         } else if (actor.Base != actorAddr) {
-                            Program.Log($"Existing player '{actor.Base}' being reallocated due to new base address...");
+                            Logger.Error($"Existing player '{actor.Base}' being reallocated due to new base address...");
                             reallocateActor(actorAddr, team, actorType, nameId);
                         }
                     } else {
@@ -193,7 +194,7 @@ namespace squad_dma
             }
             catch (Exception ex)
             {
-                Program.Log($"CRITICAL ERROR - RegisteredActors Loop FAILED: {ex}");
+                Logger.Error($"CRITICAL ERROR - RegisteredActors Loop FAILED: {ex}");
             }
             finally
             {
@@ -396,7 +397,7 @@ namespace squad_dma
             }
             catch (Exception ex)
             {
-                Program.Log($"CRITICAL ERROR - UpdateAllPlayers Loop FAILED: {ex}");
+                Logger.Error($"UpdateAllPlayers Loop FAILED: {ex}");
             }
         }
         #endregion

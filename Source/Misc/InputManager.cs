@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using squad_dma.Source.Misc;
+using System.Collections.Concurrent;
 using System.Text;
 using Vmmsharp;
 
@@ -47,9 +48,9 @@ namespace squad_dma
         public static void Initialize()
         {
             if (InputManager.InitKeyboard())
-                Program.Log("InputManager Initialized");
+                Logger.Info("InputManager Initialized");
             else
-                Program.Log("ERROR Initializing Input Manager");
+                Logger.Info("ERROR Initializing Input Manager");
         }
 
         private static bool InitKeyboard()
@@ -70,7 +71,7 @@ namespace squad_dma
 
                 if (_winLogon == null)
                 {
-                    Program.Log("Winlogon process not found");
+                    Logger.Error("Winlogon process not found");
                     _initAttempts++;
                     return false;
                 }
@@ -79,7 +80,7 @@ namespace squad_dma
             }
             catch (Exception ex)
             {
-                Program.Log($"Error initializing keyboard: {ex.Message}\n{ex.StackTrace}");
+                Logger.Error($"Error initializing keyboard: {ex.Message}\n{ex.StackTrace}");
                 _initAttempts++;
                 return false;
             }
@@ -132,12 +133,12 @@ namespace squad_dma
                 }
                 catch (Exception ex)
                 {
-                    Program.Log($"KEYBOARD ERR: {ex.Message}\n{ex.StackTrace}");
+                    Logger.Error($"KEYBOARD ERR: {ex.Message}\n{ex.StackTrace}");
                 }
             }
 
             _initAttempts++;
-            Program.Log("Failed to initialize keyboard handler for new Windows version");
+            Logger.Error("Failed to initialize keyboard handler for new Windows version");
             return false;
         }
 
@@ -164,7 +165,7 @@ namespace squad_dma
                 return true;
             }
 
-            Program.Log("Failed to get module win32k info");
+            Logger.Error("Failed to get module win32k info");
             return false;
         }
 
@@ -179,7 +180,7 @@ namespace squad_dma
                 gSessionPtr = Memory.FindSignature("48 8B 05 ? ? ? ? FF C9", baseAddr, baseAddr + size, process);
                 if (gSessionPtr == 0)
                 {
-                    Program.Log("Failed to find g_session_global_slots");
+                    Logger.Error("Failed to find g_session_global_slots");
                     return false;
                 }
             }
@@ -188,7 +189,7 @@ namespace squad_dma
 
             if (relativeOffsetResult.Value == 0)
             {
-                Program.Log("Failed to read relative offset");
+                Logger.Error("Failed to read relative offset");
                 return false;
             }
 
@@ -232,7 +233,7 @@ namespace squad_dma
 
             if (win32kbaseBase == 0)
             {
-                Program.Log("Failed to get module win32kbase info");
+                Logger.Error("Failed to get module win32kbase info");
                 return false;
             }
 
@@ -247,7 +248,7 @@ namespace squad_dma
 
             if (ptr == 0)
             {
-                Program.Log("Failed to find offset for gafAsyncKeyStateExport");
+                Logger.Error("Failed to find offset for gafAsyncKeyStateExport");
                 return false;
             }
 
@@ -255,7 +256,7 @@ namespace squad_dma
 
             if (offsetResult.Value == 0)
             {
-                Program.Log("Failed to read session offset");
+                Logger.Error("Failed to read session offset");
                 return false;
             }
 
@@ -266,7 +267,7 @@ namespace squad_dma
 
         private static bool InitKeyboardForOldWindows()
         {
-            Program.Log("Older Windows version detected, attempting to resolve via EAT");
+            Logger.Info("Older Windows version detected, attempting to resolve via EAT");
 
             var exports = _winLogon.MapModuleEAT("win32kbase.sys");
             var gafAsyncKeyStateExport = exports.FirstOrDefault(e => e.sFunction == "gafAsyncKeyState");
@@ -275,11 +276,11 @@ namespace squad_dma
             {
                 _gafAsyncKeyStateExport = gafAsyncKeyStateExport.vaFunction;
                 _initialized = true;
-                Program.Log("Resolved export via EAT");
+                Logger.Info("Resolved export via EAT");
                 return true;
             }
 
-            Program.Log("Failed to resolve via EAT, attempting to resolve with PDB");
+            Logger.Error("Failed to resolve via EAT, attempting to resolve with PDB");
 
             var pdb = _winLogon.Pdb("win32kbase.sys");
 
@@ -289,12 +290,12 @@ namespace squad_dma
                 {
                     _gafAsyncKeyStateExport = gafAsyncKeyState;
                     _initialized = true;
-                    Program.Log("Resolved export via PDB");
+                    Logger.Info("Resolved export via PDB");
                     return true;
                 }
             }
 
-            Program.Log("Failed to find export");
+            Logger.Error("Failed to find export");
             return false;
         }
 
@@ -406,7 +407,7 @@ namespace squad_dma
         /// </summary>
         private static void Worker()
         {
-            Program.Log("InputManager thread starting...");
+            Logger.Info("InputManager thread starting...");
             while (true)
             {
                 try
