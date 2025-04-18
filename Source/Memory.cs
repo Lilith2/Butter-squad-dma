@@ -803,6 +803,21 @@ namespace squad_dma
         {
             return (uint)(va & (PAGE_SIZE - 1));
         }
+
+        public static string GetActorClassName(ulong actorPtr)
+        {
+            try
+            {
+                var id = ReadValue<uint>(actorPtr + Offsets.Actor.ID);
+                var names = GetNamesById(new uint[] { id }.ToList());
+                return names.ContainsKey(id) ? names[id] : "Unknown";
+            }
+            catch (Exception ex)
+            {
+                Program.Log($"Error retrieving Actor name : {ex.Message}");
+                return "Unknown";
+            }
+        }
         #endregion
     }
 

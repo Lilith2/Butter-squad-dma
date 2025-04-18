@@ -1014,6 +1014,37 @@ namespace squad_dma {
             ActorType.Mine,
             ActorType.RallyPoint
         ];
+
+        public static readonly HashSet<ActorType> Vehicles = [
+            ActorType.TruckTransport,
+            ActorType.TruckLogistics,
+            ActorType.TruckAntiAir,
+            ActorType.TruckArtillery,
+            ActorType.TruckTransportArmed,
+            ActorType.JeepTransport,
+            ActorType.JeepLogistics,
+            ActorType.JeepTurret,
+            ActorType.JeepArtillery,
+            ActorType.JeepAntitank,
+            ActorType.JeepRWSTurret,
+            ActorType.APC,
+            ActorType.IFV,
+            ActorType.TrackedAPC,
+            ActorType.TrackedIFV,
+            ActorType.TrackedJeep,
+            ActorType.Tank,
+            ActorType.TankMGS,
+            ActorType.TransportHelicopter,
+            ActorType.AttackHelicopter,
+            ActorType.Boat,
+            ActorType.BoatLogistics,
+            ActorType.Motorcycle,
+            ActorType.AntiAir,
+            ActorType.TrackedLogistics,
+            ActorType.LoachCAS,
+            ActorType.LoachScout,
+            ActorType.TrackedAPCArtillery
+        ];
     }
     
 }

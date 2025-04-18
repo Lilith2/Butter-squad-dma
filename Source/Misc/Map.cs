@@ -205,7 +205,6 @@ namespace squad_dma
                 scale *= 1.5f; // Enlarge
             }
 
-            // Apply tech marker scale from config
             scale *= TechScale;
 
             if (!Names.BitMaps.TryGetValue(actor.ActorType, out SKBitmap skBitMap))
@@ -230,9 +229,47 @@ namespace squad_dma
             matrix = SKMatrix.Concat(matrix, SKMatrix.CreateRotationDegrees(rotation));
             matrix = SKMatrix.Concat(matrix, SKMatrix.CreateTranslation(-iconWidth / 2, -iconHeight / 2));
 
+            SKPaint paint;
+            if (Names.Vehicles.Contains(actor.ActorType) || Names.Deployables.Contains(actor.ActorType))
+            {
+                SKColor teamColor;
+                if (actor.IsFriendly())
+                {
+                    teamColor = SKPaints.Friendly;
+                }
+                else
+                {
+                    paint = new SKPaint
+                    {
+                        IsAntialias = true,
+                        FilterQuality = SKFilterQuality.High
+                    };
+                    canvas.Save();
+                    canvas.SetMatrix(matrix);
+                    canvas.DrawBitmap(icon, SKRect.Create(iconWidth, iconHeight), paint);
+                    canvas.Restore();
+                    return;
+                }
+
+                paint = new SKPaint
+                {
+                    IsAntialias = true,
+                    FilterQuality = SKFilterQuality.High,
+                    ColorFilter = SKColorFilter.CreateBlendMode(teamColor, SKBlendMode.Modulate)
+                };
+            }
+            else
+            {
+                paint = new SKPaint
+                {
+                    IsAntialias = true,
+                    FilterQuality = SKFilterQuality.High
+                };
+            }
+
             canvas.Save();
             canvas.SetMatrix(matrix);
-            canvas.DrawBitmap(icon, SKRect.Create(iconWidth, iconHeight), SKPaints.PaintBitmap);
+            canvas.DrawBitmap(icon, SKRect.Create(iconWidth, iconHeight), paint);
             canvas.Restore();
         }
 

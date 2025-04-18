@@ -24,6 +24,7 @@ namespace squad_dma
         private readonly List<PointOfInterest> _pointsOfInterest = new();
         private System.Windows.Forms.Timer _panTimer;
         private GameStatus _previousGameStatus = GameStatus.NotFound;
+        private EspOverlay _espOverlay;
 
         private bool _isFreeMapToggled;
         private bool _isDragging;
@@ -90,6 +91,13 @@ namespace squad_dma
         {
             _config = Program.Config;
             InitializeComponent();
+            if (_config.EnableEsp)
+            {
+                _espOverlay = new EspOverlay();
+                _espOverlay.Show();
+            }
+
+            LoadConfig();
             InitializeDarkMode();
             InitializeFormSettings();
             InitializeMapCanvas();
@@ -101,7 +109,7 @@ namespace squad_dma
 
         private void InitializeDarkMode()
         {
-            _darkmode = new DarkModeCS(this);
+            _darkmode = new DarkModeCS(this);            
         }
 
         private void InitializeFormSettings()
@@ -167,6 +175,23 @@ namespace squad_dma
             chkInfiniteAmmo.CheckedChanged += ChkInfiniteAmmo_CheckedChanged;
             chkQuickSwap.CheckedChanged += ChkQuickSwap_CheckedChanged;
             chkForceFullAuto.CheckedChanged += ChkForceFullAuto_CheckedChanged;
+
+            // ESP Event Handlers
+            chkEnableEsp.CheckedChanged += ChkEnableEsp_CheckedChanged;
+            chkEnableBones.CheckedChanged += ChkEnableBones_CheckedChanged;
+            trkEspMaxDistance.Scroll += TrkEspMaxDistance_Scroll;
+            chkShowAllies.CheckedChanged += ChkShowAllies_CheckedChanged;
+            chkEspShowNames.CheckedChanged += ChkEspShowNames_CheckedChanged;
+            chkEspShowDistance.CheckedChanged += ChkEspShowDistance_CheckedChanged;
+            chkEspShowHealth.CheckedChanged += ChkEspShowHealth_CheckedChanged;
+            txtEspFontSize.TextChanged += TxtEspFontSize_TextChanged;
+            txtEspColorA.TextChanged += TxtEspColorA_TextChanged;
+            txtEspColorR.TextChanged += TxtEspColorR_TextChanged;
+            txtEspColorG.TextChanged += TxtEspColorG_TextChanged;
+            txtEspColorB.TextChanged += TxtEspColorB_TextChanged;
+            txtFirstScopeMag.TextChanged += TxtFirstScopeMag_TextChanged;
+            txtSecondScopeMag.TextChanged += TxtSecondScopeMag_TextChanged;
+            txtThirdScopeMag.TextChanged += TxtThirdScopeMag_TextChanged;
         }
 
         private void LoadInitialData()
@@ -179,16 +204,23 @@ namespace squad_dma
 
         #region Overrides
         protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            e.Cancel = true; // Cancel shutdown
-            this.Enabled = false; // Lock window
+{
+    e.Cancel = true;
+    this.Enabled = false;
 
-            CleanupLoadedBitmaps();
-            Config.SaveConfig(_config); // Save Config to Config.json
-            Memory.Shutdown(); // Wait for Memory Thread to gracefully exit
-            e.Cancel = false; // Ready to close
-            base.OnFormClosing(e); // Proceed with closing
-        }
+    Program.Log("Closing form");
+    if (_espOverlay != null && !_espOverlay.IsDisposed)
+    {
+        _espOverlay.Close();
+        _espOverlay = null;
+    }
+
+    CleanupLoadedBitmaps();
+    Config.SaveConfig(_config);
+    Memory.Shutdown();
+    e.Cancel = false;
+    base.OnFormClosing(e);
+}
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -696,20 +728,53 @@ namespace squad_dma
         {
             #region Settings
             #region General
-            // User Interface
+            #region UI Config
             chkShowEnemyDistance.Checked = _config.ShowEnemyDistance;
             chkShowEnemyDistance.CheckedChanged += ChkShowEnemyDistance_CheckedChanged;
             trkAimLength.Value = _config.PlayerAimLineLength;
             trkUIScale.Value = _config.UIScale;
-            trkTechMarkerScale.Value = _config.TechMarkerScale;
             #endregion
 
-            #region Local Soldier Features
+            #region ESP Config
+            chkEnableEsp.Checked = _config.EnableEsp;
+            chkEnableBones.Checked = _config.EspBones;
+            trkEspMaxDistance.Value = (int)_config.EspMaxDistance;
+            lblEspMaxDistance.Text = $"Max Distance: {_config.EspMaxDistance}m";
+            chkShowAllies.Checked = _config.EspShowAllies;
+            chkEspShowNames.Checked = _config.EspShowNames;
+            chkEspShowDistance.Checked = _config.EspShowDistance;
+            chkEspShowHealth.Checked = _config.EspShowHealth;
+            txtEspFontSize.Text = _config.ESPFontSize.ToString();
+            txtEspColorA.Text = _config.EspTextColor.A.ToString();
+            txtEspColorR.Text = _config.EspTextColor.R.ToString();
+            txtEspColorG.Text = _config.EspTextColor.G.ToString();
+            txtEspColorB.Text = _config.EspTextColor.B.ToString();
+            txtFirstScopeMag.Text = _config.FirstScopeMagnification.ToString("F1");
+            txtSecondScopeMag.Text = _config.SecondScopeMagnification.ToString("F1");
+            txtThirdScopeMag.Text = _config.ThirdScopeMagnification.ToString("F1");
+            trkTechMarkerScale.Value = _config.TechMarkerScale;
+            #endregion
+            #endregion
+
+            #region Features Config
             chkDisableSuppression.Checked = _config.DisableSuppression;
+            chkDisableSuppression.CheckedChanged += ChkDisableSuppression_CheckedChanged;
             chkSetInteractionDistances.Checked = _config.SetInteractionDistances;
+            chkSetInteractionDistances.CheckedChanged += ChkSetInteractionDistances_CheckedChanged;
             chkAllowShootingInMainBase.Checked = _config.AllowShootingInMainBase;
+            chkAllowShootingInMainBase.CheckedChanged += ChkAllowShootingInMainBase_CheckedChanged;
             chkSpeedHack.Checked = _config.SetSpeedHack;
+            chkSpeedHack.CheckedChanged += ChkSetTimeDilation_CheckedChanged;
             chkAirStuck.Checked = _config.SetAirStuck;
+            chkAirStuck.CheckedChanged += ChkAirStuck_CheckedChanged;
+            chkNoCameraShake.Checked = _config.NoCameraShake;
+            chkNoCameraShake.CheckedChanged += ChkNoCameraShake_CheckedChanged;
+            chkNoRecoil.Checked = _config.NoRecoil;
+            chkNoRecoil.CheckedChanged += ChkNoRecoil_CheckedChanged;
+            chkNoSpread.Checked = _config.NoSpread;
+            chkNoSpread.CheckedChanged += ChkNoSpread_CheckedChanged;
+            chkNoSway.Checked = _config.NoSway;
+            chkNoSway.CheckedChanged += ChkNoSway_CheckedChanged;
             #endregion
 
             #endregion
@@ -875,6 +940,7 @@ namespace squad_dma
                     {
                         if (Memory._game._soldierManager?.IsLocalPlayerValid() == true)
                         {
+                            // Only apply features that are enabled in the config
                             if (_config.DisableSuppression)
                                 Memory._game.SetSuppression(true);
                             
@@ -905,10 +971,26 @@ namespace squad_dma
                             if (_config.ForceFullAuto)
                                 Memory._game.SetForceFullAuto(true);
 
-                            return;
+                            if (_config.NoSpread)
+                                Memory._game.SetNoSpread(true);
+
+                            if (_config.NoRecoil)
+                                Memory._game.SetNoRecoil(true);
+
+                            if (_config.NoSway)
+                                Memory._game.SetNoSway(true);
+
+                            if (_config.NoCameraShake)
+                                Memory._game.SetNoCameraShake(true);
+
+                            Logger.Info("Applied enabled features on game start");
+                            return; // Exit after applying features once
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Logger.Error($"Error applying features: {ex.Message}");
+                    }
                 }
 
                 await Task.Delay(retryDelay);
@@ -1276,57 +1358,21 @@ namespace squad_dma
                 {
                     DrawAdmin(canvas, actor, actorZoomedPos);
                 }
-                else
+                else if (Names.Vehicles.Contains(actor.ActorType))
                 {
-                    var vehicleTypes = new HashSet<ActorType>
-                    {
-                        ActorType.TruckTransport,
-                        ActorType.TruckLogistics,
-                        ActorType.TruckAntiAir,
-                        ActorType.TruckArtillery,
-                        ActorType.TruckTransportArmed,
-                        ActorType.JeepTransport,
-                        ActorType.JeepLogistics,
-                        ActorType.JeepTurret,
-                        ActorType.JeepArtillery,
-                        ActorType.JeepAntitank,
-                        ActorType.JeepRWSTurret,
-                        ActorType.APC,
-                        ActorType.IFV,
-                        ActorType.TrackedAPC,
-                        ActorType.TrackedIFV,
-                        ActorType.TrackedJeep,
-                        ActorType.Tank,
-                        ActorType.TankMGS,
-                        ActorType.TransportHelicopter,
-                        ActorType.AttackHelicopter,
-                        ActorType.Boat,
-                        ActorType.BoatLogistics,
-                        ActorType.Motorcycle,
-                        ActorType.AntiAir,
-                        ActorType.TrackedLogistics,
-                        ActorType.LoachCAS,
-                        ActorType.LoachScout,
-                        ActorType.TrackedAPCArtillery
-                    };
-
-                    if (vehicleTypes.Contains(actor.ActorType))
+                    if (!actor.IsFriendly())
                     {
                         var dist = Vector3.Distance(this.LocalPlayer.Position, actor.Position);
                         if (dist > 50 * 100)
                         {
                             lines = new string[1] { $"{(int)Math.Round(dist / 100)}m" };
-
-                            using var textPaint = new SKPaint
-                            {
-                                Color = SKColors.White,
-                                TextSize = 12 * _uiScale,
-                                IsAntialias = true
-                            };
-
                             actorZoomedPos.DrawActorText(canvas, actor, lines);
                         }
                     }
+                    actorZoomedPos.DrawTechMarker(canvas, actor);
+                }
+                else
+                {
                     actorZoomedPos.DrawTechMarker(canvas, actor);
                 }
             }
@@ -1837,7 +1883,19 @@ namespace squad_dma
 
         private void btnRestartRadar_Click(object sender, EventArgs e)
         {
+            if (_espOverlay != null && !_espOverlay.IsDisposed)
+            {
+                _espOverlay.Close();
+                _espOverlay = null;
+            }
+            Thread.Sleep(1000);
             Memory.Restart();
+            Thread.Sleep(1000);
+            if (_config.EnableEsp)
+            {
+                _espOverlay = new EspOverlay();
+                _espOverlay.Show();
+            }
         }
 
         private bool DumpNames()
@@ -1887,9 +1945,9 @@ namespace squad_dma
         private void ChkDisableSuppression_CheckedChanged(object sender, EventArgs e)
         {
             if (!InGame) return;
-
+            
             _config.DisableSuppression = chkDisableSuppression.Checked;
-            Memory._game?.SetSuppression(chkDisableSuppression.Checked);
+            Memory._game?.SetSuppression(_config.DisableSuppression);
             Config.SaveConfig(_config);
         }
 
@@ -1930,38 +1988,39 @@ namespace squad_dma
             _config.SetAirStuck = chkAirStuck.Checked;
             
             chkDisableCollision.Enabled = chkAirStuck.Checked;
-            
             if (!chkAirStuck.Checked && chkDisableCollision.Checked)
             {
                 chkDisableCollision.Checked = false;
                 _config.DisableCollision = false;
             }
-            
+
             Config.SaveConfig(_config);
         }
 
         private void ChkDisableCollision_CheckedChanged(object sender, EventArgs e)
         {
             if (!InGame) return;
-            
             if (chkDisableCollision.Checked && !chkAirStuck.Checked)
             {
                 chkDisableCollision.Checked = false;
                 return;
             }
-            
             _config.DisableCollision = chkDisableCollision.Checked;
             Config.SaveConfig(_config);
         }
 
         private void ChkQuickZoom_CheckedChanged(object sender, EventArgs e)
         {
+            if (!InGame) return;
+
             _config.QuickZoom = chkQuickZoom.Checked;
             Config.SaveConfig(_config);
         }
 
         private void ChkRapidFire_CheckedChanged(object sender, EventArgs e)
         {
+            if (!InGame) return;
+
             _config.RapidFire = chkRapidFire.Checked;
             Memory._game?.SetRapidFire(_config.RapidFire);
             Config.SaveConfig(_config);
@@ -1969,6 +2028,8 @@ namespace squad_dma
 
         private void ChkInfiniteAmmo_CheckedChanged(object sender, EventArgs e)
         {
+            if (!InGame) return;
+
             _config.InfiniteAmmo = chkInfiniteAmmo.Checked;
             Memory._game?.SetInfiniteAmmo(_config.InfiniteAmmo);
             Config.SaveConfig(_config);
@@ -1976,6 +2037,8 @@ namespace squad_dma
 
         private void ChkQuickSwap_CheckedChanged(object sender, EventArgs e)
         {
+            if (!InGame) return;
+
             _config.QuickSwap = chkQuickSwap.Checked;
             Memory._game?.SetQuickSwap(_config.QuickSwap);
             Config.SaveConfig(_config);
@@ -1983,25 +2046,230 @@ namespace squad_dma
 
         private void ChkForceFullAuto_CheckedChanged(object sender, EventArgs e)
         {
+            if (!InGame) return;
+
             _config.ForceFullAuto = chkForceFullAuto.Checked;
             Memory._game?.SetForceFullAuto(_config.ForceFullAuto);
             Config.SaveConfig(_config);
         }
-        #endregion
-        #endregion
-        #endregion
 
-        private void grpMapSetup_Enter(object sender, EventArgs e)
+        private void ChkNoRecoil_CheckedChanged(object sender, EventArgs e)
         {
+            if (!InGame) return;
+            
+            _config.NoRecoil = chkNoRecoil.Checked;
+            Memory._game?.SetNoRecoil(_config.NoRecoil);
+            Config.SaveConfig(_config);
         }
+
+        private void ChkNoSpread_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!InGame) return;
+            
+            _config.NoSpread = chkNoSpread.Checked;
+            Memory._game?.SetNoSpread(_config.NoSpread);
+            Config.SaveConfig(_config);
+        }
+
+        private void ChkNoSway_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!InGame) return;
+            
+            _config.NoSway = chkNoSway.Checked;
+            Memory._game?.SetNoSway(_config.NoSway);
+            Config.SaveConfig(_config);
+        }
+
+        private void ChkNoCameraShake_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!InGame) return;
+            
+            _config.NoCameraShake = chkNoCameraShake.Checked;
+            Memory._game?.SetNoCameraShake(_config.NoCameraShake);
+            Config.SaveConfig(_config);
+        }
+
+        private void ChkEnableEsp_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.EnableEsp = chkEnableEsp.Checked;
+            Config.SaveConfig(_config);
+
+            if (_config.EnableEsp)
+            {
+                if (_espOverlay == null || _espOverlay.IsDisposed)
+                {
+                    _espOverlay = new EspOverlay();
+                    _espOverlay.Show();
+                }
+            }
+            else
+            {
+                if (_espOverlay != null && !_espOverlay.IsDisposed)
+                {
+                    _espOverlay.Close();
+                    _espOverlay = null;
+                }
+            }
+        }
+
+        private void ChkEnableBones_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.EspBones = chkEnableBones.Checked;
+            Config.SaveConfig(_config);
+        }
+
+        private void TrkEspMaxDistance_Scroll(object sender, EventArgs e)
+        {
+            _config.EspMaxDistance = trkEspMaxDistance.Value;
+            lblEspMaxDistance.Text = $"Max Distance: {trkEspMaxDistance.Value}m";
+            Config.SaveConfig(_config);
+        }
+
+        private void ChkShowAllies_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.EspShowAllies = chkShowAllies.Checked;
+            Config.SaveConfig(_config);
+        }
+
+        private void ChkEspShowNames_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.EspShowNames = chkEspShowNames.Checked;
+            Config.SaveConfig(_config);
+        }
+
+        private void ChkEspShowDistance_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.EspShowDistance = chkEspShowDistance.Checked;
+            Config.SaveConfig(_config);
+        }
+
+        private void ChkEspShowHealth_CheckedChanged(object sender, EventArgs e)
+        {
+            _config.EspShowHealth = chkEspShowHealth.Checked;
+            Config.SaveConfig(_config);
+        }
+
+        private void TxtEspFontSize_TextChanged(object sender, EventArgs e)
+        {
+            if (float.TryParse(txtEspFontSize.Text, out float fontSize) && fontSize > 0)
+            {
+                _config.ESPFontSize = fontSize;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtEspFontSize.Text = _config.ESPFontSize.ToString();
+            }
+        }
+
+        private void TxtEspColorA_TextChanged(object sender, EventArgs e)
+        {
+            if (byte.TryParse(txtEspColorA.Text, out byte a) && a >= 0 && a <= 255)
+            {
+                var color = _config.EspTextColor;
+                color.A = a;
+                _config.EspTextColor = color;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtEspColorA.Text = _config.EspTextColor.A.ToString();
+            }
+        }
+
+        private void TxtEspColorR_TextChanged(object sender, EventArgs e)
+        {
+            if (byte.TryParse(txtEspColorR.Text, out byte r) && r >= 0 && r <= 255)
+            {
+                var color = _config.EspTextColor;
+                color.R = r;
+                _config.EspTextColor = color;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtEspColorR.Text = _config.EspTextColor.R.ToString();
+            }
+        }
+
+        private void TxtEspColorG_TextChanged(object sender, EventArgs e)
+        {
+            if (byte.TryParse(txtEspColorG.Text, out byte g) && g >= 0 && g <= 255)
+            {
+                var color = _config.EspTextColor;
+                color.G = g;
+                _config.EspTextColor = color;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtEspColorG.Text = _config.EspTextColor.G.ToString();
+            }
+        }
+
+        private void TxtEspColorB_TextChanged(object sender, EventArgs e)
+        {
+            if (byte.TryParse(txtEspColorB.Text, out byte b) && b >= 0 && b <= 255)
+            {
+                var color = _config.EspTextColor;
+                color.B = b;
+                _config.EspTextColor = color;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtEspColorB.Text = _config.EspTextColor.B.ToString();
+            }
+        }
+
+        private void TxtFirstScopeMag_TextChanged(object sender, EventArgs e)
+        {
+            if (float.TryParse(txtFirstScopeMag.Text, out float mag) && mag >= 0)
+            {
+                _config.FirstScopeMagnification = mag;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtFirstScopeMag.Text = _config.FirstScopeMagnification.ToString("F1");
+            }
+        }
+
+        private void TxtSecondScopeMag_TextChanged(object sender, EventArgs e)
+        {
+            if (float.TryParse(txtSecondScopeMag.Text, out float mag) && mag >= 0)
+            {
+                _config.SecondScopeMagnification = mag;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtSecondScopeMag.Text = _config.SecondScopeMagnification.ToString("F1");
+            }
+        }
+
+        private void TxtThirdScopeMag_TextChanged(object sender, EventArgs e)
+        {
+            if (float.TryParse(txtThirdScopeMag.Text, out float mag) && mag >= 0)
+            {
+                _config.ThirdScopeMagnification = mag;
+                Config.SaveConfig(_config);
+            }
+            else
+            {
+                txtThirdScopeMag.Text = _config.ThirdScopeMagnification.ToString("F1");
+            }
+        }
+        #endregion
+        #endregion
+        #endregion
 
         private void trkAimLength_Scroll(object sender, EventArgs e)
         {
         }
 
         private void lblAimline_Click(object sender, EventArgs e)
-        {
-
+        { 
         }
         #endregion
 
@@ -2098,3 +2366,4 @@ namespace squad_dma
     }
 }
 #endregion
+

@@ -21,9 +21,16 @@ namespace squad_dma
         public List<UActor> MySquadMembers { get; } = new List<UActor>();
         public Team Team { get; set; } = Team.Unknown;
 
+        // ESP-related properties
+        public ulong Mesh { get; set; }
+        public FTransform ComponentToWorld { get; set; }
+        public Dictionary<int, FTransform> BoneTransforms { get; } = new Dictionary<int, FTransform>();
+        public Vector2[] BoneScreenPositions { get; set; }
+        public bool NeedsFullUpdate { get; set; } = true;
+
         public bool IsFriendly()
         {
-            if (TeamID == -1) return false; 
+            if (TeamID == -1) return false;
 
             var localPlayer = Memory.LocalPlayer;
             if (localPlayer == null) return false;
@@ -90,7 +97,7 @@ namespace squad_dma
         public Vector3 Rotation3D { get; set; } = new Vector3(0, 0, 0);
         public int ErrorCount { get; set; } = 0;
 
-        public Vector3 DeathPosition { get; set; } = Vector3.Zero; 
+        public Vector3 DeathPosition { get; set; } = Vector3.Zero;
         public DateTime TimeOfDeath { get; set; } = DateTime.MinValue;
 
         #endregion
@@ -105,6 +112,7 @@ namespace squad_dma
         {
             Debug.WriteLine("Actor Constructor: Initialization started.");
             this.Base = actorBase;
+            BoneScreenPositions = new Vector2[19]; // Initialize with the number of bones we track
         }
         #endregion
     }

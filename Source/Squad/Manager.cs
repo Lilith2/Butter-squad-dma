@@ -1,6 +1,7 @@
 using Offsets;
 using squad_dma.Source.Squad.Debug;
 using squad_dma.Source.Squad.Features;
+using System.Diagnostics.Eventing.Reader;
 
 namespace squad_dma.Source.Squad
 {
@@ -28,6 +29,11 @@ namespace squad_dma.Source.Squad
         private RapidFire _rapidFire;
         private InfiniteAmmo _infiniteAmmo;
         private QuickSwap _quickSwap;
+        private ForceFullAuto _FullAuto;
+        private NoCameraShake _noCameraShake;
+        private NoSpread _noSpread;
+        private NoRecoil _noRecoil;
+        private NoSway _noSway;
 
         /// <summary>
         /// Constructor for feature classes that inherit from Manager
@@ -111,6 +117,11 @@ namespace squad_dma.Source.Squad
             _rapidFire = new RapidFire(_playerController, _inGame);
             _infiniteAmmo = new InfiniteAmmo(_playerController, _inGame);
             _quickSwap = new QuickSwap(_playerController, _inGame);
+            _FullAuto = new ForceFullAuto(_playerController, _inGame);
+            _noCameraShake = new NoCameraShake(_playerController, _inGame);
+            _noSpread = new NoSpread(_playerController, _inGame);
+            _noRecoil = new NoRecoil(_playerController, _inGame);
+            _noSway = new NoSway(_playerController, _inGame);
         }
         
         /// <summary>
@@ -173,6 +184,16 @@ namespace squad_dma.Source.Squad
                             _infiniteAmmo.Apply();
                         if (_quickSwap._isQuickSwapEnabled)
                             _quickSwap.Apply();
+                        if (_FullAuto._isForceFullAutoEnabled)
+                            _FullAuto.Apply();
+                        if (_noCameraShake._isNoCameraShakeEnabled)
+                            _noCameraShake.Apply();
+                        if (_noSpread._isNoSpreadEnabled)
+                            _noSpread.Apply();
+                        if (_noRecoil._isNoRecoilEnabled)
+                            _noRecoil.Apply();
+                        if (_noSway._isNoSwayEnabled)
+                            _noSway.Apply();
                     }
                     catch { /* Silently fail */ }
                     await Task.Delay(1000, _cancellationTokenSource.Token);
@@ -240,6 +261,11 @@ namespace squad_dma.Source.Squad
         {
             _rapidFire.SetEnabled(enable);
         }
+
+        public void SetFullAuto(bool enable)
+        {
+            _FullAuto.SetEnabled(enable);
+        }
         
         public void SetInfiniteAmmo(bool enable)
         {
@@ -249,6 +275,26 @@ namespace squad_dma.Source.Squad
         public void SetQuickSwap(bool enable)
         {
             _quickSwap.SetEnabled(enable);
+        }
+        
+        public void SetNoCameraShake(bool enable)
+        {
+            _noCameraShake.SetEnabled(enable);
+        }
+        
+        public void SetNoSpread(bool enable)
+        {
+            _noSpread.SetEnabled(enable);
+        }
+
+        public void SetNoRecoil(bool enable)
+        {
+            _noRecoil.SetEnabled(enable);
+        }
+
+        public void SetNoSway(bool enable)
+        {
+            _noSway.SetEnabled(enable);
         }
         
         public void Dispose()

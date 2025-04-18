@@ -14,6 +14,7 @@ namespace squad_dma.Source.Squad.Features
         
         private int[] _originalFireModes = null;
         private bool _originalManualBolt = false;
+        private bool _originalRequireAdsToShoot = false;
         
         public ForceFullAuto(ulong playerController, bool inGame)
             : base(playerController, inGame)
@@ -24,8 +25,7 @@ namespace squad_dma.Source.Squad.Features
                 if (config.OriginalFireModes != null && config.OriginalFireModes.Length > 0)
                 {
                     _originalFireModes = config.OriginalFireModes;
-                    _originalManualBolt = config.OriginalManualBolt;
-                    Logger.Debug($"[{NAME}] Loaded original fire modes from config: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}");
+                    Logger.Debug($"[{NAME}] Loaded original fire modes from config: {string.Join(", ", _originalFireModes)}");
                 }
             }
         }
@@ -129,14 +129,16 @@ namespace squad_dma.Source.Squad.Features
                             _originalFireModes[i] = Memory.ReadValue<int>(fireModeAddress);
                         }
                         _originalManualBolt = Memory.ReadValue<bool>(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt);
+                        _originalRequireAdsToShoot = Memory.ReadValue<bool>(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot);
 
-                        Logger.Debug($"[{NAME}] Stored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}");
+                        Logger.Debug($"[{NAME}] Stored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}, RequireAdsToShoot={_originalRequireAdsToShoot}");
 
                         // Save original values to config
                         if (Config.TryLoadConfig(out var config))
                         {
                             config.OriginalFireModes = _originalFireModes;
                             config.OriginalManualBolt = _originalManualBolt;
+                            config.OriginalRequireAdsToShoot = _originalRequireAdsToShoot;
                             Config.SaveConfig(config);
                             Logger.Debug($"[{NAME}] Saved original values to config");
                         }
@@ -150,8 +152,9 @@ namespace squad_dma.Source.Squad.Features
                     
                     Memory.WriteValue(weapon + ASQWeapon.CurrentFireMode, 0);
                     Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, false);
+                    Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, false);
                     
-                    Logger.Debug($"[{NAME}] Set all fire modes to Full Auto (-1) and disabled manual bolt");
+                    Logger.Debug($"[{NAME}] Set all fire modes to Full Auto (-1) and disabled manual bolt and ADS requirement");
                 }
                 else
                 {
@@ -165,7 +168,8 @@ namespace squad_dma.Source.Squad.Features
                         }
                         
                         Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, _originalManualBolt);
-                        Logger.Debug($"[{NAME}] Restored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}");
+                        Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, _originalRequireAdsToShoot);
+                        Logger.Debug($"[{NAME}] Restored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}, RequireAdsToShoot={_originalRequireAdsToShoot}");
                     }
                     else
                     {
@@ -175,11 +179,13 @@ namespace squad_dma.Source.Squad.Features
                             Memory.WriteValue(fireModeAddress, 1);
                         }
                         Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, true);
-                        Logger.Debug($"[{NAME}] Restored default fire modes (Single Fire) and enabled manual bolt");
+                        Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, true);
+                        Logger.Debug($"[{NAME}] Restored default fire modes (Single Fire) and enabled manual bolt and ADS requirement");
                     }
                     
                     _originalFireModes = null;
                     _originalManualBolt = false;
+                    _originalRequireAdsToShoot = false;
                 }
             }
             catch (Exception ex)

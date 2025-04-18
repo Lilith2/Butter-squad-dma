@@ -8,6 +8,7 @@ namespace squad_dma
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private Panel panelSettings;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -47,7 +48,6 @@ namespace squad_dma
             chkMapFree = new CheckBox();
             btnApplyMapScale = new Button();
             tabSettings = new TabPage();
-            grpConfig = new GroupBox();
             grpUserInterface = new GroupBox();
             lblUIScale = new Label();
             lblAimline = new Label();
@@ -65,6 +65,10 @@ namespace squad_dma
             chkInfiniteAmmo = new CheckBox();
             chkQuickSwap = new CheckBox();
             chkForceFullAuto = new CheckBox();
+            chkNoRecoil = new CheckBox();
+            chkNoSpread = new CheckBox();
+            chkNoSway = new CheckBox();
+            chkNoCameraShake = new CheckBox();
             grpKeybinds = new GroupBox();
             lblKeybindSpeedHack = new Label();
             btnKeybindSpeedHack = new Button();
@@ -87,6 +91,31 @@ namespace squad_dma
             btnKeybindZoomIn = new Button();
             lblKeybindZoomOut = new Label();
             btnKeybindZoomOut = new Button();
+            grpEsp = new GroupBox();
+            chkEnableEsp = new CheckBox();
+            chkEnableBones = new CheckBox();
+            chkShowAllies = new CheckBox();
+            chkEspShowNames = new CheckBox();
+            chkEspShowDistance = new CheckBox();
+            chkEspShowHealth = new CheckBox();
+            lblEspMaxDistance = new Label();
+            trkEspMaxDistance = new TrackBar();
+            lblEspFontSize = new Label();
+            txtEspFontSize = new TextBox();
+            lblEspColorA = new Label();
+            txtEspColorA = new TextBox();
+            lblEspColorR = new Label();
+            txtEspColorR = new TextBox();
+            lblEspColorG = new Label();
+            txtEspColorG = new TextBox();
+            lblEspColorB = new Label();
+            txtEspColorB = new TextBox();
+            lblFirstScopeMag = new Label();
+            txtFirstScopeMag = new TextBox();
+            lblSecondScopeMag = new Label();
+            txtSecondScopeMag = new TextBox();
+            lblThirdScopeMag = new Label();
+            txtThirdScopeMag = new TextBox();
             tabRadar = new TabPage();
             ticketsPanel = new Panel();
             grpMapSetup = new GroupBox();
@@ -98,11 +127,12 @@ namespace squad_dma
             ((System.ComponentModel.ISupportInitialize)trkAimLength).BeginInit();
             ((System.ComponentModel.ISupportInitialize)trkTechMarkerScale).BeginInit();
             tabSettings.SuspendLayout();
-            grpConfig.SuspendLayout();
             grpUserInterface.SuspendLayout();
             grpRadar.SuspendLayout();
             grpLocalSoldier.SuspendLayout();
             grpKeybinds.SuspendLayout();
+            grpEsp.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trkEspMaxDistance).BeginInit();
             tabRadar.SuspendLayout();
             grpMapSetup.SuspendLayout();
             tabControl.SuspendLayout();
@@ -278,30 +308,18 @@ namespace squad_dma
             // 
             // tabSettings
             // 
-            tabSettings.Controls.Add(grpConfig);
+            tabSettings.BackColor = SystemColors.Control;
+            tabSettings.Controls.Add(grpUserInterface);
+            tabSettings.Controls.Add(grpRadar);
+            tabSettings.Controls.Add(grpLocalSoldier);
+            tabSettings.Controls.Add(grpKeybinds);
+            tabSettings.Controls.Add(grpEsp);
             tabSettings.Location = new Point(4, 24);
             tabSettings.Name = "tabSettings";
             tabSettings.Padding = new Padding(3);
-            tabSettings.Size = new Size(1888, 911);
+            tabSettings.Size = new Size(1256, 653);
             tabSettings.TabIndex = 1;
             tabSettings.Text = "Settings";
-            tabSettings.UseVisualStyleBackColor = true;
-            // 
-            // grpConfig
-            // 
-            grpConfig.Controls.Add(grpUserInterface);
-            grpConfig.Controls.Add(grpRadar);
-            grpConfig.Controls.Add(grpLocalSoldier);
-            grpConfig.Controls.Add(grpKeybinds);
-            grpConfig.Dock = DockStyle.Fill;
-            grpConfig.Location = new Point(3, 3);
-            grpConfig.Margin = new Padding(15);
-            grpConfig.Name = "grpConfig";
-            grpConfig.Padding = new Padding(15);
-            grpConfig.Size = new Size(1882, 905);
-            grpConfig.TabIndex = 8;
-            grpConfig.TabStop = false;
-            grpConfig.Text = "Radar Config";
             // 
             // grpUserInterface
             // 
@@ -313,10 +331,10 @@ namespace squad_dma
             grpUserInterface.Controls.Add(trkTechMarkerScale);
             grpUserInterface.Controls.Add(chkShowEnemyDistance);
             grpUserInterface.Controls.Add(btnDumpNames);
-            grpUserInterface.Location = new Point(15, 24);
+            grpUserInterface.Location = new Point(8, 6);
             grpUserInterface.Name = "grpUserInterface";
             grpUserInterface.Padding = new Padding(15);
-            grpUserInterface.Size = new Size(500, 250);
+            grpUserInterface.Size = new Size(600, 250);
             grpUserInterface.TabIndex = 26;
             grpUserInterface.TabStop = false;
             grpUserInterface.Text = "User Interface";
@@ -357,10 +375,10 @@ namespace squad_dma
             grpRadar.Controls.Add(btnRestartRadar);
             grpRadar.Controls.Add(chkShowMapSetup);
             grpRadar.Controls.Add(btnToggleMap);
-            grpRadar.Location = new Point(15, 280);
+            grpRadar.Location = new Point(8, 265);
             grpRadar.Name = "grpRadar";
             grpRadar.Padding = new Padding(15);
-            grpRadar.Size = new Size(500, 120);
+            grpRadar.Size = new Size(600, 120);
             grpRadar.TabIndex = 26;
             grpRadar.TabStop = false;
             grpRadar.Text = "Radar";
@@ -378,9 +396,14 @@ namespace squad_dma
             grpLocalSoldier.Controls.Add(chkInfiniteAmmo);
             grpLocalSoldier.Controls.Add(chkQuickSwap);
             grpLocalSoldier.Controls.Add(chkForceFullAuto);
-            grpLocalSoldier.Location = new Point(15, 406);
+            grpLocalSoldier.Controls.Add(chkNoRecoil);
+            grpLocalSoldier.Controls.Add(chkNoSpread);
+            grpLocalSoldier.Controls.Add(chkNoSway);
+            grpLocalSoldier.Controls.Add(chkNoCameraShake);
+            grpLocalSoldier.Location = new Point(8, 391);
             grpLocalSoldier.Name = "grpLocalSoldier";
-            grpLocalSoldier.Size = new Size(500, 223);
+            grpLocalSoldier.Padding = new Padding(15);
+            grpLocalSoldier.Size = new Size(600, 235);
             grpLocalSoldier.TabIndex = 27;
             grpLocalSoldier.TabStop = false;
             grpLocalSoldier.Text = "Features";
@@ -459,7 +482,7 @@ namespace squad_dma
             // chkRapidFire
             // 
             chkRapidFire.AutoSize = true;
-            chkRapidFire.Location = new Point(210, 70);
+            chkRapidFire.Location = new Point(210, 45);
             chkRapidFire.Name = "chkRapidFire";
             chkRapidFire.Size = new Size(78, 19);
             chkRapidFire.TabIndex = 7;
@@ -469,7 +492,7 @@ namespace squad_dma
             // chkInfiniteAmmo
             // 
             chkInfiniteAmmo.AutoSize = true;
-            chkInfiniteAmmo.Location = new Point(210, 45);
+            chkInfiniteAmmo.Location = new Point(210, 20);
             chkInfiniteAmmo.Name = "chkInfiniteAmmo";
             chkInfiniteAmmo.Size = new Size(103, 19);
             chkInfiniteAmmo.TabIndex = 8;
@@ -479,7 +502,7 @@ namespace squad_dma
             // chkQuickSwap
             // 
             chkQuickSwap.AutoSize = true;
-            chkQuickSwap.Location = new Point(210, 20);
+            chkQuickSwap.Location = new Point(10, 195);
             chkQuickSwap.Name = "chkQuickSwap";
             chkQuickSwap.Size = new Size(88, 19);
             chkQuickSwap.TabIndex = 9;
@@ -489,13 +512,57 @@ namespace squad_dma
             // chkForceFullAuto
             // 
             chkForceFullAuto.AutoSize = true;
-            chkForceFullAuto.Location = new Point(210, 95);
+            chkForceFullAuto.Location = new Point(210, 70);
             chkForceFullAuto.Name = "chkForceFullAuto";
             chkForceFullAuto.Size = new Size(106, 19);
             chkForceFullAuto.TabIndex = 10;
             chkForceFullAuto.Text = "Force Full Auto";
             chkForceFullAuto.UseVisualStyleBackColor = true;
             chkForceFullAuto.CheckedChanged += ChkForceFullAuto_CheckedChanged;
+            // 
+            // chkNoRecoil
+            // 
+            chkNoRecoil.AutoSize = true;
+            chkNoRecoil.Location = new Point(210, 95);
+            chkNoRecoil.Name = "chkNoRecoil";
+            chkNoRecoil.Size = new Size(77, 19);
+            chkNoRecoil.TabIndex = 11;
+            chkNoRecoil.Text = "No Recoil";
+            chkNoRecoil.UseVisualStyleBackColor = true;
+            chkNoRecoil.CheckedChanged += ChkNoRecoil_CheckedChanged;
+            // 
+            // chkNoSpread
+            // 
+            chkNoSpread.AutoSize = true;
+            chkNoSpread.Location = new Point(210, 120);
+            chkNoSpread.Name = "chkNoSpread";
+            chkNoSpread.Size = new Size(81, 19);
+            chkNoSpread.TabIndex = 12;
+            chkNoSpread.Text = "No Spread";
+            chkNoSpread.UseVisualStyleBackColor = true;
+            chkNoSpread.CheckedChanged += ChkNoSpread_CheckedChanged;
+            // 
+            // chkNoSway
+            // 
+            chkNoSway.AutoSize = true;
+            chkNoSway.Location = new Point(210, 145);
+            chkNoSway.Name = "chkNoSway";
+            chkNoSway.Size = new Size(72, 19);
+            chkNoSway.TabIndex = 13;
+            chkNoSway.Text = "No Sway";
+            chkNoSway.UseVisualStyleBackColor = true;
+            chkNoSway.CheckedChanged += ChkNoSway_CheckedChanged;
+            // 
+            // chkNoCameraShake
+            // 
+            chkNoCameraShake.AutoSize = true;
+            chkNoCameraShake.Location = new Point(210, 170);
+            chkNoCameraShake.Name = "chkNoCameraShake";
+            chkNoCameraShake.Size = new Size(120, 19);
+            chkNoCameraShake.TabIndex = 14;
+            chkNoCameraShake.Text = "No Camera Shake";
+            chkNoCameraShake.UseVisualStyleBackColor = true;
+            chkNoCameraShake.CheckedChanged += ChkNoCameraShake_CheckedChanged;
             // 
             // grpKeybinds
             // 
@@ -520,10 +587,10 @@ namespace squad_dma
             grpKeybinds.Controls.Add(btnKeybindZoomIn);
             grpKeybinds.Controls.Add(lblKeybindZoomOut);
             grpKeybinds.Controls.Add(btnKeybindZoomOut);
-            grpKeybinds.Location = new Point(530, 24);
+            grpKeybinds.Location = new Point(630, 6);
             grpKeybinds.Name = "grpKeybinds";
             grpKeybinds.Padding = new Padding(15);
-            grpKeybinds.Size = new Size(528, 409);
+            grpKeybinds.Size = new Size(579, 300);
             grpKeybinds.TabIndex = 28;
             grpKeybinds.TabStop = false;
             grpKeybinds.Text = "Keybinds";
@@ -708,6 +775,233 @@ namespace squad_dma
             btnKeybindZoomOut.Text = "Down";
             btnKeybindZoomOut.Click += BtnKeybindZoomOut_Click;
             // 
+            // grpEsp
+            // 
+            grpEsp.Controls.Add(chkEnableEsp);
+            grpEsp.Controls.Add(chkEnableBones);
+            grpEsp.Controls.Add(chkShowAllies);
+            grpEsp.Controls.Add(chkEspShowNames);
+            grpEsp.Controls.Add(chkEspShowDistance);
+            grpEsp.Controls.Add(chkEspShowHealth);
+            grpEsp.Controls.Add(lblEspMaxDistance);
+            grpEsp.Controls.Add(trkEspMaxDistance);
+            grpEsp.Controls.Add(lblEspFontSize);
+            grpEsp.Controls.Add(txtEspFontSize);
+            grpEsp.Controls.Add(lblEspColorA);
+            grpEsp.Controls.Add(txtEspColorA);
+            grpEsp.Controls.Add(lblEspColorR);
+            grpEsp.Controls.Add(txtEspColorR);
+            grpEsp.Controls.Add(lblEspColorG);
+            grpEsp.Controls.Add(txtEspColorG);
+            grpEsp.Controls.Add(lblEspColorB);
+            grpEsp.Controls.Add(txtEspColorB);
+            grpEsp.Controls.Add(lblFirstScopeMag);
+            grpEsp.Controls.Add(txtFirstScopeMag);
+            grpEsp.Controls.Add(lblSecondScopeMag);
+            grpEsp.Controls.Add(txtSecondScopeMag);
+            grpEsp.Controls.Add(lblThirdScopeMag);
+            grpEsp.Controls.Add(txtThirdScopeMag);
+            grpEsp.Location = new Point(630, 312);
+            grpEsp.Name = "grpEsp";
+            grpEsp.Padding = new Padding(10);
+            grpEsp.Size = new Size(579, 314);
+            grpEsp.TabIndex = 31;
+            grpEsp.TabStop = false;
+            grpEsp.Text = "ESP";
+            // 
+            // chkEnableEsp
+            // 
+            chkEnableEsp.Location = new Point(15, 25);
+            chkEnableEsp.Name = "chkEnableEsp";
+            chkEnableEsp.Size = new Size(85, 24);
+            chkEnableEsp.TabIndex = 0;
+            chkEnableEsp.Text = "Enable ESP";
+            chkEnableEsp.UseVisualStyleBackColor = true;
+            // 
+            // chkEnableBones
+            // 
+            chkEnableBones.Location = new Point(15, 50);
+            chkEnableBones.Name = "chkEnableBones";
+            chkEnableBones.Size = new Size(101, 24);
+            chkEnableBones.TabIndex = 1;
+            chkEnableBones.Text = "Enable Bones";
+            chkEnableBones.UseVisualStyleBackColor = true;
+            // 
+            // chkShowAllies
+            // 
+            chkShowAllies.Location = new Point(15, 75);
+            chkShowAllies.Name = "chkShowAllies";
+            chkShowAllies.Size = new Size(101, 24);
+            chkShowAllies.TabIndex = 2;
+            chkShowAllies.Text = "Show Allies";
+            chkShowAllies.UseVisualStyleBackColor = true;
+            // 
+            // chkEspShowNames
+            // 
+            chkEspShowNames.Location = new Point(15, 100);
+            chkEspShowNames.Name = "chkEspShowNames";
+            chkEspShowNames.Size = new Size(101, 24);
+            chkEspShowNames.TabIndex = 3;
+            chkEspShowNames.Text = "Show Names";
+            chkEspShowNames.UseVisualStyleBackColor = true;
+            // 
+            // chkEspShowDistance
+            // 
+            chkEspShowDistance.Location = new Point(15, 125);
+            chkEspShowDistance.Name = "chkEspShowDistance";
+            chkEspShowDistance.Size = new Size(113, 24);
+            chkEspShowDistance.TabIndex = 4;
+            chkEspShowDistance.Text = "Show Distance";
+            chkEspShowDistance.UseVisualStyleBackColor = true;
+            // 
+            // chkEspShowHealth
+            // 
+            chkEspShowHealth.Location = new Point(15, 150);
+            chkEspShowHealth.Name = "chkEspShowHealth";
+            chkEspShowHealth.Size = new Size(101, 24);
+            chkEspShowHealth.TabIndex = 5;
+            chkEspShowHealth.Text = "Show Health";
+            chkEspShowHealth.UseVisualStyleBackColor = true;
+            // 
+            // lblEspMaxDistance
+            // 
+            lblEspMaxDistance.Location = new Point(15, 205);
+            lblEspMaxDistance.Name = "lblEspMaxDistance";
+            lblEspMaxDistance.Size = new Size(150, 23);
+            lblEspMaxDistance.TabIndex = 6;
+            lblEspMaxDistance.Text = "Max Distance: 100m";
+            // 
+            // trkEspMaxDistance
+            // 
+            trkEspMaxDistance.Location = new Point(15, 230);
+            trkEspMaxDistance.Maximum = 1000;
+            trkEspMaxDistance.Minimum = 10;
+            trkEspMaxDistance.Name = "trkEspMaxDistance";
+            trkEspMaxDistance.Size = new Size(551, 45);
+            trkEspMaxDistance.TabIndex = 7;
+            trkEspMaxDistance.TickFrequency = 50;
+            trkEspMaxDistance.Value = 100;
+            // 
+            // lblEspFontSize
+            // 
+            lblEspFontSize.Location = new Point(140, 25);
+            lblEspFontSize.Name = "lblEspFontSize";
+            lblEspFontSize.Size = new Size(74, 24);
+            lblEspFontSize.TabIndex = 8;
+            lblEspFontSize.Text = "Font Size:";
+            // 
+            // txtEspFontSize
+            // 
+            txtEspFontSize.Location = new Point(220, 25);
+            txtEspFontSize.Name = "txtEspFontSize";
+            txtEspFontSize.Size = new Size(100, 23);
+            txtEspFontSize.TabIndex = 9;
+            // 
+            // lblEspColorA
+            // 
+            lblEspColorA.Location = new Point(140, 50);
+            lblEspColorA.Name = "lblEspColorA";
+            lblEspColorA.Size = new Size(74, 24);
+            lblEspColorA.TabIndex = 10;
+            lblEspColorA.Text = "Alpha:";
+            // 
+            // txtEspColorA
+            // 
+            txtEspColorA.Location = new Point(220, 50);
+            txtEspColorA.Name = "txtEspColorA";
+            txtEspColorA.Size = new Size(100, 23);
+            txtEspColorA.TabIndex = 11;
+            // 
+            // lblEspColorR
+            // 
+            lblEspColorR.Location = new Point(140, 75);
+            lblEspColorR.Name = "lblEspColorR";
+            lblEspColorR.Size = new Size(74, 23);
+            lblEspColorR.TabIndex = 12;
+            lblEspColorR.Text = "Red:";
+            // 
+            // txtEspColorR
+            // 
+            txtEspColorR.Location = new Point(220, 75);
+            txtEspColorR.Name = "txtEspColorR";
+            txtEspColorR.Size = new Size(100, 23);
+            txtEspColorR.TabIndex = 13;
+            // 
+            // lblEspColorG
+            // 
+            lblEspColorG.Location = new Point(140, 100);
+            lblEspColorG.Name = "lblEspColorG";
+            lblEspColorG.Size = new Size(74, 23);
+            lblEspColorG.TabIndex = 14;
+            lblEspColorG.Text = "Green:";
+            // 
+            // txtEspColorG
+            // 
+            txtEspColorG.Location = new Point(220, 100);
+            txtEspColorG.Name = "txtEspColorG";
+            txtEspColorG.Size = new Size(100, 23);
+            txtEspColorG.TabIndex = 15;
+            // 
+            // lblEspColorB
+            // 
+            lblEspColorB.Location = new Point(140, 125);
+            lblEspColorB.Name = "lblEspColorB";
+            lblEspColorB.Size = new Size(75, 23);
+            lblEspColorB.TabIndex = 16;
+            lblEspColorB.Text = "Blue:";
+            // 
+            // txtEspColorB
+            // 
+            txtEspColorB.Location = new Point(220, 125);
+            txtEspColorB.Name = "txtEspColorB";
+            txtEspColorB.Size = new Size(100, 23);
+            txtEspColorB.TabIndex = 17;
+            // 
+            // lblFirstScopeMag
+            // 
+            lblFirstScopeMag.Location = new Point(330, 25);
+            lblFirstScopeMag.Name = "lblFirstScopeMag";
+            lblFirstScopeMag.Size = new Size(74, 23);
+            lblFirstScopeMag.TabIndex = 18;
+            lblFirstScopeMag.Text = "1st Scope:";
+            // 
+            // txtFirstScopeMag
+            // 
+            txtFirstScopeMag.Location = new Point(410, 25);
+            txtFirstScopeMag.Name = "txtFirstScopeMag";
+            txtFirstScopeMag.Size = new Size(75, 23);
+            txtFirstScopeMag.TabIndex = 19;
+            // 
+            // lblSecondScopeMag
+            // 
+            lblSecondScopeMag.Location = new Point(330, 50);
+            lblSecondScopeMag.Name = "lblSecondScopeMag";
+            lblSecondScopeMag.Size = new Size(74, 23);
+            lblSecondScopeMag.TabIndex = 20;
+            lblSecondScopeMag.Text = "2nd Scope:";
+            // 
+            // txtSecondScopeMag
+            // 
+            txtSecondScopeMag.Location = new Point(410, 50);
+            txtSecondScopeMag.Name = "txtSecondScopeMag";
+            txtSecondScopeMag.Size = new Size(75, 23);
+            txtSecondScopeMag.TabIndex = 21;
+            // 
+            // lblThirdScopeMag
+            // 
+            lblThirdScopeMag.Location = new Point(330, 75);
+            lblThirdScopeMag.Name = "lblThirdScopeMag";
+            lblThirdScopeMag.Size = new Size(74, 23);
+            lblThirdScopeMag.TabIndex = 22;
+            lblThirdScopeMag.Text = "3rd Scope:";
+            // 
+            // txtThirdScopeMag
+            // 
+            txtThirdScopeMag.Location = new Point(410, 75);
+            txtThirdScopeMag.Name = "txtThirdScopeMag";
+            txtThirdScopeMag.Size = new Size(75, 23);
+            txtThirdScopeMag.TabIndex = 23;
+            // 
             // tabRadar
             // 
             tabRadar.Controls.Add(ticketsPanel);
@@ -716,7 +1010,7 @@ namespace squad_dma
             tabRadar.Location = new Point(4, 24);
             tabRadar.Name = "tabRadar";
             tabRadar.Padding = new Padding(3);
-            tabRadar.Size = new Size(1888, 911);
+            tabRadar.Size = new Size(1256, 653);
             tabRadar.TabIndex = 0;
             tabRadar.Text = "Radar";
             tabRadar.UseVisualStyleBackColor = true;
@@ -726,7 +1020,7 @@ namespace squad_dma
             ticketsPanel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ticketsPanel.BackColor = SystemColors.ScrollBar;
             ticketsPanel.BorderStyle = BorderStyle.FixedSingle;
-            ticketsPanel.Location = new Point(8, 875);
+            ticketsPanel.Location = new Point(8, 618);
             ticketsPanel.Name = "ticketsPanel";
             ticketsPanel.Size = new Size(285, 30);
             ticketsPanel.TabIndex = 12;
@@ -787,14 +1081,14 @@ namespace squad_dma
             tabControl.Location = new Point(0, 0);
             tabControl.Name = "tabControl";
             tabControl.SelectedIndex = 0;
-            tabControl.Size = new Size(1896, 939);
+            tabControl.Size = new Size(1264, 681);
             tabControl.TabIndex = 8;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1896, 939);
+            ClientSize = new Size(1264, 681);
             Controls.Add(tabControl);
             Margin = new Padding(4, 3, 4, 3);
             Name = "MainForm";
@@ -803,7 +1097,6 @@ namespace squad_dma
             ((System.ComponentModel.ISupportInitialize)trkAimLength).EndInit();
             ((System.ComponentModel.ISupportInitialize)trkTechMarkerScale).EndInit();
             tabSettings.ResumeLayout(false);
-            grpConfig.ResumeLayout(false);
             grpUserInterface.ResumeLayout(false);
             grpUserInterface.PerformLayout();
             grpRadar.ResumeLayout(false);
@@ -812,6 +1105,9 @@ namespace squad_dma
             grpLocalSoldier.PerformLayout();
             grpKeybinds.ResumeLayout(false);
             grpKeybinds.PerformLayout();
+            grpEsp.ResumeLayout(false);
+            grpEsp.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trkEspMaxDistance).EndInit();
             tabRadar.ResumeLayout(false);
             tabRadar.PerformLayout();
             grpMapSetup.ResumeLayout(false);
@@ -824,7 +1120,6 @@ namespace squad_dma
         private ColorDialog colDialog;
         private ToolTip toolTip;
         private TabPage tabSettings;
-        private GroupBox grpConfig;
         private GroupBox grpUserInterface;
         private TrackBar trkAimLength;
         private Label lblAimline;
@@ -860,6 +1155,10 @@ namespace squad_dma
         private CheckBox chkInfiniteAmmo;
         private CheckBox chkQuickSwap;
         private CheckBox chkForceFullAuto;
+        private CheckBox chkNoRecoil;
+        private CheckBox chkNoSpread;
+        private CheckBox chkNoSway;
+        private CheckBox chkNoCameraShake;
         private GroupBox grpKeybinds;
         private Button btnKeybindSpeedHack;
         private Button btnKeybindAirStuck;
@@ -884,6 +1183,31 @@ namespace squad_dma
         private Button btnKeybindQuickZoom;
         private Label lblTechMarkerScale;
         private TrackBar trkTechMarkerScale;
+        private GroupBox grpEsp;
+        private CheckBox chkEnableEsp;
+        private CheckBox chkEnableBones;
+        private TrackBar trkEspMaxDistance;
+        private Label lblEspMaxDistance;
+        private CheckBox chkShowAllies;
+        private CheckBox chkEspShowNames;
+        private CheckBox chkEspShowDistance;
+        private CheckBox chkEspShowHealth;
+        private TextBox txtEspFontSize;
+        private Label lblEspFontSize;
+        private TextBox txtEspColorA;
+        private Label lblEspColorA;
+        private TextBox txtEspColorR;
+        private Label lblEspColorR;
+        private TextBox txtEspColorG;
+        private Label lblEspColorG;
+        private TextBox txtEspColorB;
+        private Label lblEspColorB;
+        private Label lblFirstScopeMag;
+        private TextBox txtFirstScopeMag;
+        private Label lblSecondScopeMag;
+        private TextBox txtSecondScopeMag;
+        private Label lblThirdScopeMag;
+        private TextBox txtThirdScopeMag;
 
         private void BtnKeybindZoomIn_Click(object sender, EventArgs e)
         {

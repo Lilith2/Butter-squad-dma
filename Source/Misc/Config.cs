@@ -22,6 +22,9 @@ namespace squad_dma
         [JsonPropertyName("fontSize")]
         public int FontSize { get; set; } = 13;
 
+        [JsonPropertyName("paintColors")]
+        public Dictionary<string, PaintColor.Colors> PaintColors { get; set; }
+
         [JsonPropertyName("playerAimLine")]
         public int PlayerAimLineLength { get; set; } = 1000;
 
@@ -47,6 +50,47 @@ namespace squad_dma
 
         [JsonPropertyName("zoomStep")]
         public int ZoomStep { get; set; } = 1;
+        #endregion
+
+        #region ESP Settings
+        [JsonPropertyName("enableEsp")]
+        public bool EnableEsp { get; set; } = true;
+
+        [JsonPropertyName("espFontSize")]
+        public float ESPFontSize { get; set; } = 10f;
+
+        [JsonPropertyName("espShowDistance")]
+        public bool EspShowDistance { get; set; } = true;
+
+        [JsonPropertyName("espShowHealth")]
+        public bool EspShowHealth { get; set; } = false;
+
+        [JsonPropertyName("espShowBox")]
+        public bool EspShowBox { get; set; } = false;
+
+        [JsonPropertyName("espShowNames")]
+        public bool EspShowNames { get; set; } = false;
+
+        [JsonPropertyName("espMaxDistance")]
+        public float EspMaxDistance { get; set; } = 1000f;
+
+        [JsonPropertyName("espTextColor")]
+        public PaintColor.Colors EspTextColor { get; set; }
+
+        [JsonPropertyName("espBones")]
+        public bool EspBones { get; set; } = true;
+
+        [JsonPropertyName("espShowAllies")]
+        public bool EspShowAllies { get; set; } = false;
+
+        [JsonPropertyName("firstScopeMagnification")]
+        public float FirstScopeMagnification { get; set; } = 4.0f;
+
+        [JsonPropertyName("secondScopeMagnification")]
+        public float SecondScopeMagnification { get; set; } = 6.0f;
+
+        [JsonPropertyName("thirdScopeMagnification")]
+        public float ThirdScopeMagnification { get; set; } = 12.0f;
         #endregion
 
         #region Feature States
@@ -82,6 +126,18 @@ namespace squad_dma
 
         [JsonPropertyName("forceFullAuto")]
         public bool ForceFullAuto { get; set; } = false;
+
+        [JsonPropertyName("noRecoil")]
+        public bool NoRecoil { get; set; } = false;
+
+        [JsonPropertyName("noSpread")]
+        public bool NoSpread { get; set; } = false;
+
+        [JsonPropertyName("noSway")]
+        public bool NoSway { get; set; } = false;
+
+        [JsonPropertyName("noCameraShake")]
+        public bool NoCameraShake { get; set; } = false;
         #endregion
 
         #region Feature Cache
@@ -99,6 +155,24 @@ namespace squad_dma
 
         [JsonPropertyName("originalCameraRecoil")]
         public bool OriginalCameraRecoil { get; set; } = true;
+
+        [JsonPropertyName("originalNoRecoilAnimValues")]
+        public Dictionary<string, float> OriginalNoRecoilAnimValues { get; set; } = new Dictionary<string, float>();
+
+        [JsonPropertyName("originalNoRecoilWeaponValues")]
+        public Dictionary<string, float> OriginalNoRecoilWeaponValues { get; set; } = new Dictionary<string, float>();
+
+        [JsonPropertyName("originalNoSpreadAnimValues")]
+        public Dictionary<string, float> OriginalNoSpreadAnimValues { get; set; } = new Dictionary<string, float>();
+
+        [JsonPropertyName("originalNoSpreadWeaponValues")]
+        public Dictionary<string, float> OriginalNoSpreadWeaponValues { get; set; } = new Dictionary<string, float>();
+
+        [JsonPropertyName("originalNoSwayAnimValues")]
+        public Dictionary<string, float> OriginalNoSwayAnimValues { get; set; } = new Dictionary<string, float>();
+
+        [JsonPropertyName("originalNoSwayWeaponValues")]
+        public Dictionary<string, float> OriginalNoSwayWeaponValues { get; set; } = new Dictionary<string, float>();
 
         [JsonPropertyName("originalTimeBetweenShots")]
         public float OriginalTimeBetweenShots { get; set; } = 0.0f;
@@ -139,6 +213,9 @@ namespace squad_dma
         [JsonPropertyName("originalManualBolt")]
         public bool OriginalManualBolt { get; set; } = false;
 
+        [JsonPropertyName("originalRequireAdsToShoot")]
+        public bool OriginalRequireAdsToShoot { get; set; } = false;
+
         /// <summary>
         /// Clears all cached feature values to ensure a clean state on game/app restart.
         /// This should be called when the game closes or the application is terminated.
@@ -150,6 +227,12 @@ namespace squad_dma
             OriginalMaxSuppression = -1.0f;
             OriginalSuppressionMultiplier = 1.0f;
             OriginalCameraRecoil = true;
+            OriginalNoRecoilAnimValues.Clear();
+            OriginalNoRecoilWeaponValues.Clear();
+            OriginalNoSpreadAnimValues.Clear();
+            OriginalNoSpreadWeaponValues.Clear();
+            OriginalNoSwayAnimValues.Clear();
+            OriginalNoSwayWeaponValues.Clear();
             OriginalTimeBetweenShots = 0.0f;
             OriginalTimeBetweenSingleShots = 0.0f;
             OriginalVehicleTimeBetweenShots = 0.0f;
@@ -163,7 +246,7 @@ namespace squad_dma
             OriginalCollisionEnabled = 1;
             OriginalFireModes = null;
             OriginalManualBolt = false;
-            // Add other cache clearing here as we implement more features
+            OriginalRequireAdsToShoot = false;
         }
         #endregion
 
@@ -198,6 +281,12 @@ namespace squad_dma
 
         #region Private Fields
         [JsonIgnore]
+        public Dictionary<string, PaintColor.Colors> DefaultPaintColors = new Dictionary<string, PaintColor.Colors>()
+        {
+            ["EspText"] = new PaintColor.Colors { A = 255, R = 255, G = 255, B = 255 }
+        };
+
+        [JsonIgnore]
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             WriteIndented = true,
@@ -212,6 +301,40 @@ namespace squad_dma
         #endregion
 
         #region Public Methods
+        public Config()
+        {
+            ShowEnemyDistance = true;
+            DefaultZoom = 100;
+            EnemyCount = false;
+            Font = 0;
+            FontSize = 13;
+            PaintColors = DefaultPaintColors;
+            PlayerAimLineLength = 1000;
+            EspShowNames = false;
+            UIScale = 100;
+            VSync = false;
+
+            // Initialize ESP settings
+            EnableEsp = true;
+            ESPFontSize = 10f;
+            EspShowDistance = true;
+            EspShowHealth = false;
+            EspShowBox = false;
+            EspMaxDistance = 1000f;
+            EspTextColor = DefaultPaintColors["EspText"];
+            EspBones = true;
+            EspShowAllies = false;
+            FirstScopeMagnification = 4.0f;
+            SecondScopeMagnification = 6.0f;
+            ThirdScopeMagnification = 12.0f;
+
+            // Initialize feature states
+            NoRecoil = false;
+            NoSpread = false;
+            NoSway = false;
+            NoCameraShake = false;
+        }
+
         /// <summary>
         /// Attempts to load the configuration from disk.
         /// </summary>
