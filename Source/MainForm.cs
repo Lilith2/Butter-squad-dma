@@ -44,14 +44,25 @@ namespace squad_dma
         private UActor _closestPlayerToMouse;
         private SKPoint _targetPanPosition;
 
-        private const float DRAG_SENSITIVITY = 3.5f;
-        private const double PAN_SMOOTHNESS = 0.1;
-        private const int PAN_INTERVAL = 10;
+        private const float DRAG_SENSITIVITY = 1.0f;
+        private const float VELOCITY_DECAY = 0.92f;
+        private const float MAX_VELOCITY = 50.0f;
+        private const float PAN_SMOOTHNESS = 0.3f;
+        private const int PAN_INTERVAL = 16;
 
         private bool _isWaitingForKey = false;
         private Button _currentKeybindButton = null;
         private Keys _currentKeybind = Keys.None;
         private bool _isHolding_QuickZoom = false;
+
+        private SKPoint _lastPanPosition;
+        private DateTime _lastPanUpdate;
+        private float _currentPanSpeed = 0f;
+
+        private Vector2 _velocity = Vector2.Zero;
+        private Vector2 _lastMouseDelta = Vector2.Zero;
+        private DateTime _lastUpdateTime;
+        private bool _isPanning = false;
         #endregion
 
         #region Properties
@@ -459,7 +470,7 @@ namespace squad_dma
             else if (e.Delta > 0)
                 ZoomIn(zoomStep);
 
-            if (_isFreeMapToggled && e.Delta < 0)
+            if (_isFreeMapToggled)
             {
                 var mousePos = _mapCanvas.PointToClient(Cursor.Position);
                 var mapParams = GetMapLocation();
@@ -468,9 +479,13 @@ namespace squad_dma
                     mapParams.Bounds.Top + mousePos.Y / mapParams.YScale
                 );
 
-                _targetPanPosition = mapMousePos;
-                if (!_panTimer.Enabled)
-                    _panTimer.Start();
+                // Only update target position if zooming out
+                if (e.Delta < 0)
+                {
+                    _targetPanPosition = mapMousePos;
+                    if (!_panTimer.Enabled)
+                        _panTimer.Start();
+                }
             }
         }
 
@@ -505,18 +520,21 @@ namespace squad_dma
         {
             if (!_lastMousePosition.IsEmpty)
             {
-                int dx = (int)((e.X - _lastMousePosition.X) * DRAG_SENSITIVITY);
-                int dy = (int)((e.Y - _lastMousePosition.Y) * DRAG_SENSITIVITY);
-
-                _targetPanPosition.X -= dx / _config.DefaultZoom * 20; 
-                _targetPanPosition.Y -= dy / _config.DefaultZoom * 20;
-
+                float dx = (e.X - _lastMousePosition.X) * DRAG_SENSITIVITY;
+                float dy = (e.Y - _lastMousePosition.Y) * DRAG_SENSITIVITY;
+                
+                float zoomScale = 1.0f / (_config.DefaultZoom * 0.01f);
+                
+                _targetPanPosition.X -= dx * zoomScale;
+                _targetPanPosition.Y -= dy * zoomScale;
+                
+                // Update position immediately for direct response
                 _mapPanPosition.X = _targetPanPosition.X;
                 _mapPanPosition.Y = _targetPanPosition.Y;
-
-                if (!_panTimer.Enabled)
-                    _panTimer.Start();
+                
+                _mapCanvas.Invalidate();
             }
+            
             _lastMousePosition = e.Location;
         }
 
@@ -542,6 +560,7 @@ namespace squad_dma
             {
                 _isDragging = true;
                 _lastMousePosition = e.Location;
+                _panTimer.Stop();
             }
 
             if (e.Button == MouseButtons.Right && _hoveredPoi != null)
@@ -578,6 +597,7 @@ namespace squad_dma
             {
                 _isDragging = false;
                 _lastMousePosition = e.Location;
+                _panTimer.Start();
             }
         }
 
@@ -1743,32 +1763,51 @@ namespace squad_dma
 
         private void PanTimer_Tick(object sender, EventArgs e)
         {
-            var panDifference = new SKPoint(
-                this._targetPanPosition.X - this._mapPanPosition.X,
-                this._targetPanPosition.Y - this._mapPanPosition.Y
-            );
-
-            if (panDifference.Length > 0.1)
+            if (!_isDragging)
             {
-                this._mapPanPosition.X += (float)(panDifference.X * PAN_SMOOTHNESS);
-                this._mapPanPosition.Y += (float)(panDifference.Y * PAN_SMOOTHNESS);
-            }
-            else
-            {
-                this._panTimer.Stop();
+                float dx = _targetPanPosition.X - _mapPanPosition.X;
+                float dy = _targetPanPosition.Y - _mapPanPosition.Y;
+                
+                if (Math.Abs(dx) < 0.1f && Math.Abs(dy) < 0.1f)
+                {
+                    _panTimer.Stop();
+                    return;
+                }
+                
+                _mapPanPosition.X += dx * PAN_SMOOTHNESS;
+                _mapPanPosition.Y += dy * PAN_SMOOTHNESS;
+                _mapCanvas.Invalidate();
             }
         }
 
         private bool ZoomIn(int step = 1)
         {
+            float oldZoom = _config.DefaultZoom;
             _config.DefaultZoom = Math.Max(10, _config.DefaultZoom - step);
+            
+            if (_isFreeMapToggled)
+            {
+                float zoomFactor = oldZoom / _config.DefaultZoom;
+                _mapPanPosition.X = _targetPanPosition.X - (_targetPanPosition.X - _mapPanPosition.X) * zoomFactor;
+                _mapPanPosition.Y = _targetPanPosition.Y - (_targetPanPosition.Y - _mapPanPosition.Y) * zoomFactor;
+            }
+            
             _mapCanvas.Invalidate();
             return true;
         }
 
         private bool ZoomOut(int step = 1)
         {
+            float oldZoom = _config.DefaultZoom;
             _config.DefaultZoom = Math.Min(200, _config.DefaultZoom + step);
+            
+            if (_isFreeMapToggled)
+            {
+                float zoomFactor = oldZoom / _config.DefaultZoom;
+                _mapPanPosition.X = _targetPanPosition.X - (_targetPanPosition.X - _mapPanPosition.X) * zoomFactor;
+                _mapPanPosition.Y = _targetPanPosition.Y - (_targetPanPosition.Y - _mapPanPosition.Y) * zoomFactor;
+            }
+            
             _mapCanvas.Invalidate();
             return true;
         }
@@ -1792,6 +1831,9 @@ namespace squad_dma
                     _mapPanPosition.Y = localPlayerMapPos.Y;
                     _mapPanPosition.Height = localPlayerMapPos.Height;
                     _mapPanPosition.TechScale = (.01f * _config.TechMarkerScale);
+                    
+                    if (_panTimer.Enabled)
+                        _panTimer.Stop();
                 }
             }
             else
@@ -1807,6 +1849,9 @@ namespace squad_dma
                     _mapPanPosition.Y = localPlayerMapPos.Y;
                     _mapPanPosition.Height = localPlayerMapPos.Height;
                     _mapPanPosition.TechScale = (.01f * _config.TechMarkerScale);
+                    
+                    if (_panTimer.Enabled)
+                        _panTimer.Stop();
                 }
             }
             
@@ -1951,70 +1996,78 @@ namespace squad_dma
 
         private void ChkDisableSuppression_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-            
             _config.DisableSuppression = chkDisableSuppression.Checked;
-            Memory._game?.SetSuppression(_config.DisableSuppression);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetSuppression(_config.DisableSuppression);
+            }
         }
 
         private void ChkSetInteractionDistances_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-            
             _config.SetInteractionDistances = chkSetInteractionDistances.Checked;
-            Memory._game?.SetInteractionDistances(_config.SetInteractionDistances);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetInteractionDistances(_config.SetInteractionDistances);
+            }
         }
 
         private void ChkAllowShootingInMainBase_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-            
             _config.AllowShootingInMainBase = chkAllowShootingInMainBase.Checked;
-            Memory._game?.SetShootingInMainBase(_config.AllowShootingInMainBase);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetShootingInMainBase(_config.AllowShootingInMainBase);
+            }
         }
 
         private void ChkSetTimeDilation_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
             if (!chkSpeedHack.Checked)
             {
                 _config.SetSpeedHack = false;
-                Memory._game?.SetSpeedHack(false);
-                UpdateStatusIndicator(lblStatusSpeedHack, false);
+                Config.SaveConfig(_config);
+                
+                if (InGame)
+                {
+                    Memory._game?.SetSpeedHack(false);
+                    UpdateStatusIndicator(lblStatusSpeedHack, false);
+                }
             }
-            Config.SaveConfig(_config);
         }
 
         private void ChkAirStuck_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-            
             chkDisableCollision.Enabled = chkAirStuck.Checked;
             
             if (!chkAirStuck.Checked && _config.SetAirStuck)
             {
                 _config.SetAirStuck = false;
-                Memory._game?.SetAirStuck(false);
-                UpdateStatusIndicator(lblStatusAirStuck, false);
+                Config.SaveConfig(_config);
                 
-                if (_config.DisableCollision)
+                if (InGame)
                 {
-                    _config.DisableCollision = false;
-                    chkDisableCollision.Checked = false;
-                    Memory._game?.DisableCollision(false);
+                    Memory._game?.SetAirStuck(false);
+                    UpdateStatusIndicator(lblStatusAirStuck, false);
+                    
+                    if (_config.DisableCollision)
+                    {
+                        _config.DisableCollision = false;
+                        chkDisableCollision.Checked = false;
+                        Memory._game?.DisableCollision(false);
+                    }
                 }
             }
-            
-            Config.SaveConfig(_config);
         }
 
         private void ChkDisableCollision_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-            
             if (chkDisableCollision.Checked && !chkAirStuck.Checked)
             {
                 chkDisableCollision.Checked = false;
@@ -2022,88 +2075,106 @@ namespace squad_dma
             }
             
             _config.DisableCollision = chkDisableCollision.Checked;
-            Memory._game?.DisableCollision(_config.DisableCollision);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.DisableCollision(_config.DisableCollision);
+            }
         }
 
         private void ChkQuickZoom_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-
             _config.QuickZoom = chkQuickZoom.Checked;
             Config.SaveConfig(_config);
         }
 
         private void ChkRapidFire_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-
             _config.RapidFire = chkRapidFire.Checked;
-            Memory._game?.SetRapidFire(_config.RapidFire);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetRapidFire(_config.RapidFire);
+            }
         }
 
         private void ChkInfiniteAmmo_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-
             _config.InfiniteAmmo = chkInfiniteAmmo.Checked;
-            Memory._game?.SetInfiniteAmmo(_config.InfiniteAmmo);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetInfiniteAmmo(_config.InfiniteAmmo);
+            }
         }
 
         private void ChkQuickSwap_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-
             _config.QuickSwap = chkQuickSwap.Checked;
-            Memory._game?.SetQuickSwap(_config.QuickSwap);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetQuickSwap(_config.QuickSwap);
+            }
         }
 
         private void ChkForceFullAuto_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-
             _config.ForceFullAuto = chkForceFullAuto.Checked;
-            Memory._game?.SetForceFullAuto(_config.ForceFullAuto);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetForceFullAuto(_config.ForceFullAuto);
+            }
         }
 
         private void ChkNoRecoil_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame || Memory._game == null) return;
-            
             _config.NoRecoil = chkNoRecoil.Checked;
-            Memory._game?.SetNoRecoil(_config.NoRecoil);
             Config.SaveConfig(_config);
+            
+            if (InGame && Memory._game != null)
+            {
+                Memory._game?.SetNoRecoil(_config.NoRecoil);
+            }
         }
 
         private void ChkNoSpread_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame || Memory._game == null) return;
-            
             _config.NoSpread = chkNoSpread.Checked;
-            Memory._game?.SetNoSpread(_config.NoSpread);
             Config.SaveConfig(_config);
+            
+            if (InGame && Memory._game != null)
+            {
+                Memory._game?.SetNoSpread(_config.NoSpread);
+            }
         }
 
         private void ChkNoSway_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-
             _config.NoSway = chkNoSway.Checked;
-            Memory._game?.SetNoSway(_config.NoSway);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetNoSway(_config.NoSway);
+            }
         }
 
         private void ChkNoCameraShake_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
-
             _config.NoCameraShake = chkNoCameraShake.Checked;
-            Memory._game?.SetNoCameraShake(_config.NoCameraShake);
             Config.SaveConfig(_config);
+            
+            if (InGame)
+            {
+                Memory._game?.SetNoCameraShake(_config.NoCameraShake);
+            }
         }
 
         private void ChkEnableEsp_CheckedChanged(object sender, EventArgs e)

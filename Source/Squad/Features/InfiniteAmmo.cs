@@ -8,6 +8,9 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "InfiniteAmmo";
         private ulong _lastWeapon = 0;
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
         
         public InfiniteAmmo(ulong playerController, bool inGame)
             : base(playerController, inGame)
@@ -22,6 +25,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Infinite ammo {(enable ? "enabled" : "disabled")}");
             
             // If disabling, restore the last weapon's state

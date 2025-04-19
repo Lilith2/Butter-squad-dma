@@ -1,5 +1,6 @@
 using Offsets;
 using squad_dma.Source.Squad.Features;
+using System.Diagnostics.Eventing.Reader;
 
 namespace squad_dma.Source.Squad
 {
@@ -187,15 +188,16 @@ namespace squad_dma.Source.Squad
                         UpdateCachedPointers();
                         _weaponManager.Update();
 
-                        if (_config.DisableSuppression)
+                        // Only apply features if they are both enabled in config AND the feature itself is enabled
+                        if (_config.DisableSuppression && _suppression.IsEnabled)
                             _suppression.Apply();
-                        if (_config.SetInteractionDistances)
+                        if (_config.SetInteractionDistances && _interactionDistances.IsEnabled)
                             _interactionDistances.Apply();
-                        if (_config.AllowShootingInMainBase)
+                        if (_config.AllowShootingInMainBase && _shootingInMainBase.IsEnabled)
                             _shootingInMainBase.Apply();
-                        if (_config.SetSpeedHack)
+                        if (_config.SetSpeedHack && _speedHack.IsEnabled)
                             _speedHack.Apply();
-                        if (_config.SetAirStuck)
+                        if (_config.SetAirStuck && _airStuck.IsEnabled)
                             _airStuck.Apply();
                         
                         // Handle DisableCollision, ensuring it's disabled if AirStuck is disabled
@@ -205,23 +207,23 @@ namespace squad_dma.Source.Squad
                             _collision.SetEnabled(false);
                         }
                         
-                        if (_config.DisableCollision)
+                        if (_config.DisableCollision && _collision.IsEnabled)
                             _collision.Apply();
-                        if (_config.RapidFire)
+                        if (_config.RapidFire && _rapidFire.IsEnabled)
                             _rapidFire.Apply();
-                        if (_config.InfiniteAmmo)
+                        if (_config.InfiniteAmmo && _infiniteAmmo.IsEnabled)
                             _infiniteAmmo.Apply();
-                        if (_config.QuickSwap)
+                        if (_config.QuickSwap && _quickSwap.IsEnabled)
                             _quickSwap.Apply();
-                        if (_config.ForceFullAuto)
+                        if (_config.ForceFullAuto && _FullAuto.IsEnabled)
                             _FullAuto.Apply();
-                        if (_config.NoCameraShake)
+                        if (_config.NoCameraShake && _noCameraShake.IsEnabled)
                             _noCameraShake.Apply();
-                        if (_config.NoSpread)
+                        if (_config.NoSpread && _noSpread.IsEnabled)
                             _noSpread.Apply();
-                        if (_config.NoRecoil)
+                        if (_config.NoRecoil && _noRecoil.IsEnabled)
                             _noRecoil.Apply();
-                        if (_config.NoSway)
+                        if (_config.NoSway && _noSway.IsEnabled)
                             _noSway.Apply();
                     }
                     catch { /* Silently fail */ }
@@ -317,7 +319,7 @@ namespace squad_dma.Source.Squad
         {
             _noSway.SetEnabled(enable);
         }
-        
+
         public void Dispose()
         {
             if (_cancellationTokenSource != null)

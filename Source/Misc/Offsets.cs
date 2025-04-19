@@ -282,6 +282,7 @@
     {
         public const uint Health = 0x374;
         public const uint MaxHealth = 0x36C;
+        public const uint Team = 0x250;
     }
 
     public struct FString

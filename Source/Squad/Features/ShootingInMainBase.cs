@@ -7,6 +7,10 @@ namespace squad_dma.Source.Squad.Features
     public class ShootingInMainBase : Manager, Weapon
     {
         public const string NAME = "ShootingInMainBase";
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
         private ulong _lastWeapon = 0;
         private ulong _lastVehicleWeapon = 0;
         
@@ -23,6 +27,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Shooting in main base {(enable ? "enabled" : "disabled")}");
             
             // If disabling, restore the last weapons' states

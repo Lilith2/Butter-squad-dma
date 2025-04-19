@@ -41,6 +41,19 @@ namespace squad_dma
             return localPlayer.Team == this.Team;
         }
 
+        public bool IsEnemy()
+        {
+            if (TeamID == -1) return false;
+
+            var localPlayer = Memory.LocalPlayer;
+            if (localPlayer == null) return false;
+
+            if (localPlayer.TeamID != -1 && this.TeamID != -1)
+                return localPlayer.TeamID != this.TeamID;
+
+            return localPlayer.Team != this.Team;
+        }
+
         public bool IsInMySquad()
         {
             return IsFriendly() &&

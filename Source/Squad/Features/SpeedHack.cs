@@ -7,7 +7,14 @@ namespace squad_dma.Source.Squad.Features
     public class SpeedHack : Manager
     {
         public const string NAME = "SpeedHack";
-                
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
+        private float _originalMaxFlySpeed;
+        private float _originalMaxCustomMovementSpeed;
+        private float _originalMaxAcceleration;
+        
         public SpeedHack(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
@@ -21,6 +28,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Speed hack {(enable ? "enabled" : "disabled")}");
             Apply();
         }

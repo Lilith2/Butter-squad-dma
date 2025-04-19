@@ -9,6 +9,10 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "AirStuck";
         
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
         private Collision _collision;
         
         // Original values
@@ -39,8 +43,14 @@ namespace squad_dma.Source.Squad.Features
 
         public void SetEnabled(bool enable)
         {
-            if (!IsLocalPlayerValid()) return;
-            Logger.Debug($"[{NAME}] Air Stuck {(enable ? "enabled" : "disabled")}");
+            if (!IsLocalPlayerValid())
+            {
+                Logger.Error($"[{NAME}] Cannot enable/disable air stuck - local player is not valid");
+                return;
+            }
+            
+            _isEnabled = enable;
+            Logger.Debug($"[{NAME}] Air stuck {(enable ? "enabled" : "disabled")}");
             Apply();
         }
 

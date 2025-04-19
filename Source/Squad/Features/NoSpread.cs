@@ -8,6 +8,10 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "NoSpread";
                 
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
         // Original values for animation instance
         private Dictionary<ulong, float> _originalAnimValues = new Dictionary<ulong, float>();
         
@@ -85,6 +89,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] No spread {(enable ? "enabled" : "disabled")}");
             
             // If disabling, restore the last weapon's state

@@ -8,6 +8,10 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "Suppression";
         
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
         private float _originalSuppressionPercentage = 0.0f;
         private float _originalMaxSuppression = -1.0f;
         private float _originalSuppressionMultiplier = 1.0f;
@@ -26,6 +30,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Suppression {(enable ? "enabled" : "disabled")}");
             Apply();
         }

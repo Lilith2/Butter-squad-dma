@@ -8,6 +8,10 @@ namespace squad_dma.Source.Squad.Features
     public class QuickSwap : Manager, Weapon
     {
         public const string NAME = "QuickSwap";
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
         private ulong _lastWeapon = 0;
         
         public QuickSwap(ulong playerController, bool inGame)
@@ -23,6 +27,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Quick swap {(enable ? "enabled" : "disabled")}");
             
             // If disabling, restore the last weapon's state

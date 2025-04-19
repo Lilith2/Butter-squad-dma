@@ -1,11 +1,8 @@
-﻿using Offsets;
-using squad_dma.Source.Misc;
-using System;
+﻿using squad_dma.Source.Misc;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Numerics;
-using System.Linq;
 
 namespace squad_dma
 {
@@ -276,7 +273,7 @@ namespace squad_dma
                     {
                         playerInstanceInfoRound.AddEntry<float>(i, 2, actorAddr + Offsets.SQDeployable.Health);
                         playerInstanceInfoRound.AddEntry<float>(i, 3, actorAddr + Offsets.SQDeployable.MaxHealth);
-                        playerInstanceInfoRound.AddEntry<int>(i, 14, actorAddr + 0x250);
+                        playerInstanceInfoRound.AddEntry<int>(i, 14, actorAddr + Offsets.SQDeployable.Team);
                     }
                     else
                     {
@@ -487,7 +484,7 @@ namespace squad_dma
                             claimedBySquadResult.TryGetResult<ulong>(out var claimedBySquad) &&
                             claimedBySquad != 0)
                         {
-                            var teamId = Memory.ReadValue<int>(claimedBySquad + 0x2AC);
+                            var teamId = Memory.ReadValue<int>(claimedBySquad + Offsets.ASQSquadState.TeamId);
                             actor.TeamID = (teamId == 1 || teamId == 2) ? teamId : -1;
                         }
                         else

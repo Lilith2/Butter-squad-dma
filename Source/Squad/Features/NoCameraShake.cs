@@ -6,15 +6,17 @@ namespace squad_dma.Source.Squad.Features
     public class NoCameraShake : Manager
     {
         public const string NAME = "NoCameraShake";
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
         private CancellationTokenSource _cancellationTokenSource;
-        private bool _isEnabled;
         private float _originalShakeScale;
         
         public NoCameraShake(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
             _cancellationTokenSource = new CancellationTokenSource();
-            _isEnabled = false;
         }
 
         public void SetEnabled(bool enable)
@@ -69,7 +71,7 @@ namespace squad_dma.Source.Squad.Features
             {
                 if (!IsLocalPlayerValid())
                 {
-                    Logger.Error($"[{NAME}] Cannot apply no camera shake - local player is not valid");
+                    //Logger.Error($"[{NAME}] Cannot apply no camera shake - local player is not valid");
                     return;
                 }
 

@@ -9,7 +9,10 @@ namespace squad_dma.Source.Squad.Features
     public class Collision : Manager
     {
         public const string NAME = "Collision";
+        private bool _isEnabled = false;
         
+        public bool IsEnabled => _isEnabled;
+                
         public Collision(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
@@ -18,6 +21,7 @@ namespace squad_dma.Source.Squad.Features
         public void SetEnabled(bool enable)
         {
             if (!IsLocalPlayerValid()) return;
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Collision {(enable ? "enabled" : "disabled")}");
             Apply();
         }

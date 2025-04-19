@@ -7,6 +7,12 @@ namespace squad_dma.Source.Squad.Features
     public class InteractionDistances : Manager
     {
         public const string NAME = "InteractionDistances";
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
+        private float _originalInteractionDistance;
+        private float _originalMaxInteractionDistance;
         
         public InteractionDistances(ulong playerController, bool inGame)
             : base(playerController, inGame)
@@ -21,6 +27,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Interaction distances {(enable ? "enabled" : "disabled")}");
             Apply();
         }

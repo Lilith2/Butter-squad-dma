@@ -400,7 +400,6 @@ namespace squad_dma
                             Memory.GameStatus = GameStatus.Menu;
                             Memory._ready = true;
                             Memory._game.WaitForGame();
-                            Config.ClearCache();
 
                             while (Memory.GameStatus == GameStatus.InGame && _running)
                             {
@@ -452,8 +451,6 @@ namespace squad_dma
                         finally
                         {
                             Memory._ready = false;
-                            // Clear cache when returning to menu
-                            Config.ClearCache();
                             Thread.Sleep(100);
                         }
                     }

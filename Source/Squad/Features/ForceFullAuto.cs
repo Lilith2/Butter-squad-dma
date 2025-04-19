@@ -10,6 +10,10 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "ForceFullAuto";
                 
+        private bool _isEnabled = false;
+        
+        public bool IsEnabled => _isEnabled;
+        
         private int[] _originalFireModes = null;
         private bool _originalManualBolt = false;
         private bool _originalRequireAdsToShoot = false;
@@ -28,6 +32,7 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
+            _isEnabled = enable;
             Logger.Debug($"[{NAME}] Force Full Auto {(enable ? "enabled" : "disabled")}");
             
             // If disabling, restore the last weapon's state

@@ -1,4 +1,5 @@
-﻿using squad_dma.Source.Misc;
+﻿using Offsets;
+using squad_dma.Source.Misc;
 using squad_dma.Source.Squad.Debug;
 using squad_dma.Source.Squad.Features;
 using System.Collections.ObjectModel;
@@ -91,7 +92,6 @@ namespace squad_dma
         public void LogTeamInfo() => _debugTeam?.LogTeamInfo();
         public void ReadCurrentWeapons(bool includeOtherPlayers = false) => _debugSoldier?.ReadCurrentWeapons(includeOtherPlayers);
         public void ModifyGrenadeProperties() => _debugSoldier?.ModifyGrenadeProperties();
-
         public void WaitForGame()
         {
             while (true)
@@ -246,19 +246,18 @@ namespace squad_dma
                     try
                     {
                         ulong playerState = Memory.ReadPtr(_playerController + Offsets.Controller.PlayerState);
-                        ulong squadState = Memory.ReadPtr(_playerController + Offsets.PlayerController.SquadState);
-
-                        if (playerState == 0 || squadState == 0)
+                        if (playerState == 0)
                             return false;
 
                         int teamId = Memory.ReadValue<int>(playerState + Offsets.ASQPlayerState.TeamID);
-                                                
+                        _localUPlayer.TeamID = teamId;
+
+                        ulong squadState = Memory.ReadPtr(_playerController + Offsets.PlayerController.SquadState);
                         if (squadState != 0)
                         {
                             int squadId = Memory.ReadValue<int>(squadState + Offsets.ASQSquadState.SquadId);
                             _localUPlayer.SquadID = squadId;
                         }
-                        _localUPlayer.TeamID = teamId;
                     }
                     catch { return false; }
                 }

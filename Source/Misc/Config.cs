@@ -396,6 +396,7 @@ namespace squad_dma
             if (TryLoadConfig(out var config))
             {
                 config.ClearFeatureCaches();
+                Logger.Info("Cleared caches");
                 SaveConfig(config);
             }
         }

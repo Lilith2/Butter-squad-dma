@@ -80,7 +80,10 @@ namespace squad_dma.Source.Squad
                     {
                         try
                         {
-                            feature.OnWeaponChanged(newWeapon, _currentWeapon);
+                            if (feature.IsEnabled)
+                            {
+                                feature.OnWeaponChanged(newWeapon, _currentWeapon);
+                            }
                         }
                         catch (Exception ex)
                         {

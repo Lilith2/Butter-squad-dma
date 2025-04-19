@@ -9,6 +9,11 @@ namespace squad_dma.Source.Squad.Features
     public interface Weapon
     {
         /// <summary>
+        /// Gets whether the feature is currently enabled
+        /// </summary>
+        bool IsEnabled { get; }
+
+        /// <summary>
         /// Called when the player switches weapons or enters/exits a vehicle.
         /// </summary>
         /// <param name="newWeapon">Address of the new weapon. Can be a soldier weapon or vehicle weapon.</param>
