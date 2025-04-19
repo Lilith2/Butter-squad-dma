@@ -9,9 +9,7 @@ namespace squad_dma.Source.Squad.Features
     public class ForceFullAuto : Manager
     {
         public const string NAME = "ForceFullAuto";
-        
-        public bool _isForceFullAutoEnabled = false;
-        
+                
         private int[] _originalFireModes = null;
         private bool _originalManualBolt = false;
         private bool _originalRequireAdsToShoot = false;
@@ -33,7 +31,6 @@ namespace squad_dma.Source.Squad.Features
         public void SetEnabled(bool enable)
         {
             if (!IsLocalPlayerValid()) return;
-            _isForceFullAutoEnabled = enable;
             Logger.Debug($"[{NAME}] Force Full Auto {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -47,7 +44,7 @@ namespace squad_dma.Source.Squad.Features
         {
             try
             {
-                if (!_isForceFullAutoEnabled && _originalFireModes == null)
+                if (!Program.Config.ForceFullAuto && _originalFireModes == null)
                     return;
                 
                 if (!IsLocalPlayerValid()) return;
@@ -118,7 +115,7 @@ namespace squad_dma.Source.Squad.Features
                     return;
                 }
 
-                if (_isForceFullAutoEnabled)
+                if (Program.Config.ForceFullAuto)
                 {
                     if (_originalFireModes == null)
                     {

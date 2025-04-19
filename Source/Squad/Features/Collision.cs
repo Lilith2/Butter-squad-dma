@@ -10,8 +10,6 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "Collision";
         
-        public bool IsCollisionDisabled { get; private set; } = false;
-        
         public Collision(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
@@ -20,8 +18,7 @@ namespace squad_dma.Source.Squad.Features
         public void SetEnabled(bool enable)
         {
             if (!IsLocalPlayerValid()) return;
-            IsCollisionDisabled = enable;
-            Logger.Debug($"[{NAME}] Collision {(enable ? "disabled" : "enabled")}");
+            Logger.Debug($"[{NAME}] Collision {(enable ? "enabled" : "disabled")}");
             Apply();
         }
 
@@ -40,14 +37,14 @@ namespace squad_dma.Source.Squad.Features
 
                 ulong bodyInstanceAddr = rootComponent + UPrimitiveComponent.BodyInstance;
                 
-                if (IsCollisionDisabled)
+                if (Program.Config.DisableCollision)
                 {
                     Memory.WriteValue<byte>(bodyInstanceAddr + FBodyInstance.CollisionEnabled, 0); // NoCollision
                     Logger.Debug($"[{NAME}] Set collision to NoCollision (0)");
                 }
                 else
                 {
-                    Memory.WriteValue<byte>(bodyInstanceAddr + FBodyInstance.CollisionEnabled, 1); // QueryOnly
+                    Memory.WriteValue<byte>(bodyInstanceAddr + FBodyInstance.CollisionEnabled, 1); // QueryOnly (normal collision)
                     Logger.Debug($"[{NAME}] Set collision to QueryOnly (1)");
                 }
             }

@@ -6,9 +6,7 @@ namespace squad_dma.Source.Squad.Features
     public class NoSway : Manager
     {
         public const string NAME = "NoSway";
-        
-        public bool _isNoSwayEnabled = false;
-        
+                
         // Original values for animation instance
         private Dictionary<ulong, float> _originalAnimValues = new Dictionary<ulong, float>();
         
@@ -81,7 +79,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isNoSwayEnabled = enable;
             Logger.Debug($"[{NAME}] No sway {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -96,7 +93,7 @@ namespace squad_dma.Source.Squad.Features
                     return;
                 }
 
-                Logger.Debug($"[{NAME}] === {(_isNoSwayEnabled ? "ENABLING" : "DISABLING")} NO SWAY ===");
+                Logger.Debug($"[{NAME}] === {(Program.Config.NoSway ? "ENABLING" : "DISABLING")} NO SWAY ===");
 
                 // Get soldier actor
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
@@ -145,7 +142,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Applying no sway to anim instance at 0x{animInstance:X}");
                 // Apply no sway to anim instance
-                if (_isNoSwayEnabled)
+                if (Program.Config.NoSway)
                 {
                     // Store original values when first enabled
                     if (_originalAnimValues.Count == 0)
@@ -189,7 +186,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Applying no sway to weapon static info at 0x{weaponStaticInfo:X}");
                 // Apply no sway to weapon static info
-                if (_isNoSwayEnabled)
+                if (Program.Config.NoSway)
                 {
                     // Store original values when first enabled
                     if (_originalWeaponValues.Count == 0)
@@ -231,7 +228,7 @@ namespace squad_dma.Source.Squad.Features
                     }
                 }
 
-                Logger.Debug($"[{NAME}] Successfully {(_isNoSwayEnabled ? "enabled" : "disabled")} no sway");
+                Logger.Debug($"[{NAME}] Successfully {(Program.Config.NoSway ? "enabled" : "disabled")} no sway");
                 Logger.Debug($"[{NAME}] =============================");
             }
             catch (Exception ex)

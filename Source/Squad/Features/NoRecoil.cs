@@ -7,9 +7,7 @@ namespace squad_dma.Source.Squad.Features
     public class NoRecoil : Manager
     {
         public const string NAME = "NoRecoil";
-        
-        public bool _isNoRecoilEnabled = false;
-        
+                
         // Original values for animation instance
         private Dictionary<ulong, float> _originalAnimValues = new Dictionary<ulong, float>();
         
@@ -142,7 +140,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isNoRecoilEnabled = enable;
             Logger.Debug($"[{NAME}] No recoil {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -204,7 +201,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Applying no recoil to anim instance at 0x{animInstance:X}");
                 // Apply no recoil to anim instance
-                if (_isNoRecoilEnabled)
+                if (Program.Config.NoRecoil)
                 {
                     // Store original values when first enabled
                     if (_originalAnimValues.Count == 0)
@@ -248,7 +245,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Applying no recoil to weapon static info at 0x{weaponStaticInfo:X}");
                 // Apply no recoil to weapon static info
-                if (_isNoRecoilEnabled)
+                if (Program.Config.NoRecoil)
                 {
                     // Store original values when first enabled
                     if (_originalWeaponValues.Count == 0)
@@ -291,7 +288,7 @@ namespace squad_dma.Source.Squad.Features
                 }
 
                 // Handle camera recoil
-                if (_isNoRecoilEnabled)
+                if (Program.Config.NoRecoil)
                 {
                     // Store original value when first enabled
                     if (_originalCameraRecoil)
@@ -316,7 +313,7 @@ namespace squad_dma.Source.Squad.Features
                     Logger.Debug($"[{NAME}] Restored original camera recoil state: {_originalCameraRecoil}");
                 }
 
-                Logger.Debug($"[{NAME}] Successfully {(_isNoRecoilEnabled ? "enabled" : "disabled")} no recoil");
+                Logger.Debug($"[{NAME}] Successfully {(Program.Config.NoRecoil ? "enabled" : "disabled")} no recoil");
                 Logger.Debug("=============================");
             }
             catch (Exception ex)

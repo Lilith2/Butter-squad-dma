@@ -1,7 +1,5 @@
 using Offsets;
-using squad_dma.Source.Squad.Debug;
 using squad_dma.Source.Squad.Features;
-using System.Diagnostics.Eventing.Reader;
 
 namespace squad_dma.Source.Squad
 {
@@ -9,6 +7,7 @@ namespace squad_dma.Source.Squad
     {
         public readonly ulong _playerController;
         public readonly bool _inGame;
+        private readonly Config _config;
         private CancellationTokenSource _cancellationTokenSource;
         
         protected ulong _cachedPlayerState = 0;
@@ -159,40 +158,41 @@ namespace squad_dma.Source.Squad
                     {
                         UpdateCachedPointers();
 
-                        if (_suppression._isSuppressionEnabled)
+                        if (_config.DisableSuppression)
                             _suppression.Apply();
-                        if (_interactionDistances._isInteractionDistancesEnabled)
+                        if (_config.SetInteractionDistances)
                             _interactionDistances.Apply();
-                        if (_shootingInMainBase._isShootingInMainBaseEnabled)
+                        if (_config.AllowShootingInMainBase)
                             _shootingInMainBase.Apply();
-                        if (_speedHack._isSpeedHackEnabled)
+                        if (_config.SetSpeedHack)
                             _speedHack.Apply();
-                        if (_airStuck._isAirStuckEnabled)
+                        if (_config.SetAirStuck)
                             _airStuck.Apply();
                         
                         // Handle DisableCollision, ensuring it's disabled if AirStuck is disabled
-                        if (!_airStuck._isAirStuckEnabled && _collision.IsCollisionDisabled)
+                        if (!_config.SetAirStuck && _config.DisableCollision)
                         {
+                            _config.DisableCollision = false;
                             _collision.SetEnabled(false);
                         }
                         
-                        if (_collision.IsCollisionDisabled)
+                        if (_config.DisableCollision)
                             _collision.Apply();
-                        if (_rapidFire._isRapidFireEnabled)
+                        if (_config.RapidFire)
                             _rapidFire.Apply();
-                        if (_infiniteAmmo._isInfiniteAmmoEnabled)
+                        if (_config.InfiniteAmmo)
                             _infiniteAmmo.Apply();
-                        if (_quickSwap._isQuickSwapEnabled)
+                        if (_config.QuickSwap)
                             _quickSwap.Apply();
-                        if (_FullAuto._isForceFullAutoEnabled)
+                        if (_config.ForceFullAuto)
                             _FullAuto.Apply();
-                        if (_noCameraShake._isNoCameraShakeEnabled)
+                        if (_config.NoCameraShake)
                             _noCameraShake.Apply();
-                        if (_noSpread._isNoSpreadEnabled)
+                        if (_config.NoSpread)
                             _noSpread.Apply();
-                        if (_noRecoil._isNoRecoilEnabled)
+                        if (_config.NoRecoil)
                             _noRecoil.Apply();
-                        if (_noSway._isNoSwayEnabled)
+                        if (_config.NoSway)
                             _noSway.Apply();
                     }
                     catch { /* Silently fail */ }
@@ -231,12 +231,6 @@ namespace squad_dma.Source.Squad
         public void SetAirStuck(bool enable)
         {
             _airStuck.SetEnabled(enable);
-            
-            // If AirStuck is disabled, also disable collision
-            if (!enable && _collision.IsCollisionDisabled)
-            {
-                _collision.SetEnabled(false);
-            }
         }
         
         public void SetQuickZoom(bool enable)
@@ -249,7 +243,7 @@ namespace squad_dma.Source.Squad
         public void DisableCollision(bool disable)
         {
             // Only allow enabling if AirStuck is enabled
-            if (disable && !_airStuck._isAirStuckEnabled)
+            if (disable && !Program.Config.SetAirStuck)
             {
                 return;
             }

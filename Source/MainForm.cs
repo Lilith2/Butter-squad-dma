@@ -204,23 +204,23 @@ namespace squad_dma
 
         #region Overrides
         protected override void OnFormClosing(FormClosingEventArgs e)
-{
-    e.Cancel = true;
-    this.Enabled = false;
+        {
+            e.Cancel = true;
+            this.Enabled = false;
 
-    Program.Log("Closing form");
-    if (_espOverlay != null && !_espOverlay.IsDisposed)
-    {
-        _espOverlay.Close();
-        _espOverlay = null;
-    }
+            Program.Log("Closing form");
+            if (_espOverlay != null && !_espOverlay.IsDisposed)
+            {
+                _espOverlay.Close();
+                _espOverlay = null;
+            }
 
-    CleanupLoadedBitmaps();
-    Config.SaveConfig(_config);
-    Memory.Shutdown();
-    e.Cancel = false;
-    base.OnFormClosing(e);
-}
+            CleanupLoadedBitmaps();
+            Config.ClearAndSaveCaches();
+            Memory.Shutdown();
+            e.Cancel = false;
+            base.OnFormClosing(e);
+        }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -233,10 +233,12 @@ namespace squad_dma
             }
             else if (keyData == _config.KeybindAirStuck && chkAirStuck.Checked)
             {
+                // Toggle AirStuck state
                 _config.SetAirStuck = !_config.SetAirStuck;
                 Memory._game?.SetAirStuck(_config.SetAirStuck);
                 UpdateStatusIndicator(lblStatusAirStuck, _config.SetAirStuck);
                 
+                // If NoCollision is also checked, toggle it together with AirStuck
                 if (chkDisableCollision.Checked)
                 {
                     _config.DisableCollision = _config.SetAirStuck;
@@ -330,7 +332,7 @@ namespace squad_dma
             chkAirStuck.CheckedChanged += ChkAirStuck_CheckedChanged;
 
             chkDisableCollision.Checked = _config.DisableCollision;
-            chkDisableCollision.Enabled = _config.SetAirStuck; // Only enable if AirStuck is checked
+            chkDisableCollision.Enabled = _config.SetAirStuck;
             chkDisableCollision.CheckedChanged += ChkDisableCollision_CheckedChanged;
 
             chkQuickZoom.Checked = _config.QuickZoom;
@@ -412,12 +414,18 @@ namespace squad_dma
                 Memory._game?.SetAirStuck(_config.SetAirStuck);
                 UpdateStatusIndicator(lblStatusAirStuck, _config.SetAirStuck);
                 
-                // If DisableCollision is checked, toggle it along with AirStuck
-                if (chkDisableCollision.Checked)
+                if (!_config.SetAirStuck && chkDisableCollision.Checked)
                 {
-                    _config.DisableCollision = _config.SetAirStuck;
-                    Memory._game?.DisableCollision(_config.DisableCollision);
+                    _config.DisableCollision = false;
+                    Memory._game?.DisableCollision(false);
                 }
+                else if (_config.SetAirStuck && chkDisableCollision.Checked)
+                {
+                    _config.DisableCollision = true;
+                    Memory._game?.DisableCollision(true);
+                }
+                
+                Config.SaveConfig(_config);
             }
 
             // Handle other keybinds
@@ -940,7 +948,6 @@ namespace squad_dma
                     {
                         if (Memory._game._soldierManager?.IsLocalPlayerValid() == true)
                         {
-                            // Only apply features that are enabled in the config
                             if (_config.DisableSuppression)
                                 Memory._game.SetSuppression(true);
                             
@@ -983,9 +990,9 @@ namespace squad_dma
                             if (_config.NoCameraShake)
                                 Memory._game.SetNoCameraShake(true);
 
-                            Logger.Info("Applied enabled features on game start");
-                            return; // Exit after applying features once
+                            return;
                         }
+
                     }
                     catch (Exception ex)
                     {
@@ -1985,27 +1992,37 @@ namespace squad_dma
         {
             if (!InGame) return;
             
-            _config.SetAirStuck = chkAirStuck.Checked;
-            
             chkDisableCollision.Enabled = chkAirStuck.Checked;
-            if (!chkAirStuck.Checked && chkDisableCollision.Checked)
+            
+            if (!chkAirStuck.Checked && _config.SetAirStuck)
             {
-                chkDisableCollision.Checked = false;
-                _config.DisableCollision = false;
+                _config.SetAirStuck = false;
+                Memory._game?.SetAirStuck(false);
+                UpdateStatusIndicator(lblStatusAirStuck, false);
+                
+                if (_config.DisableCollision)
+                {
+                    _config.DisableCollision = false;
+                    chkDisableCollision.Checked = false;
+                    Memory._game?.DisableCollision(false);
+                }
             }
-
+            
             Config.SaveConfig(_config);
         }
 
         private void ChkDisableCollision_CheckedChanged(object sender, EventArgs e)
         {
             if (!InGame) return;
+            
             if (chkDisableCollision.Checked && !chkAirStuck.Checked)
             {
                 chkDisableCollision.Checked = false;
                 return;
             }
+            
             _config.DisableCollision = chkDisableCollision.Checked;
+            Memory._game?.DisableCollision(_config.DisableCollision);
             Config.SaveConfig(_config);
         }
 
@@ -2055,7 +2072,7 @@ namespace squad_dma
 
         private void ChkNoRecoil_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
+            if (!InGame || Memory._game == null) return;
             
             _config.NoRecoil = chkNoRecoil.Checked;
             Memory._game?.SetNoRecoil(_config.NoRecoil);
@@ -2064,7 +2081,7 @@ namespace squad_dma
 
         private void ChkNoSpread_CheckedChanged(object sender, EventArgs e)
         {
-            if (!InGame) return;
+            if (!InGame || Memory._game == null) return;
             
             _config.NoSpread = chkNoSpread.Checked;
             Memory._game?.SetNoSpread(_config.NoSpread);
@@ -2074,7 +2091,7 @@ namespace squad_dma
         private void ChkNoSway_CheckedChanged(object sender, EventArgs e)
         {
             if (!InGame) return;
-            
+
             _config.NoSway = chkNoSway.Checked;
             Memory._game?.SetNoSway(_config.NoSway);
             Config.SaveConfig(_config);
@@ -2083,7 +2100,7 @@ namespace squad_dma
         private void ChkNoCameraShake_CheckedChanged(object sender, EventArgs e)
         {
             if (!InGame) return;
-            
+
             _config.NoCameraShake = chkNoCameraShake.Checked;
             Memory._game?.SetNoCameraShake(_config.NoCameraShake);
             Config.SaveConfig(_config);

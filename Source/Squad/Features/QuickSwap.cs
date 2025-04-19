@@ -7,9 +7,7 @@ namespace squad_dma.Source.Squad.Features
     public class QuickSwap : Manager
     {
         public const string NAME = "QuickSwap";
-        
-        public bool _isQuickSwapEnabled = false;
-        
+                
         public QuickSwap(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
@@ -23,7 +21,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isQuickSwapEnabled = enable;
             Logger.Debug($"[{NAME}] Quick swap {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -46,7 +43,7 @@ namespace squad_dma.Source.Squad.Features
                     return;
                 }
                 
-                if (_isQuickSwapEnabled)
+                if (Program.Config.QuickSwap)
                 {
                     const float FAST_SWAP_VALUE = 0.01f;
                     Logger.Debug($"[{NAME}] Setting quick swap values to {FAST_SWAP_VALUE}");

@@ -6,9 +6,7 @@ namespace squad_dma.Source.Squad.Features
     public class NoSpread : Manager
     {
         public const string NAME = "NoSpread";
-        
-        public bool _isNoSpreadEnabled = false;
-        
+                
         // Original values for animation instance
         private Dictionary<ulong, float> _originalAnimValues = new Dictionary<ulong, float>();
         
@@ -95,7 +93,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isNoSpreadEnabled = enable;
             Logger.Debug($"[{NAME}] No spread {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -157,7 +154,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Applying no spread to anim instance at 0x{animInstance:X}");
                 // Apply no spread to anim instance
-                if (_isNoSpreadEnabled)
+                if (Program.Config.NoSpread)
                 {
                     // Store original values when first enabled
                     if (_originalAnimValues.Count == 0)
@@ -201,7 +198,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Applying no spread to weapon static info at 0x{weaponStaticInfo:X}");
                 // Apply no spread to weapon static info
-                if (_isNoSpreadEnabled)
+                if (Program.Config.NoSpread)
                 {
                     // Store original values when first enabled
                     if (_originalWeaponValues.Count == 0)
@@ -243,7 +240,7 @@ namespace squad_dma.Source.Squad.Features
                     }
                 }
 
-                Logger.Debug($"[{NAME}] Successfully {(_isNoSpreadEnabled ? "enabled" : "disabled")} no spread");
+                Logger.Debug($"[{NAME}] Successfully {(Program.Config.NoSpread ? "enabled" : "disabled")} no spread");
                 Logger.Debug("=============================");
             }
             catch (Exception ex)

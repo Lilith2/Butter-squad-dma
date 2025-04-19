@@ -8,9 +8,7 @@ namespace squad_dma.Source.Squad.Features
     public class RapidFire : Manager
     {
         public const string NAME = "RapidFire";
-        
-        public bool _isRapidFireEnabled = false;
-        
+                
         // Original values for soldier weapon
         private float _soldierOriginalTimeBetweenShots = 0.0f;
         private float _soldierOriginalTimeBetweenSingleShots = 0.0f;
@@ -45,7 +43,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isRapidFireEnabled = enable;
             Logger.Debug($"[{NAME}] Rapid fire {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -135,7 +132,7 @@ namespace squad_dma.Source.Squad.Features
                 ulong weaponConfigOffset = weapon + ASQWeapon.WeaponConfig;
                 Logger.Debug($"[{NAME}] Found weapon config at 0x{weaponConfigOffset:X} for {(isVehicle ? "vehicle" : "soldier")} weapon");
 
-                if (_isRapidFireEnabled)
+                if (Program.Config.RapidFire)
                 {
                     // Store original values when first enabled
                     if (originalTimeBetweenShots == 0.0f)

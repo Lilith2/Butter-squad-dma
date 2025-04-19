@@ -7,7 +7,6 @@ namespace squad_dma.Source.Squad.Features
     public class InfiniteAmmo : Manager
     {
         public const string NAME = "InfiniteAmmo";
-        public bool _isInfiniteAmmoEnabled = false;
         
         public InfiniteAmmo(ulong playerController, bool inGame)
             : base(playerController, inGame)
@@ -22,7 +21,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isInfiniteAmmoEnabled = enable;
             Logger.Debug($"[{NAME}] Infinite ammo {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -109,17 +107,17 @@ namespace squad_dma.Source.Squad.Features
             {
                 ulong weaponConfigOffset = weapon + ASQWeapon.WeaponConfig;
 
-                if (_isInfiniteAmmoEnabled)
+                if (Program.Config.InfiniteAmmo)
                 {
                     Memory.WriteValue<byte>(weaponConfigOffset + FSQWeaponData.bInfiniteAmmo, 1);
                     Memory.WriteValue<byte>(weaponConfigOffset + FSQWeaponData.bInfiniteMags, 1);
-                    Logger.Debug($"[{NAME}] Enabled infinite ammo and magazines");
+                    Logger.Debug($"[{NAME}] Enabled infinite ammo");
                 }
                 else
                 {
                     Memory.WriteValue<byte>(weaponConfigOffset + FSQWeaponData.bInfiniteAmmo, 0);
                     Memory.WriteValue<byte>(weaponConfigOffset + FSQWeaponData.bInfiniteMags, 0);
-                    Logger.Debug($"[{NAME}] Disabled infinite ammo and magazines");
+                    Logger.Debug($"[{NAME}] Disabled infinite ammo");
                 }
             }
             catch (Exception ex)

@@ -7,7 +7,6 @@ namespace squad_dma.Source.Squad.Features
     public class InteractionDistances : Manager
     {
         public const string NAME = "InteractionDistances";
-        public bool _isInteractionDistancesEnabled = false;
         
         public InteractionDistances(ulong playerController, bool inGame)
             : base(playerController, inGame)
@@ -22,7 +21,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isInteractionDistancesEnabled = enable;
             Logger.Debug($"[{NAME}] Interaction distances {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -45,7 +43,7 @@ namespace squad_dma.Source.Squad.Features
                     return;
                 }
 
-                if (_isInteractionDistancesEnabled)
+                if (Program.Config.SetInteractionDistances)
                 {
                     Memory.WriteValue<float>(soldierActor + ASQSoldier.UseInteractDistance, 5000.0f);
                     Memory.WriteValue<float>(soldierActor + ASQSoldier.InteractableRadiusMultiplier, 70.0f);

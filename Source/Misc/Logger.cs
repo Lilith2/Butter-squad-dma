@@ -41,8 +41,26 @@ namespace squad_dma.Source.Misc
             if (!IsConsoleEnabled) return;
             
             var logMessage = $"[{level}] {message}";
+            
+            // Set color based on log level
+            switch (level)
+            {
+                case "ERROR":
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case "DEBUG":
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    break;
+                case "INFO":
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+            }
+            
             Console.WriteLine(logMessage);
             System.Diagnostics.Debug.WriteLine(logMessage);
+            
+            // Reset color
+            Console.ResetColor();
         }
     }
 } 

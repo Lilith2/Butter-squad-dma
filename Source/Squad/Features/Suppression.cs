@@ -1,6 +1,5 @@
 using System;
 using Offsets;
-using squad_dma;
 using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
@@ -9,7 +8,6 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "Suppression";
         
-        public bool _isSuppressionEnabled = false;
         private float _originalSuppressionPercentage = 0.0f;
         private float _originalMaxSuppression = -1.0f;
         private float _originalSuppressionMultiplier = 1.0f;
@@ -41,7 +39,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isSuppressionEnabled = enable;
             Logger.Debug($"[{NAME}] Suppression {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -64,7 +61,7 @@ namespace squad_dma.Source.Squad.Features
                     return;
                 }
 
-                if (_isSuppressionEnabled)
+                if (Program.Config.DisableSuppression)
                 {
                     // Store original values if we don't have them cached
                     if (_originalSuppressionPercentage == 0.0f && _originalMaxSuppression == -1.0f && 

@@ -7,7 +7,6 @@ namespace squad_dma.Source.Squad.Features
     public class ShootingInMainBase : Manager
     {
         public const string NAME = "ShootingInMainBase";
-        public bool _isShootingInMainBaseEnabled = false;
         
         public ShootingInMainBase(ulong playerController, bool inGame)
             : base(playerController, inGame)
@@ -22,7 +21,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isShootingInMainBaseEnabled = enable;
             Logger.Debug($"[{NAME}] Shooting in main base {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -65,7 +63,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Found current item static info at 0x{currentItemStaticInfo:X}");
 
-                if (_isShootingInMainBaseEnabled)
+                if (Program.Config.AllowShootingInMainBase)
                 {
                     Memory.WriteValue<bool>(currentItemStaticInfo + ASQSoldier.bUsableInMainBase, true);
                     Logger.Debug($"[{NAME}] Enabled shooting in main base");

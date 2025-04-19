@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
+using squad_dma.Source.Misc;
+
 
 namespace squad_dma
 {
@@ -327,12 +329,6 @@ namespace squad_dma
             FirstScopeMagnification = 4.0f;
             SecondScopeMagnification = 6.0f;
             ThirdScopeMagnification = 12.0f;
-
-            // Initialize feature states
-            NoRecoil = false;
-            NoSpread = false;
-            NoSway = false;
-            NoCameraShake = false;
         }
 
         /// <summary>
@@ -375,11 +371,19 @@ namespace squad_dma
         {
             lock (_lock)
             {
-                Directory.CreateDirectory(SettingsDirectory);
-                File.WriteAllText(
-                    Path.Combine(SettingsDirectory, "Settings.json"),
-                    JsonSerializer.Serialize(config, _jsonOptions)
-                );
+                try
+                {
+                    Directory.CreateDirectory(SettingsDirectory);
+                    var settingsPath = Path.Combine(SettingsDirectory, "Settings.json");
+                    var json = JsonSerializer.Serialize(config, _jsonOptions);
+                    File.WriteAllText(settingsPath, json);
+                    Logger.Info($"Successfully saved config to {settingsPath}");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Failed to save config: {ex.Message}");
+                    throw;
+                }
             }
         }
 

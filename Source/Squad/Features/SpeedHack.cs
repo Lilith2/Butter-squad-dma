@@ -7,9 +7,7 @@ namespace squad_dma.Source.Squad.Features
     public class SpeedHack : Manager
     {
         public const string NAME = "SpeedHack";
-        
-        public bool _isSpeedHackEnabled = false;
-        
+                
         public SpeedHack(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
@@ -23,7 +21,6 @@ namespace squad_dma.Source.Squad.Features
                 return;
             }
             
-            _isSpeedHackEnabled = enable;
             Logger.Debug($"[{NAME}] Speed hack {(enable ? "enabled" : "disabled")}");
             Apply();
         }
@@ -48,7 +45,7 @@ namespace squad_dma.Source.Squad.Features
 
                 Logger.Debug($"[{NAME}] Found soldier actor at 0x{soldierActor:X}");
 
-                if (_isSpeedHackEnabled)
+                if (Program.Config.SetSpeedHack)
                 {
                     const float SPEED_MULTIPLIER = 4.0f;
                     Memory.WriteValue<float>(soldierActor + Actor.CustomTimeDilation, SPEED_MULTIPLIER);

@@ -9,7 +9,6 @@ namespace squad_dma.Source.Squad.Features
     {
         public const string NAME = "AirStuck";
         
-        public bool _isAirStuckEnabled = false;
         private Collision _collision;
         
         // Original values
@@ -53,16 +52,7 @@ namespace squad_dma.Source.Squad.Features
         public void SetEnabled(bool enable)
         {
             if (!IsLocalPlayerValid()) return;
-            _isAirStuckEnabled = enable;
             Logger.Debug($"[{NAME}] Air Stuck {(enable ? "enabled" : "disabled")}");
-            
-            // Ensure collision is disabled when AirStuck is disabled
-            if (!_isAirStuckEnabled && _collision.IsCollisionDisabled)
-            {
-                _collision.SetEnabled(false);
-                Logger.Debug($"[{NAME}] Disabled collision with Air Stuck");
-            }
-            
             Apply();
         }
 
@@ -79,7 +69,7 @@ namespace squad_dma.Source.Squad.Features
                 ulong characterMovement = _cachedCharacterMovement;
                 if (characterMovement == 0) return;
 
-                if (_isAirStuckEnabled)
+                if (Program.Config.SetAirStuck)
                 {
                     // Store original values if we don't have them cached
                     if (_originalMovementMode == 1 && _originalReplicatedMovementMode == 1 && 

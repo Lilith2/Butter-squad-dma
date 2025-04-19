@@ -8,7 +8,7 @@ namespace squad_dma.Source.Squad.Features
     public class QuickZoom : Manager
     {
         public const string NAME = "QuickZoom";
-        
+
         private bool _isQuickZoomEnabled = false;
         private float _originalFov = 0.0f;
         
