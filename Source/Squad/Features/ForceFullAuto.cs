@@ -6,75 +6,65 @@ using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
-    public class ForceFullAuto : Manager
+    public class ForceFullAuto : Manager, Weapon
     {
         public const string NAME = "ForceFullAuto";
                 
         private int[] _originalFireModes = null;
         private bool _originalManualBolt = false;
         private bool _originalRequireAdsToShoot = false;
+        private ulong _lastWeapon = 0;
         
         public ForceFullAuto(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
-            // Load original values from config if they exist
-            if (Config.TryLoadConfig(out var config))
-            {
-                if (config.OriginalFireModes != null && config.OriginalFireModes.Length > 0)
-                {
-                    _originalFireModes = config.OriginalFireModes;
-                    Logger.Debug($"[{NAME}] Loaded original fire modes from config: {string.Join(", ", _originalFireModes)}");
-                }
-            }
         }
         
         public void SetEnabled(bool enable)
         {
-            if (!IsLocalPlayerValid()) return;
-            Logger.Debug($"[{NAME}] Force Full Auto {(enable ? "enabled" : "disabled")}");
-            Apply();
-        }
-
-        // FireModes :
-        // 1 = Single Fire
-        // 3 = Burst
-        // -1 = Full Auto
-        
-        public override void Apply()
-        {
-            try
+            if (!IsLocalPlayerValid())
             {
-                if (!Program.Config.ForceFullAuto && _originalFireModes == null)
-                    return;
-                
-                if (!IsLocalPlayerValid()) return;
-                
-                // First try to apply to soldier weapon
+                Logger.Error($"[{NAME}] Cannot enable/disable force full auto - local player is not valid");
+                return;
+            }
+            
+            Logger.Debug($"[{NAME}] Force Full Auto {(enable ? "enabled" : "disabled")}");
+            
+            // If disabling, restore the last weapon's state
+            if (!enable && _lastWeapon != 0)
+            {
+                RestoreWeapon(_lastWeapon);
+            }
+            
+            // Apply to current weapon if enabled
+            if (enable)
+            {
                 UpdateCachedPointers();
-                ulong currentWeapon = _cachedCurrentWeapon;
-                if (currentWeapon != 0)
+                if (_cachedCurrentWeapon != 0)
                 {
-                    Logger.Debug($"[{NAME}] Applying to soldier weapon");
-                    Apply(currentWeapon);
+                    Apply(_cachedCurrentWeapon);
                 }
 
-                // Then check if player is in a vehicle and apply to vehicle weapon
+                // Check for vehicle weapon
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
                 if (playerState != 0)
                 {
                     ulong currentSeat = Memory.ReadPtr(playerState + ASQPlayerState.CurrentSeat);
                     if (currentSeat != 0)
                     {
+                        Logger.Debug($"[{NAME}] Found current seat at 0x{currentSeat:X}");
                         ulong seatPawn = Memory.ReadPtr(currentSeat + USQVehicleSeatComponent.SeatPawn);
                         if (seatPawn != 0)
                         {
+                            Logger.Debug($"[{NAME}] Found seat pawn at 0x{seatPawn:X}");
                             ulong vehicleInventory = Memory.ReadPtr(seatPawn + ASQVehicleSeat.VehicleInventory);
                             if (vehicleInventory != 0)
                             {
+                                Logger.Debug($"[{NAME}] Found vehicle inventory at 0x{vehicleInventory:X}");
                                 ulong vehicleWeapon = Memory.ReadPtr(vehicleInventory + USQPawnInventoryComponent.CurrentWeapon);
                                 if (vehicleWeapon != 0)
                                 {
-                                    Logger.Debug($"[{NAME}] Applying to vehicle weapon");
+                                    Logger.Debug($"[{NAME}] Applying force full auto to vehicle weapon at 0x{vehicleWeapon:X}");
                                     Apply(vehicleWeapon);
                                 }
                             }
@@ -82,12 +72,92 @@ namespace squad_dma.Source.Squad.Features
                     }
                 }
             }
+        }
+        
+        public void OnWeaponChanged(ulong newWeapon, ulong oldWeapon)
+        {
+            if (!IsLocalPlayerValid()) return;
+            
+            try
+            {
+                // Restore the old weapon's state
+                if (oldWeapon != 0)
+                {
+                    RestoreWeapon(oldWeapon);
+                }
+                
+                // Apply to new weapon if enabled
+                if (Program.Config.ForceFullAuto && newWeapon != 0)
+                {
+                    Apply(newWeapon);
+                }
+                
+                _lastWeapon = newWeapon;
+            }
             catch (Exception ex)
             {
-                Logger.Error($"[{NAME}] Error setting force full auto: {ex.Message}");
+                Logger.Error($"[{NAME}] Error handling weapon change: {ex.Message}");
             }
         }
+        
+        private void RestoreWeapon(ulong weapon)
+        {
+            try
+            {
+                ulong weaponConfig = weapon + ASQWeapon.WeaponConfig;
+                ulong fireModesArray = weaponConfig + FSQWeaponData.FireModes;
+                ulong fireModesData = Memory.ReadPtr(fireModesArray);
+                if (fireModesData == 0)
+                {
+                    Logger.Error($"[{NAME}] Failed to get fire modes data");
+                    return;
+                }
+                
+                int fireModeCount = Memory.ReadValue<int>(fireModesArray + 0x8);
+                if (fireModeCount <= 0)
+                {
+                    Logger.Error($"[{NAME}] Invalid fire mode count");
+                    return;
+                }
+                
+                ulong itemStaticInfo = Memory.ReadPtr(weapon + ASQEquipableItem.ItemStaticInfo);
+                if (itemStaticInfo == 0)
+                {
+                    Logger.Error($"[{NAME}] Failed to get weapon static info");
+                    return;
+                }
 
+                // Restore original values or use defaults if not found
+                if (_originalFireModes != null)
+                {
+                    for (int i = 0; i < fireModeCount && i < _originalFireModes.Length; i++)
+                    {
+                        ulong fireModeAddress = fireModesData + ((ulong)i * 4);
+                        Memory.WriteValue(fireModeAddress, _originalFireModes[i]);
+                    }
+                    
+                    Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, _originalManualBolt);
+                    Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, _originalRequireAdsToShoot);
+                    Logger.Debug($"[{NAME}] Restored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}, RequireAdsToShoot={_originalRequireAdsToShoot}");
+                }
+                else
+                {
+                    for (int i = 0; i < fireModeCount; i++)
+                    {
+                        ulong fireModeAddress = fireModesData + ((ulong)i * 4);
+                        Memory.WriteValue(fireModeAddress, 1);
+                    }
+                    Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, true);
+                    Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, true);
+                    Logger.Debug($"[{NAME}] Restored default fire modes (Single Fire) and enabled manual bolt and ADS requirement");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"[{NAME}] Error restoring weapon at 0x{weapon:X}: {ex.Message}");
+            }
+        }
+        
         private void Apply(ulong weapon)
         {
             try
@@ -115,80 +185,49 @@ namespace squad_dma.Source.Squad.Features
                     return;
                 }
 
-                if (Program.Config.ForceFullAuto)
+                if (_originalFireModes == null)
                 {
-                    if (_originalFireModes == null)
-                    {
-                        _originalFireModes = new int[fireModeCount];
-                        for (int i = 0; i < fireModeCount; i++)
-                        {
-                            ulong fireModeAddress = fireModesData + ((ulong)i * 4);
-                            _originalFireModes[i] = Memory.ReadValue<int>(fireModeAddress);
-                        }
-                        _originalManualBolt = Memory.ReadValue<bool>(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt);
-                        _originalRequireAdsToShoot = Memory.ReadValue<bool>(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot);
-
-                        Logger.Debug($"[{NAME}] Stored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}, RequireAdsToShoot={_originalRequireAdsToShoot}");
-
-                        // Save original values to config
-                        if (Config.TryLoadConfig(out var config))
-                        {
-                            config.OriginalFireModes = _originalFireModes;
-                            config.OriginalManualBolt = _originalManualBolt;
-                            config.OriginalRequireAdsToShoot = _originalRequireAdsToShoot;
-                            Config.SaveConfig(config);
-                            Logger.Debug($"[{NAME}] Saved original values to config");
-                        }
-                    }
-
+                    _originalFireModes = new int[fireModeCount];
                     for (int i = 0; i < fireModeCount; i++)
                     {
                         ulong fireModeAddress = fireModesData + ((ulong)i * 4);
-                        Memory.WriteValue(fireModeAddress, -1);
+                        _originalFireModes[i] = Memory.ReadValue<int>(fireModeAddress);
                     }
-                    
-                    Memory.WriteValue(weapon + ASQWeapon.CurrentFireMode, 0);
-                    Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, false);
-                    Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, false);
-                    
-                    Logger.Debug($"[{NAME}] Set all fire modes to Full Auto (-1) and disabled manual bolt and ADS requirement");
+                    _originalManualBolt = Memory.ReadValue<bool>(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt);
+                    _originalRequireAdsToShoot = Memory.ReadValue<bool>(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot);
+
+                    Logger.Debug($"[{NAME}] Stored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}, RequireAdsToShoot={_originalRequireAdsToShoot}");
+
+                    // Save original values to config
+                    if (Config.TryLoadConfig(out var config))
+                    {
+                        config.OriginalFireModes = _originalFireModes;
+                        config.OriginalManualBolt = _originalManualBolt;
+                        config.OriginalRequireAdsToShoot = _originalRequireAdsToShoot;
+                        Config.SaveConfig(config);
+                        Logger.Debug($"[{NAME}] Saved original values to config");
+                    }
                 }
-                else
+
+                for (int i = 0; i < fireModeCount; i++)
                 {
-                    // Restore original values or use defaults if not found
-                    if (_originalFireModes != null)
-                    {
-                        for (int i = 0; i < fireModeCount && i < _originalFireModes.Length; i++)
-                        {
-                            ulong fireModeAddress = fireModesData + ((ulong)i * 4);
-                            Memory.WriteValue(fireModeAddress, _originalFireModes[i]);
-                        }
-                        
-                        Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, _originalManualBolt);
-                        Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, _originalRequireAdsToShoot);
-                        Logger.Debug($"[{NAME}] Restored original fire modes: {string.Join(", ", _originalFireModes)}, ManualBolt={_originalManualBolt}, RequireAdsToShoot={_originalRequireAdsToShoot}");
-                    }
-                    else
-                    {
-                        for (int i = 0; i < fireModeCount; i++)
-                        {
-                            ulong fireModeAddress = fireModesData + ((ulong)i * 4);
-                            Memory.WriteValue(fireModeAddress, 1);
-                        }
-                        Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, true);
-                        Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, true);
-                        Logger.Debug($"[{NAME}] Restored default fire modes (Single Fire) and enabled manual bolt and ADS requirement");
-                    }
-                    
-                    _originalFireModes = null;
-                    _originalManualBolt = false;
-                    _originalRequireAdsToShoot = false;
+                    ulong fireModeAddress = fireModesData + ((ulong)i * 4);
+                    Memory.WriteValue(fireModeAddress, -1);
                 }
+                
+                Memory.WriteValue(weapon + ASQWeapon.CurrentFireMode, 0);
+                Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequiresManualBolt, false);
+                Memory.WriteValue(itemStaticInfo + USQWeaponStaticInfo.bRequireAdsToShoot, false);
+                
+                Logger.Debug($"[{NAME}] Set all fire modes to Full Auto (-1) and disabled manual bolt and ADS requirement");
             }
             catch (Exception ex)
             {
-                Logger.Error($"[{NAME}] Error applying force full auto to weapon: {ex.Message}");
+                Logger.Error($"[{NAME}] Error applying force full auto to weapon at 0x{weapon:X}: {ex.Message}");
             }
         }
+        
+        // Override Apply to do nothing since we handle weapon changes in OnWeaponChanged
+        public override void Apply() { }
     }
 } 

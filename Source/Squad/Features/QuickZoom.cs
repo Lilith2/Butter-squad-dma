@@ -15,12 +15,6 @@ namespace squad_dma.Source.Squad.Features
         public QuickZoom(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
-            // Load the original FOV from config if it exists
-            if (Config.TryLoadConfig(out var config) && config.OriginalFov > 0.0f)
-            {
-                _originalFov = config.OriginalFov;
-                Logger.Debug($"[{NAME}] Loaded original FOV from config: {_originalFov}");
-            }
         }
         
         public void SetEnabled(bool enable)

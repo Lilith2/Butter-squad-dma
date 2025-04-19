@@ -4,9 +4,11 @@ using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
-    public class ShootingInMainBase : Manager
+    public class ShootingInMainBase : Manager, Weapon
     {
         public const string NAME = "ShootingInMainBase";
+        private ulong _lastWeapon = 0;
+        private ulong _lastVehicleWeapon = 0;
         
         public ShootingInMainBase(ulong playerController, bool inGame)
             : base(playerController, inGame)
@@ -22,62 +24,98 @@ namespace squad_dma.Source.Squad.Features
             }
             
             Logger.Debug($"[{NAME}] Shooting in main base {(enable ? "enabled" : "disabled")}");
-            Apply();
+            
+            // If disabling, restore the last weapons' states
+            if (!enable)
+            {
+                if (_lastWeapon != 0)
+                {
+                    RestoreWeapon(_lastWeapon, false);
+                }
+                if (_lastVehicleWeapon != 0)
+                {
+                    RestoreWeapon(_lastVehicleWeapon, true);
+                }
+            }
+            
+            // Apply to current weapons if enabled
+            if (enable)
+            {
+                UpdateCachedPointers();
+                if (_cachedCurrentWeapon != 0)
+                {
+                    Apply(_cachedCurrentWeapon, false);
+                }
+            }
         }
         
-        public override void Apply()
+        public void OnWeaponChanged(ulong newWeapon, ulong oldWeapon)
         {
+            if (!IsLocalPlayerValid()) return;
+            
             try
             {
-                if (!IsLocalPlayerValid())
+                // Restore the old weapon's state
+                if (oldWeapon != 0)
                 {
-                    Logger.Error($"[{NAME}] Cannot apply shooting in main base - local player is not valid");
-                    return;
+                    RestoreWeapon(oldWeapon, false);
                 }
                 
-                UpdateCachedPointers();
-                ulong soldierActor = _cachedSoldierActor;
-                if (soldierActor == 0)
+                // Apply to new weapon if enabled
+                if (Program.Config.AllowShootingInMainBase && newWeapon != 0)
                 {
-                    Logger.Error($"[{NAME}] Cannot apply shooting in main base - soldier actor is not valid");
-                    return;
+                    Apply(newWeapon, false);
                 }
-
-                Logger.Debug($"[{NAME}] Found soldier actor at 0x{soldierActor:X}");
-
-                ulong inventoryComponent = _cachedInventoryComponent;
-                if (inventoryComponent == 0)
-                {
-                    Logger.Error($"[{NAME}] Cannot apply shooting in main base - inventory component is not valid");
-                    return;
-                }
-
-                Logger.Debug($"[{NAME}] Found inventory component at 0x{inventoryComponent:X}");
-
-                ulong currentItemStaticInfo = Memory.ReadPtr(inventoryComponent + ASQSoldier.CurrentItemStaticInfo);
-                if (currentItemStaticInfo == 0)
-                {
-                    Logger.Error($"[{NAME}] Cannot apply shooting in main base - current item static info is not valid");
-                    return;
-                }
-
-                Logger.Debug($"[{NAME}] Found current item static info at 0x{currentItemStaticInfo:X}");
-
-                if (Program.Config.AllowShootingInMainBase)
-                {
-                    Memory.WriteValue<bool>(currentItemStaticInfo + ASQSoldier.bUsableInMainBase, true);
-                    Logger.Debug($"[{NAME}] Enabled shooting in main base");
-                }
-                else
-                {
-                    Memory.WriteValue<bool>(currentItemStaticInfo + ASQSoldier.bUsableInMainBase, false);
-                    Logger.Debug($"[{NAME}] Disabled shooting in main base");
-                }
+                
+                _lastWeapon = newWeapon;
             }
             catch (Exception ex)
             {
-                Logger.Error($"[{NAME}] Error setting shooting in main base: {ex.Message}");
+                Logger.Error($"[{NAME}] Error handling weapon change: {ex.Message}");
             }
         }
+        
+        private void RestoreWeapon(ulong weapon, bool isVehicle)
+        {
+            try
+            {
+                ulong itemStaticInfo = Memory.ReadPtr(weapon + ASQEquipableItem.ItemStaticInfo);
+                if (itemStaticInfo == 0)
+                {
+                    Logger.Error($"[{NAME}] Cannot restore {(isVehicle ? "vehicle" : "soldier")} weapon - item static info is not valid");
+                    return;
+                }
+
+                Memory.WriteValue<bool>(itemStaticInfo + ASQSoldier.bUsableInMainBase, false);
+                Logger.Debug($"[{NAME}] Restored {(isVehicle ? "vehicle" : "soldier")} weapon at 0x{weapon:X}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"[{NAME}] Error restoring {(isVehicle ? "vehicle" : "soldier")} weapon at 0x{weapon:X}: {ex.Message}");
+            }
+        }
+        
+        private void Apply(ulong weapon, bool isVehicle)
+        {
+            try
+            {
+                ulong itemStaticInfo = Memory.ReadPtr(weapon + ASQEquipableItem.ItemStaticInfo);
+                if (itemStaticInfo == 0)
+                {
+                    Logger.Error($"[{NAME}] Cannot apply shooting in main base to {(isVehicle ? "vehicle" : "soldier")} weapon - item static info is not valid");
+                    return;
+                }
+
+                Memory.WriteValue<bool>(itemStaticInfo + ASQSoldier.bUsableInMainBase, Program.Config.AllowShootingInMainBase);
+                Logger.Debug($"[{NAME}] Applied shooting in main base to {(isVehicle ? "vehicle" : "soldier")} weapon at 0x{weapon:X}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"[{NAME}] Error applying shooting in main base to {(isVehicle ? "vehicle" : "soldier")} weapon at 0x{weapon:X}: {ex.Message}");
+            }
+        }
+        
+        // Override Apply to do nothing since we handle weapon changes in OnWeaponChanged
+        public override void Apply() { }
     }
 } 

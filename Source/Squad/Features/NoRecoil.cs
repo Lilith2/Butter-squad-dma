@@ -4,7 +4,7 @@ using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
-    public class NoRecoil : Manager
+    public class NoRecoil : Manager, Weapon
     {
         public const string NAME = "NoRecoil";
                 
@@ -22,6 +22,8 @@ namespace squad_dma.Source.Squad.Features
 
         // Config storage for weapon values
         private Dictionary<string, float> _configWeaponValues = new Dictionary<string, float>();
+        
+        private ulong _lastWeapon = 0;
         
         private readonly List<IScatterWriteDataEntry<float>> _noRecoilAnimEntries = new List<IScatterWriteDataEntry<float>>
         {
@@ -118,18 +120,6 @@ namespace squad_dma.Source.Squad.Features
         public NoRecoil(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
-            // Load original values from config if they exist
-            if (Config.TryLoadConfig(out var config))
-            {
-                _originalCameraRecoil = config.OriginalCameraRecoil;
-                _configAnimValues = config.OriginalNoRecoilAnimValues ?? new Dictionary<string, float>();
-                _configWeaponValues = config.OriginalNoRecoilWeaponValues ?? new Dictionary<string, float>();
-                Logger.Debug($"[{NAME}] Loaded original values from config");
-            }
-            else
-            {
-                Logger.Debug($"[{NAME}] No config found, will load original values when no recoil is enabled");
-            }
         }
 
         public void SetEnabled(bool enable)
@@ -141,58 +131,122 @@ namespace squad_dma.Source.Squad.Features
             }
             
             Logger.Debug($"[{NAME}] No recoil {(enable ? "enabled" : "disabled")}");
-            Apply();
+            
+            // If disabling, restore the last weapon's state
+            if (!enable && _lastWeapon != 0)
+            {
+                RestoreWeapon(_lastWeapon);
+            }
+            
+            // Apply to current weapon if enabled
+            if (enable)
+            {
+                UpdateCachedPointers();
+                if (_cachedCurrentWeapon != 0)
+                {
+                    Apply(_cachedCurrentWeapon);
+                }
+            }
         }
-
-        public override void Apply()
+        
+        public void OnWeaponChanged(ulong newWeapon, ulong oldWeapon)
+        {
+            if (!IsLocalPlayerValid()) return;
+            
+            try
+            {
+                // Restore the old weapon's state
+                if (oldWeapon != 0)
+                {
+                    RestoreWeapon(oldWeapon);
+                }
+                
+                // Apply to new weapon if enabled
+                if (Program.Config.NoRecoil && newWeapon != 0)
+                {
+                    Apply(newWeapon);
+                }
+                
+                _lastWeapon = newWeapon;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"[{NAME}] Error handling weapon change: {ex.Message}");
+            }
+        }
+        
+        private void RestoreWeapon(ulong weapon)
         {
             try
             {
-                if (!IsLocalPlayerValid())
+                if (_cachedSoldierActor == 0)
                 {
-                    Logger.Error($"[{NAME}] Cannot apply no recoil - local player is not valid");
+                    Logger.Error($"[{NAME}] Cannot restore weapon - soldier actor is not valid");
                     return;
                 }
 
-                // Get soldier actor
-                ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
-                if (playerState == 0)
+                ulong animInstance = Memory.ReadPtr(_cachedSoldierActor + ASQSoldier.CachedAnimInstance1p);
+                if (animInstance == 0)
                 {
-                    Logger.Error($"[{NAME}] Cannot apply no recoil - player state is not valid");
+                    Logger.Error($"[{NAME}] Cannot restore weapon - animation instance is not valid");
                     return;
                 }
 
-                ulong soldierActor = Memory.ReadPtr(playerState + ASQPlayerState.Soldier);
-                if (soldierActor == 0)
+                ulong weaponStaticInfo = GetCachedWeaponStaticInfo(weapon);
+                if (weaponStaticInfo == 0)
+                {
+                    Logger.Error($"[{NAME}] Cannot restore weapon - weapon static info is not valid");
+                    return;
+                }
+
+                // Restore original values
+                if (_originalAnimValues.Count > 0)
+                {
+                    var restoreEntries = _originalAnimValues.Select(kvp => 
+                        new ScatterWriteDataEntry<float>(animInstance + kvp.Key, kvp.Value)).ToList();
+                    Memory.WriteScatter(restoreEntries);
+                    Logger.Debug($"[{NAME}] Restored original anim values");
+                }
+
+                if (_originalWeaponValues.Count > 0)
+                {
+                    var restoreEntries = _originalWeaponValues.Select(kvp => 
+                        new ScatterWriteDataEntry<float>(weaponStaticInfo + kvp.Key, kvp.Value)).ToList();
+                    Memory.WriteScatter(restoreEntries);
+                    Logger.Debug($"[{NAME}] Restored original weapon values");
+                }
+
+                // Restore camera recoil
+                Memory.WriteValue(_cachedSoldierActor + ASQSoldier.bIsCameraRecoilActive, _originalCameraRecoil);
+                Logger.Debug($"[{NAME}] Restored original camera recoil state: {_originalCameraRecoil}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"[{NAME}] Error restoring weapon at 0x{weapon:X}: {ex.Message}");
+            }
+        }
+        
+        private void Apply(ulong weapon)
+        {
+            try
+            {
+                // Use cached pointers
+                if (_cachedSoldierActor == 0)
                 {
                     Logger.Error($"[{NAME}] Cannot apply no recoil - soldier actor is not valid");
                     return;
                 }
 
-                // Get anim instance
-                ulong animInstance = Memory.ReadPtr(soldierActor + ASQSoldier.CachedAnimInstance1p);
+                // Get anim instance from cached soldier actor
+                ulong animInstance = Memory.ReadPtr(_cachedSoldierActor + ASQSoldier.CachedAnimInstance1p);
                 if (animInstance == 0)
                 {
                     Logger.Error($"[{NAME}] Cannot apply no recoil - animation instance is not valid");
                     return;
                 }
 
-                // Get current weapon
-                ulong inventoryComponent = Memory.ReadPtr(soldierActor + ASQSoldier.InventoryComponent);
-                if (inventoryComponent == 0)
-                {
-                    Logger.Error($"[{NAME}] Cannot apply no recoil - inventory component is not valid");
-                    return;
-                }
-
-                ulong currentWeapon = Memory.ReadPtr(inventoryComponent + USQPawnInventoryComponent.CurrentWeapon);
-                if (currentWeapon == 0)
-                {
-                    Logger.Error($"[{NAME}] Cannot apply no recoil - current weapon is not valid");
-                    return;
-                }
-
-                ulong weaponStaticInfo = Memory.ReadPtr(currentWeapon + ASQEquipableItem.ItemStaticInfo);
+                // Get weapon static info using cached version if possible
+                ulong weaponStaticInfo = GetCachedWeaponStaticInfo(weapon);
                 if (weaponStaticInfo == 0)
                 {
                     Logger.Error($"[{NAME}] Cannot apply no recoil - weapon static info is not valid");
@@ -231,17 +285,6 @@ namespace squad_dma.Source.Squad.Features
                         new ScatterWriteDataEntry<float>(animInstance + entry.Address, entry.Data)).ToList();
                     Memory.WriteScatter(animEntries);
                 }
-                else
-                {
-                    // Restore original values
-                    if (_originalAnimValues.Count > 0)
-                    {
-                        var restoreEntries = _originalAnimValues.Select(kvp => 
-                            new ScatterWriteDataEntry<float>(animInstance + kvp.Key, kvp.Value)).ToList();
-                        Memory.WriteScatter(restoreEntries);
-                        Logger.Debug($"[{NAME}] Restored original anim values");
-                    }
-                }
 
                 Logger.Debug($"[{NAME}] Applying no recoil to weapon static info at 0x{weaponStaticInfo:X}");
                 // Apply no recoil to weapon static info
@@ -275,17 +318,6 @@ namespace squad_dma.Source.Squad.Features
                         new ScatterWriteDataEntry<float>(weaponStaticInfo + entry.Address, entry.Data)).ToList();
                     Memory.WriteScatter(weaponEntries);
                 }
-                else
-                {
-                    // Restore original values
-                    if (_originalWeaponValues.Count > 0)
-                    {
-                        var restoreEntries = _originalWeaponValues.Select(kvp => 
-                            new ScatterWriteDataEntry<float>(weaponStaticInfo + kvp.Key, kvp.Value)).ToList();
-                        Memory.WriteScatter(restoreEntries);
-                        Logger.Debug($"[{NAME}] Restored original weapon values");
-                    }
-                }
 
                 // Handle camera recoil
                 if (Program.Config.NoRecoil)
@@ -293,7 +325,7 @@ namespace squad_dma.Source.Squad.Features
                     // Store original value when first enabled
                     if (_originalCameraRecoil)
                     {
-                        _originalCameraRecoil = Memory.ReadValue<bool>(soldierActor + ASQSoldier.bIsCameraRecoilActive);
+                        _originalCameraRecoil = Memory.ReadValue<bool>(_cachedSoldierActor + ASQSoldier.bIsCameraRecoilActive);
                         
                         // Save to config
                         if (Config.TryLoadConfig(out var config))
@@ -304,13 +336,8 @@ namespace squad_dma.Source.Squad.Features
                         }
                     }
                     
-                    Memory.WriteValue(soldierActor + ASQSoldier.bIsCameraRecoilActive, false);
+                    Memory.WriteValue(_cachedSoldierActor + ASQSoldier.bIsCameraRecoilActive, false);
                     Logger.Debug($"[{NAME}] Disabled camera recoil");
-                }
-                else
-                {
-                    Memory.WriteValue(soldierActor + ASQSoldier.bIsCameraRecoilActive, _originalCameraRecoil);
-                    Logger.Debug($"[{NAME}] Restored original camera recoil state: {_originalCameraRecoil}");
                 }
 
                 Logger.Debug($"[{NAME}] Successfully {(Program.Config.NoRecoil ? "enabled" : "disabled")} no recoil");
@@ -318,8 +345,11 @@ namespace squad_dma.Source.Squad.Features
             }
             catch (Exception ex)
             {
-                Logger.Error($"[{NAME}] Error setting no recoil: {ex.Message}");
+                Logger.Error($"[{NAME}] Error applying no recoil to weapon at 0x{weapon:X}: {ex.Message}");
             }
         }
+        
+        // Override Apply to do nothing since we handle weapon changes in OnWeaponChanged
+        public override void Apply() { }
     }
 }

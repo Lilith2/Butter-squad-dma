@@ -16,19 +16,6 @@ namespace squad_dma.Source.Squad.Features
         public Suppression(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
-            // Load original values from config if they exist
-            if (Config.TryLoadConfig(out var config))
-            {
-                _originalSuppressionPercentage = config.OriginalSuppressionPercentage;
-                _originalMaxSuppression = config.OriginalMaxSuppression;
-                _originalSuppressionMultiplier = config.OriginalSuppressionMultiplier;
-                _originalCameraRecoil = config.OriginalCameraRecoil;
-                Logger.Debug($"[{NAME}] Loaded original suppression values from config: Percentage={_originalSuppressionPercentage}, Max={_originalMaxSuppression}, Multiplier={_originalSuppressionMultiplier}, CameraRecoil={_originalCameraRecoil}");
-            }
-            else
-            {
-                Logger.Debug($"[{NAME}] No config found, will load original values when suppression is enabled");
-            }
         }
                 
         public void SetEnabled(bool enable)

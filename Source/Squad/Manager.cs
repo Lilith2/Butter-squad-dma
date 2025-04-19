@@ -15,6 +15,7 @@ namespace squad_dma.Source.Squad
         protected ulong _cachedInventoryComponent = 0;
         protected ulong _cachedCurrentWeapon = 0;
         protected ulong _cachedCharacterMovement = 0;
+        protected ulong _cachedWeaponStaticInfo = 0;
         protected DateTime _lastPointerUpdate = DateTime.MinValue;
         
         // Modules
@@ -33,6 +34,9 @@ namespace squad_dma.Source.Squad
         private NoSpread _noSpread;
         private NoRecoil _noRecoil;
         private NoSway _noSway;
+        
+        // Weapon manager
+        private WeaponManager _weaponManager;
 
         /// <summary>
         /// Constructor for feature classes that inherit from Manager
@@ -56,6 +60,9 @@ namespace squad_dma.Source.Squad
             
             // Initialize cached pointers
             UpdateCachedPointers();
+            
+            // Initialize weapon manager
+            _weaponManager = new WeaponManager(_playerController, _inGame);
             
             // Initialize all feature modules
             InitializeFeatures();
@@ -87,6 +94,10 @@ namespace squad_dma.Source.Squad
                 if (_cachedInventoryComponent != 0)
                 {
                     _cachedCurrentWeapon = Memory.ReadPtr(_cachedInventoryComponent + USQPawnInventoryComponent.CurrentWeapon);
+                    if (_cachedCurrentWeapon != 0)
+                    {
+                        _cachedWeaponStaticInfo = Memory.ReadPtr(_cachedCurrentWeapon + ASQEquipableItem.ItemStaticInfo);
+                    }
                 }
                 
                 _cachedCharacterMovement = Memory.ReadPtr(_cachedSoldierActor + Character.CharacterMovement);
@@ -101,7 +112,17 @@ namespace squad_dma.Source.Squad
                 _cachedInventoryComponent = 0;
                 _cachedCurrentWeapon = 0;
                 _cachedCharacterMovement = 0;
+                _cachedWeaponStaticInfo = 0;
             }
+        }
+        
+        protected ulong GetCachedWeaponStaticInfo(ulong weapon)
+        {
+            if (weapon == _cachedCurrentWeapon)
+            {
+                return _cachedWeaponStaticInfo;
+            }
+            return Memory.ReadPtr(weapon + ASQEquipableItem.ItemStaticInfo);
         }
         
         private void InitializeFeatures()
@@ -121,6 +142,16 @@ namespace squad_dma.Source.Squad
             _noSpread = new NoSpread(_playerController, _inGame);
             _noRecoil = new NoRecoil(_playerController, _inGame);
             _noSway = new NoSway(_playerController, _inGame);
+            
+            // Register weapon features
+            _weaponManager.RegisterFeature(_infiniteAmmo);
+            _weaponManager.RegisterFeature(_FullAuto);
+            _weaponManager.RegisterFeature(_noRecoil);
+            _weaponManager.RegisterFeature(_noSpread);
+            _weaponManager.RegisterFeature(_noSway);
+            _weaponManager.RegisterFeature(_quickSwap);
+            _weaponManager.RegisterFeature(_rapidFire);
+            _weaponManager.RegisterFeature(_shootingInMainBase);
         }
         
         /// <summary>
@@ -145,9 +176,6 @@ namespace squad_dma.Source.Squad
             { return false; }
         }
         
-        // Start a timer to apply features every second
-        // Simple fix for when the Localplayer respawns
-        // Need to change it to a better solution
         private void StartFeatureTimer()
         {
             Task.Run(async () =>
@@ -157,6 +185,7 @@ namespace squad_dma.Source.Squad
                     try
                     {
                         UpdateCachedPointers();
+                        _weaponManager.Update();
 
                         if (_config.DisableSuppression)
                             _suppression.Apply();
@@ -238,8 +267,6 @@ namespace squad_dma.Source.Squad
             _quickZoom.SetEnabled(enable);
         }
         
-
-        
         public void DisableCollision(bool disable)
         {
             // Only allow enabling if AirStuck is enabled
@@ -298,6 +325,7 @@ namespace squad_dma.Source.Squad
                 _cancellationTokenSource.Cancel();
                 _cancellationTokenSource.Dispose();
             }
+            _weaponManager?.Dispose();
         }
         #endregion
     }

@@ -5,9 +5,11 @@ using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
-    public class RapidFire : Manager
+    public class RapidFire : Manager, Weapon
     {
         public const string NAME = "RapidFire";
+        private ulong _lastWeapon = 0;
+        private ulong _lastVehicleWeapon = 0;
                 
         // Original values for soldier weapon
         private float _soldierOriginalTimeBetweenShots = 0.0f;
@@ -20,19 +22,6 @@ namespace squad_dma.Source.Squad.Features
         public RapidFire(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
-            // Load original values from config if they exist
-            if (Config.TryLoadConfig(out var config))
-            {
-                _soldierOriginalTimeBetweenShots = config.OriginalTimeBetweenShots;
-                _soldierOriginalTimeBetweenSingleShots = config.OriginalTimeBetweenSingleShots;
-                _vehicleOriginalTimeBetweenShots = config.OriginalVehicleTimeBetweenShots;
-                _vehicleOriginalTimeBetweenSingleShots = config.OriginalVehicleTimeBetweenSingleShots;
-                Logger.Debug($"[{NAME}] Loaded original rapid fire values from config: Soldier={_soldierOriginalTimeBetweenShots}/{_soldierOriginalTimeBetweenSingleShots}, Vehicle={_vehicleOriginalTimeBetweenShots}/{_vehicleOriginalTimeBetweenSingleShots}");
-            }
-            else
-            {
-                Logger.Debug($"[{NAME}] No config found, will load original values when rapid fire is enabled");
-            }
         }
         
         public void SetEnabled(bool enable)
@@ -44,87 +33,102 @@ namespace squad_dma.Source.Squad.Features
             }
             
             Logger.Debug($"[{NAME}] Rapid fire {(enable ? "enabled" : "disabled")}");
-            Apply();
-        }
-        
-        public override void Apply()
-        {
-            try
+            
+            // If disabling, restore the last weapons' states
+            if (!enable)
             {
-                if (!IsLocalPlayerValid())
+                if (_lastWeapon != 0)
                 {
-                    Logger.Error($"[{NAME}] Cannot apply rapid fire - local player is not valid");
-                    return;
+                    RestoreWeapon(_lastWeapon, ref _soldierOriginalTimeBetweenShots, ref _soldierOriginalTimeBetweenSingleShots, false);
                 }
-                
-                // First try to apply to soldier weapon
+                if (_lastVehicleWeapon != 0)
+                {
+                    RestoreWeapon(_lastVehicleWeapon, ref _vehicleOriginalTimeBetweenShots, ref _vehicleOriginalTimeBetweenSingleShots, true);
+                }
+            }
+            
+            // Apply to current weapons if enabled
+            if (enable)
+            {
                 UpdateCachedPointers();
-                ulong currentWeapon = _cachedCurrentWeapon;
-                if (currentWeapon != 0)
+                if (_cachedCurrentWeapon != 0)
                 {
-                    Apply(currentWeapon, ref _soldierOriginalTimeBetweenShots, ref _soldierOriginalTimeBetweenSingleShots, false);
-                }
-                else
-                {
-                    Logger.Debug($"[{NAME}] No soldier weapon found");
+                    Apply(_cachedCurrentWeapon, ref _soldierOriginalTimeBetweenShots, ref _soldierOriginalTimeBetweenSingleShots, false);
                 }
 
-                // Then check if player is in a vehicle and apply to vehicle weapon
+                // Check for vehicle weapon
                 ulong playerState = Memory.ReadPtr(_playerController + Controller.PlayerState);
                 if (playerState != 0)
-                {                    
+                {
                     ulong currentSeat = Memory.ReadPtr(playerState + ASQPlayerState.CurrentSeat);
                     if (currentSeat != 0)
                     {
-                        Logger.Debug($"[{NAME}] Found current seat at 0x{currentSeat:X}");
-                        
                         ulong seatPawn = Memory.ReadPtr(currentSeat + USQVehicleSeatComponent.SeatPawn);
                         if (seatPawn != 0)
                         {
-                            Logger.Debug($"[{NAME}] Found seat pawn at 0x{seatPawn:X}");
-                            
                             ulong vehicleInventory = Memory.ReadPtr(seatPawn + ASQVehicleSeat.VehicleInventory);
                             if (vehicleInventory != 0)
                             {
-                                Logger.Debug($"[{NAME}] Found vehicle inventory at 0x{vehicleInventory:X}");
-                                
                                 ulong vehicleWeapon = Memory.ReadPtr(vehicleInventory + USQPawnInventoryComponent.CurrentWeapon);
                                 if (vehicleWeapon != 0)
                                 {
-                                    Logger.Debug($"[{NAME}] Found vehicle weapon at 0x{vehicleWeapon:X}");
                                     Apply(vehicleWeapon, ref _vehicleOriginalTimeBetweenShots, ref _vehicleOriginalTimeBetweenSingleShots, true);
                                 }
-                                else
-                                {
-                                    Logger.Debug($"[{NAME}] No vehicle weapon found");
-                                }
-                            }
-                            else
-                            {
-                                Logger.Debug($"[{NAME}] No vehicle inventory found");
                             }
                         }
-                        else
-                        {
-                            Logger.Debug($"[{NAME}] No seat pawn found");
-                        }
                     }
-                    else
-                    {
-                        Logger.Debug($"[{NAME}] No current seat found");
-                    }
+                }
+            }
+        }
+        
+        public void OnWeaponChanged(ulong newWeapon, ulong oldWeapon)
+        {
+            if (!IsLocalPlayerValid()) return;
+            
+            try
+            {
+                // Restore the old weapon's state
+                if (oldWeapon != 0)
+                {
+                    RestoreWeapon(oldWeapon, ref _soldierOriginalTimeBetweenShots, ref _soldierOriginalTimeBetweenSingleShots, false);
+                }
+                
+                // Apply to new weapon if enabled
+                if (Program.Config.RapidFire && newWeapon != 0)
+                {
+                    Apply(newWeapon, ref _soldierOriginalTimeBetweenShots, ref _soldierOriginalTimeBetweenSingleShots, false);
+                }
+                
+                _lastWeapon = newWeapon;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"[{NAME}] Error handling weapon change: {ex.Message}");
+            }
+        }
+        
+        private void RestoreWeapon(ulong weapon, ref float originalTimeBetweenShots, ref float originalTimeBetweenSingleShots, bool isVehicle)
+        {
+            try
+            {
+                if (originalTimeBetweenShots != 0.0f)
+                {
+                    ulong weaponConfigOffset = weapon + ASQWeapon.WeaponConfig;
+                    Memory.WriteValue<float>(weaponConfigOffset + FSQWeaponData.TimeBetweenShots, originalTimeBetweenShots);
+                    Memory.WriteValue<float>(weaponConfigOffset + FSQWeaponData.TimeBetweenSingleShots, originalTimeBetweenSingleShots);
+                    Logger.Debug($"[{NAME}] Restored original {(isVehicle ? "vehicle" : "soldier")} weapon values: TimeBetweenShots={originalTimeBetweenShots}, TimeBetweenSingleShots={originalTimeBetweenSingleShots}");
                 }
                 else
                 {
-                    Logger.Debug($"[{NAME}] No player state found");
+                    Logger.Error($"[{NAME}] Cannot restore {(isVehicle ? "vehicle" : "soldier")} weapon values - original values not loaded");
                 }
             }
             catch (Exception ex)
             {
-                Logger.Error($"[{NAME}] Error setting rapid fire: {ex.Message}");
+                Logger.Error($"[{NAME}] Error restoring {(isVehicle ? "vehicle" : "soldier")} weapon: {ex.Message}");
             }
         }
-
+        
         private void Apply(ulong weapon, ref float originalTimeBetweenShots, ref float originalTimeBetweenSingleShots, bool isVehicle)
         {
             try
@@ -171,16 +175,7 @@ namespace squad_dma.Source.Squad.Features
                 }
                 else
                 {
-                    if (originalTimeBetweenShots != 0.0f)
-                    {
-                        Memory.WriteValue<float>(weaponConfigOffset + FSQWeaponData.TimeBetweenShots, originalTimeBetweenShots);
-                        Memory.WriteValue<float>(weaponConfigOffset + FSQWeaponData.TimeBetweenSingleShots, originalTimeBetweenSingleShots);
-                        Logger.Debug($"[{NAME}] Restored original {(isVehicle ? "vehicle" : "soldier")} weapon values: TimeBetweenShots={originalTimeBetweenShots}, TimeBetweenSingleShots={originalTimeBetweenSingleShots}");
-                    }
-                    else
-                    {
-                        Logger.Error($"[{NAME}] Cannot restore {(isVehicle ? "vehicle" : "soldier")} weapon values - original values not loaded");
-                    }
+                    RestoreWeapon(weapon, ref originalTimeBetweenShots, ref originalTimeBetweenSingleShots, isVehicle);
                 }
             }
             catch (Exception ex)
@@ -188,5 +183,8 @@ namespace squad_dma.Source.Squad.Features
                 Logger.Error($"[{NAME}] Error applying rapid fire to {(isVehicle ? "vehicle" : "soldier")} weapon: {ex.Message}");
             }
         }
+        
+        // Override Apply to do nothing since we handle weapon changes in OnWeaponChanged
+        public override void Apply() { }
     }
 } 

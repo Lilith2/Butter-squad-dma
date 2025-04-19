@@ -216,7 +216,7 @@ namespace squad_dma
             }
 
             CleanupLoadedBitmaps();
-            Config.ClearAndSaveCaches();
+            Config.ClearCache();
             Memory.Shutdown();
             e.Cancel = false;
             base.OnFormClosing(e);

@@ -9,14 +9,12 @@ namespace squad_dma.Source.Squad.Features
         private CancellationTokenSource _cancellationTokenSource;
         private bool _isEnabled;
         private float _originalShakeScale;
-        private bool _hasOriginalValue;
         
         public NoCameraShake(ulong playerController, bool inGame)
             : base(playerController, inGame)
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _isEnabled = false;
-            _hasOriginalValue = false;
         }
 
         public void SetEnabled(bool enable)
@@ -37,7 +35,6 @@ namespace squad_dma.Source.Squad.Features
             else
             {
                 StopTimer();
-                RestoreOriginalValues();
             }
         }
 
@@ -66,28 +63,6 @@ namespace squad_dma.Source.Squad.Features
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        private void RestoreOriginalValues()
-        {
-            if (!_hasOriginalValue) return;
-
-            try
-            {
-                ulong cameraManagerPtr = Memory.ReadPtr(_playerController + PlayerController.PlayerCameraManager);
-                if (cameraManagerPtr == 0) return;
-
-                ulong cameraShakeModPtr = Memory.ReadPtr(cameraManagerPtr + PlayerCameraManager.CachedCameraShakeMod);
-                if (cameraShakeModPtr == 0) return;
-
-                // Restore original shake scale
-                Memory.WriteValue(cameraShakeModPtr + UCameraModifier_CameraShake.SplitScreenShakeScale, _originalShakeScale);
-                Logger.Debug($"[{NAME}] Restored original shake scale: {_originalShakeScale}");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"[{NAME}] Error restoring original values: {ex.Message}");
-            }
-        }
-
         public override void Apply()
         {
             try
@@ -112,14 +87,6 @@ namespace squad_dma.Source.Squad.Features
                 {
                     Logger.Error($"[{NAME}] Cannot apply no camera shake - camera shake modifier is not valid");
                     return;
-                }
-
-                // Store original shake scale if we haven't already
-                if (!_hasOriginalValue)
-                {
-                    _originalShakeScale = Memory.ReadValue<float>(cameraShakeModPtr + UCameraModifier_CameraShake.SplitScreenShakeScale);
-                    _hasOriginalValue = true;
-                    Logger.Debug($"[{NAME}] Stored original shake scale: {_originalShakeScale}");
                 }
 
                 // Prevent new shakes by setting scale to 0
@@ -150,7 +117,7 @@ namespace squad_dma.Source.Squad.Features
                 if (scatterEntries.Count > 0)
                 {
                     Memory.WriteScatter(scatterEntries);
-                    Logger.Debug($"[{NAME}] Successfully modified {scatterEntries.Count} camera shakes");
+                    //Logger.Debug($"[{NAME}] Successfully modified {scatterEntries.Count} camera shakes");
                 }
             }
             catch (Exception ex)
@@ -162,7 +129,6 @@ namespace squad_dma.Source.Squad.Features
         public void Dispose()
         {
             StopTimer();
-            RestoreOriginalValues();
             _cancellationTokenSource.Dispose();
         }
     }

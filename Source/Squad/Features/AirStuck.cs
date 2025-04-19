@@ -23,18 +23,6 @@ namespace squad_dma.Source.Squad.Features
             : base(playerController, inGame)
         {
             _collision = collisionMod;
-            
-            // Load original values from config if they exist
-            if (Config.TryLoadConfig(out var config))
-            {
-                _originalMovementMode = config.OriginalMovementMode;
-                _originalReplicatedMovementMode = config.OriginalReplicatedMovementMode;
-                _originalReplicateMovement = config.OriginalReplicateMovement;
-                _originalMaxFlySpeed = config.OriginalMaxFlySpeed;
-                _originalMaxCustomMovementSpeed = config.OriginalMaxCustomMovementSpeed;
-                _originalMaxAcceleration = config.OriginalMaxAcceleration;
-                Logger.Debug($"[{NAME}] Loaded original values from config: MovementMode={_originalMovementMode}, ReplicatedMode={_originalReplicatedMovementMode}, ReplicateMovement={_originalReplicateMovement}");
-            }
         }
 
         private enum EMovementMode : byte

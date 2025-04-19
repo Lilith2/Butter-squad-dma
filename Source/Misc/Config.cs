@@ -229,12 +229,12 @@ namespace squad_dma
             OriginalMaxSuppression = -1.0f;
             OriginalSuppressionMultiplier = 1.0f;
             OriginalCameraRecoil = true;
-            OriginalNoRecoilAnimValues.Clear();
-            OriginalNoRecoilWeaponValues.Clear();
-            OriginalNoSpreadAnimValues.Clear();
-            OriginalNoSpreadWeaponValues.Clear();
-            OriginalNoSwayAnimValues.Clear();
-            OriginalNoSwayWeaponValues.Clear();
+            OriginalNoRecoilAnimValues = new Dictionary<string, float>();
+            OriginalNoRecoilWeaponValues = new Dictionary<string, float>();
+            OriginalNoSpreadAnimValues = new Dictionary<string, float>();
+            OriginalNoSpreadWeaponValues = new Dictionary<string, float>();
+            OriginalNoSwayAnimValues = new Dictionary<string, float>();
+            OriginalNoSwayWeaponValues = new Dictionary<string, float>();
             OriginalTimeBetweenShots = 0.0f;
             OriginalTimeBetweenSingleShots = 0.0f;
             OriginalVehicleTimeBetweenShots = 0.0f;
@@ -391,7 +391,7 @@ namespace squad_dma
         /// Clears all feature caches and saves the config.
         /// This should be called when the game closes or the application is terminated.
         /// </summary>
-        public static void ClearAndSaveCaches()
+        public static void ClearCache()
         {
             if (TryLoadConfig(out var config))
             {

@@ -27,7 +27,9 @@ namespace squad_dma
         private static readonly Stopwatch _tickSw = new();
         private static readonly ManualResetEvent _syncProcessRunning = new(false);
         private static readonly Stopwatch _processCheckTimer = new();
-        private const int PROCESS_CHECK_INTERVAL = 1000;
+        private const int PROCESS_CHECK_INTERVAL = 500;
+        private const int HEARTBEAT_CHECK_INTERVAL = 1000;
+        private static readonly Stopwatch _heartbeatTimer = new();
 
         public static GameStatus GameStatus = GameStatus.NotFound;
 
@@ -158,19 +160,34 @@ namespace squad_dma
             try
             {
                 ThrowIfDMAShutdown();
+                
+                // Get new process
                 _process = vmmInstance.Process("SquadGame.exe");
-
                 if (_process is null)
-                    throw new DMAException("Unable to obtain PID. Game is not running.");
-                else
                 {
-                    //Logger.Info($"SquadGame.exe is running at PID {_process.PID}");
+                    Logger.Error("Unable to obtain PID. Game is not running.");
+                    return false;
+                }
+
+                // Simple verification that we can read from the process
+                try
+                {
+                    var scatterMap = new ScatterReadMap(1);
+                    var checkRound = scatterMap.AddRound();
+                    checkRound.AddEntry<byte>(0, 0, 0x1000, 1); // Try to read from a low address
+                    scatterMap.Execute();
                     return true;
+                }
+                catch
+                {
+                    Logger.Error("Process verification failed - cannot read process memory");
+                    return false;
                 }
             }
             catch (DMAShutdown) { throw; }
             catch (Exception ex)
             {
+                Logger.Error($"Error getting PID: {ex.Message}");
                 return false;
             }
         }
@@ -183,18 +200,36 @@ namespace squad_dma
             try
             {
                 ThrowIfDMAShutdown();
+                
+                // Get new module base
                 _squadBase = _process.GetModuleBase("SquadGame.exe");
-                if (_squadBase == 0) throw new DMAException("Unable to obtain Base Module Address. Game may not be running");
-                // else
-                // {
-                //     Logger.Info($"Found SquadGame.exe at 0x{_squadBase.ToString("x")}");
-                //     return true;
-                // }
-                return true;
+                if (_squadBase == 0)
+                {
+                    Logger.Error("Unable to obtain Base Module Address. Game may not be running");
+                    return false;
+                }
+
+                // Verify the base is valid
+                try
+                {
+                    var scatterMap = new ScatterReadMap(1);
+                    var checkRound = scatterMap.AddRound();
+                    checkRound.AddEntry<string>(0, 0, _squadBase, 8);
+                    scatterMap.Execute();
+                    
+                    return scatterMap.Results[0][0].TryGetResult<string>(out var header) && 
+                           header.StartsWith("MZ");
+                }
+                catch
+                {
+                    Logger.Error("Module base verification failed");
+                    return false;
+                }
             }
             catch (DMAShutdown) { throw; }
             catch (Exception ex)
             {
+                Logger.Error($"Error getting module base: {ex.Message}");
                 return false;
             }
         }
@@ -253,6 +288,25 @@ namespace squad_dma
             Logger.Info("[Memory] Refresh thread stopped.");
         }
 
+        private static bool CheckGameHeartbeat()
+        {
+            try
+            {
+                if (_squadBase == 0) return false;
+                
+                var scatterMap = new ScatterReadMap(1);
+                var heartbeatRound = scatterMap.AddRound();
+                heartbeatRound.AddEntry<ulong>(0, 0, _squadBase + Offsets.GameObjects.GWorld);
+                scatterMap.Execute();
+                
+                return scatterMap.Results[0][0].TryGetResult<ulong>(out _);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static bool VerifyRunningProcess()
         {
             try
@@ -263,20 +317,46 @@ namespace squad_dma
                     return false;
                 }
 
-                var scatterMap = new ScatterReadMap(1);
-                var baseCheckRound = scatterMap.AddRound();
-                baseCheckRound.AddEntry<string>(0, 0, _squadBase, 8);
-
-                scatterMap.Execute();
-
-                if (!scatterMap.Results[0][0].TryGetResult<string>(out var moduleHeader) ||
-                    !moduleHeader.StartsWith("MZ"))
+                // Check if process is still responding
+                try
                 {
-                    Logger.Error("Module header verification failed - game may have terminated!");
+                    var scatterMap = new ScatterReadMap(1);
+                    var baseCheckRound = scatterMap.AddRound();
+                    baseCheckRound.AddEntry<string>(0, 0, _squadBase, 8);
+                    scatterMap.Execute();
+
+                    if (!scatterMap.Results[0][0].TryGetResult<string>(out var moduleHeader) ||
+                        !moduleHeader.StartsWith("MZ"))
+                    {
+                        Logger.Error("Module header verification failed - game may have terminated!");
+                        return false;
+                    }
+
+                    // Additional check for game state
+                    if (Memory._game != null && !Memory._game.InGame)
+                    {
+                        Logger.Error("Game state verification failed!");
+                        return false;
+                    }
+
+                    // Check game heartbeat if enough time has passed
+                    if (_heartbeatTimer.ElapsedMilliseconds > HEARTBEAT_CHECK_INTERVAL)
+                    {
+                        if (!CheckGameHeartbeat())
+                        {
+                            Logger.Error("Game heartbeat check failed!");
+                            return false;
+                        }
+                        _heartbeatTimer.Restart();
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Process verification error: {ex.Message}");
                     return false;
                 }
-
-                return true;
             }
             catch (Exception ex)
             {
@@ -301,7 +381,7 @@ namespace squad_dma
                         Memory.GameStatus = GameStatus.NotFound;
                         _syncProcessRunning.Reset();
                         // Clear cached values when game is lost
-                        Config.ClearAndSaveCaches();
+                        Config.ClearCache();
                         Logger.Error("Squad not found, checking again in 1 second...");
                         Thread.Sleep(1000);
                     }
@@ -309,6 +389,7 @@ namespace squad_dma
                     Logger.Info("Squad process located! Startup successful.");
                     _syncProcessRunning.Set();
                     _processCheckTimer.Restart();
+                    _heartbeatTimer.Restart();
 
                     while (true)
                     {
@@ -319,6 +400,7 @@ namespace squad_dma
                             Memory.GameStatus = GameStatus.Menu;
                             Memory._ready = true;
                             Memory._game.WaitForGame();
+                            Config.ClearCache();
 
                             while (Memory.GameStatus == GameStatus.InGame && _running)
                             {
@@ -342,26 +424,53 @@ namespace squad_dma
                                 Thread.SpinWait(1000);
                             }
                         }
-                        catch (GameNotRunningException) { break; }
-                        catch (ThreadInterruptedException) { throw; }
-                        catch (DMAShutdown) { throw; }
+                        catch (GameNotRunningException)
+                        {
+                            Logger.Error("Game is no longer running!");
+                            break;
+                        }
+                        catch (ThreadInterruptedException)
+                        {
+                            Logger.Info("Memory worker thread interrupted");
+                            throw;
+                        }
+                        catch (DMAShutdown)
+                        {
+                            Logger.Info("DMA shutdown requested");
+                            throw;
+                        }
+                        catch (VmmException ex)
+                        {
+                            Logger.Error($"DMA error: {ex.Message}");
+                            break; // Force restart
+                        }
                         catch (Exception ex)
                         {
-                            Logger.Error($"Game loop error: {ex.Message}");
+                            Logger.Error($"Unexpected error in game loop: {ex.Message}");
+                            break; // Force restart
                         }
                         finally
                         {
                             Memory._ready = false;
+                            // Clear cache when returning to menu
+                            Config.ClearCache();
                             Thread.Sleep(100);
                         }
                     }
                     Logger.Error("Game is no longer running! Attempting to restart...");
                 }
             }
-            catch (ThreadInterruptedException) { }
-            catch (DMAShutdown) { }
+            catch (ThreadInterruptedException)
+            {
+                Logger.Info("Memory worker thread interrupted");
+            }
+            catch (DMAShutdown)
+            {
+                Logger.Info("DMA shutdown requested");
+            }
             catch (Exception ex)
             {
+                Logger.Error($"FATAL ERROR on Memory Thread: {ex}");
                 Environment.FailFast($"FATAL ERROR on Memory Thread: {ex}");
             }
             finally
@@ -753,6 +862,7 @@ namespace squad_dma
         {
             Memory.GameStatus = GameStatus.Menu;
             Logger.Info("Restarting game... getting fresh GameWorld instance");
+            Config.ClearCache();
             Memory._restart = false;
         }
         /// <summary>
@@ -766,7 +876,7 @@ namespace squad_dma
                 _running = false;
                 Memory.StopMemoryWorker();
                 // Clear caches when shutting down
-                Config.ClearAndSaveCaches();
+                Config.ClearCache();
             }
         }
 
