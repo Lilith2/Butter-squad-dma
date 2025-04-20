@@ -609,7 +609,7 @@ namespace squad_dma
                 canvas.Clear();
                 UpdateWindowTitle();
 
-                if (IsReadyToRender())
+                if (IsReadyToRender() && _config is not null)
                 {
                     lock (_renderLock)
                     {
@@ -1186,9 +1186,22 @@ namespace squad_dma
 
         private MapParameters GetMapParameters(MapPosition localPlayerPos)
         {
+            // Ensure _loadedBitmaps is properly initialized before proceeding
+            if (_loadedBitmaps == null || _loadedBitmaps.Length == 0)
+            {
+                throw new InvalidOperationException("Map bitmaps are not loaded yet. Ensure _loadedBitmaps is initialized before calling this method.");
+            }
+
             int mapLayerIndex = GetMapLayerIndex(localPlayerPos.Height);
 
+            // Check if the specific bitmap is loaded
+            if (_loadedBitmaps[mapLayerIndex] == null)
+            {
+                throw new InvalidOperationException($"Bitmap for map layer {mapLayerIndex} is not loaded yet. Ensure all bitmaps are properly initialized.");
+            }
+
             var bitmap = _loadedBitmaps[mapLayerIndex];
+
             float zoomFactor = 0.01f * _config.DefaultZoom;
             float zoomWidth = bitmap.Width * zoomFactor;
             float zoomHeight = bitmap.Height * zoomFactor;
@@ -1213,8 +1226,28 @@ namespace squad_dma
 
         private MapParameters GetMapLocation()
         {
+            bool fucked = false;
+            SKBitmap broken = null;
+            if (_loadedBitmaps.Length <= 0)
+                fucked = true;
+            if (!fucked) {
+                foreach (var item in _loadedBitmaps)
+                {
+                    if (item is null) {
+                        fucked = true;
+                        break;
+                    }
+                        
+                    if (item.IsNull)
+                    {
+                        broken = item;
+                        fucked = true;
+                    }
+                }
+            }
+            
             var localPlayer = this.LocalPlayer;
-            if (localPlayer is not null)
+            if (localPlayer is not null && broken == null && !fucked)
             {
                 var localPlayerPos = localPlayer.Position + AbsoluteLocation;
                 var localPlayerMapPos = localPlayerPos.ToMapPos(_selectedMap);
@@ -1251,22 +1284,24 @@ namespace squad_dma
             {
                 grpMapSetup.Text = "Map Setup";
             }
+            if (_config is not null) {
+                var mapParams = GetMapLocation();
+                var mapCanvasBounds = new SKRect
+                {
+                    Left = _mapCanvas.Left,
+                    Right = _mapCanvas.Right,
+                    Top = _mapCanvas.Top,
+                    Bottom = _mapCanvas.Bottom
+                };
 
-            var mapParams = GetMapLocation();
-            var mapCanvasBounds = new SKRect
-            {
-                Left = _mapCanvas.Left,
-                Right = _mapCanvas.Right,
-                Top = _mapCanvas.Top,
-                Bottom = _mapCanvas.Bottom
-            };
-
-            canvas.DrawBitmap(
-                _loadedBitmaps[mapParams.MapLayerIndex],
-                mapParams.Bounds,
-                mapCanvasBounds,
-                SKPaints.PaintBitmap
-            );
+                canvas.DrawBitmap(
+                    _loadedBitmaps[mapParams.MapLayerIndex],
+                    mapParams.Bounds,
+                    mapCanvasBounds,
+                    SKPaints.PaintBitmap
+                );
+            }
+            
         }
 
         private void DrawActors(SKCanvas canvas, List<SKPoint> deadMarkers, List<UActor> projectileAAs)

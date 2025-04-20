@@ -56,7 +56,7 @@ namespace squad_dma
 
         #region ESP Settings
         [JsonPropertyName("enableEsp")]
-        public bool EnableEsp { get; set; } = true;
+        public bool EnableEsp { get; set; } = false;
 
         [JsonPropertyName("espFontSize")]
         public float ESPFontSize { get; set; } = 10f;
@@ -317,7 +317,7 @@ namespace squad_dma
             VSync = false;
 
             // Initialize ESP settings
-            EnableEsp = true;
+            EnableEsp = false;
             ESPFontSize = 10f;
             EspShowDistance = true;
             EspShowHealth = false;

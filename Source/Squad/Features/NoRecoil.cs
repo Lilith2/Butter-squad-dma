@@ -4,8 +4,47 @@ using squad_dma.Source.Misc;
 
 namespace squad_dma.Source.Squad.Features
 {
+
+
+    using System.Runtime.InteropServices;
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct Vector3_
+    {
+        public float X;
+        public float Y;
+        public float Z;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct Vector3_18x
+    {
+        public Vector3_ V0;
+        public Vector3_ V1;
+        public Vector3_ V2;
+        public Vector3_ V3;
+        public Vector3_ V4;
+        public Vector3_ V5;
+        public Vector3_ V6;
+        public Vector3_ V7;
+        public Vector3_ V8;
+        public Vector3_ V9;
+        public Vector3_ V10;
+        public Vector3_ V11;
+        public Vector3_ V12;
+        public Vector3_ V13;
+        public Vector3_ V14;
+        public Vector3_ V15;
+        public Vector3_ V16;
+        public Vector3_ V17;
+    }
+
+
+
+
     public class NoRecoil : Manager, Weapon
     {
+        public Vector3_18x vec18 = new Vector3_18x();
         public const string NAME = "NoRecoil";
         private bool _isEnabled = false;
         
@@ -136,11 +175,11 @@ namespace squad_dma.Source.Squad.Features
             _isEnabled = enable;
             Logger.Debug($"[{NAME}] No recoil {(enable ? "enabled" : "disabled")}");
             
-            // If disabling, restore the last weapon's state
-            if (!enable && _lastWeapon != 0)
-            {
-                RestoreWeapon(_lastWeapon);
-            }
+            //// If disabling, restore the last weapon's state
+            //if (!enable && _lastWeapon != 0)
+            //{
+            //    RestoreWeapon(_lastWeapon);
+            //}
             
             // Apply to current weapon if enabled
             if (enable)
@@ -159,11 +198,11 @@ namespace squad_dma.Source.Squad.Features
             
             try
             {
-                // Restore the old weapon's state
-                if (oldWeapon != 0)
-                {
-                    RestoreWeapon(oldWeapon);
-                }
+                //// Restore the old weapon's state
+                //if (oldWeapon != 0)
+                //{
+                //    RestoreWeapon(oldWeapon);
+                //}
                 
                 // Apply to new weapon if enabled
                 if (Program.Config.NoRecoil && newWeapon != 0)
@@ -229,7 +268,9 @@ namespace squad_dma.Source.Squad.Features
                 Logger.Error($"[{NAME}] Error restoring weapon at 0x{weapon:X}: {ex.Message}");
             }
         }
+
         
+
         private void Apply(ulong weapon)
         {
             try
@@ -248,100 +289,24 @@ namespace squad_dma.Source.Squad.Features
                     Logger.Error($"[{NAME}] Cannot apply no recoil - animation instance is not valid");
                     return;
                 }
-
-                // Get weapon static info using cached version if possible
-                ulong weaponStaticInfo = GetCachedWeaponStaticInfo(weapon);
-                if (weaponStaticInfo == 0)
-                {
-                    Logger.Error($"[{NAME}] Cannot apply no recoil - weapon static info is not valid");
-                    return;
-                }
-
                 Logger.Debug($"[{NAME}] Applying no recoil to anim instance at 0x{animInstance:X}");
                 // Apply no recoil to anim instance
                 if (Program.Config.NoRecoil)
                 {
-                    // Store original values when first enabled
-                    if (_originalAnimValues.Count == 0)
-                    {
-                        foreach (var entry in _noRecoilAnimEntries)
-                        {
-                            float originalValue = Memory.ReadValue<float>(animInstance + entry.Address);
-                            _originalAnimValues[entry.Address] = originalValue;
-                            
-                            // Store in config with descriptive key
-                            string configKey = $"Anim_{entry.Address:X}";
-                            _configAnimValues[configKey] = originalValue;
-                            
-                            Logger.Debug($"[{NAME}] Stored original anim value at 0x{entry.Address:X}: {originalValue}");
-                        }
-
-                        // Save to config
-                        if (Config.TryLoadConfig(out var config))
-                        {
-                            config.OriginalNoRecoilAnimValues = _configAnimValues;
-                            Config.SaveConfig(config);
-                            Logger.Debug($"[{NAME}] Saved original anim values to config");
-                        }
-                    }
-
-                    var animEntries = _noRecoilAnimEntries.Select(entry => 
-                        new ScatterWriteDataEntry<float>(animInstance + entry.Address, entry.Data)).ToList();
-                    Memory.WriteScatter(animEntries);
-                }
-
-                Logger.Debug($"[{NAME}] Applying no recoil to weapon static info at 0x{weaponStaticInfo:X}");
-                // Apply no recoil to weapon static info
-                if (Program.Config.NoRecoil)
-                {
-                    // Store original values when first enabled
-                    if (_originalWeaponValues.Count == 0)
-                    {
-                        foreach (var entry in _noRecoilWeaponEntries)
-                        {
-                            float originalValue = Memory.ReadValue<float>(weaponStaticInfo + entry.Address);
-                            _originalWeaponValues[entry.Address] = originalValue;
-                            
-                            // Store in config with descriptive key
-                            string configKey = $"Weapon_{entry.Address:X}";
-                            _configWeaponValues[configKey] = originalValue;
-                            
-                            Logger.Debug($"[{NAME}] Stored original weapon value at 0x{entry.Address:X}: {originalValue}");
-                        }
-
-                        // Save to config
-                        if (Config.TryLoadConfig(out var config))
-                        {
-                            config.OriginalNoRecoilWeaponValues = _configWeaponValues;
-                            Config.SaveConfig(config);
-                            Logger.Debug($"[{NAME}] Saved original weapon values to config");
-                        }
-                    }
-
-                    var weaponEntries = _noRecoilWeaponEntries.Select(entry => 
-                        new ScatterWriteDataEntry<float>(weaponStaticInfo + entry.Address, entry.Data)).ToList();
-                    Memory.WriteScatter(weaponEntries);
-                }
-
-                // Handle camera recoil
-                if (Program.Config.NoRecoil)
-                {
-                    // Store original value when first enabled
-                    if (_originalCameraRecoil)
-                    {
-                        _originalCameraRecoil = Memory.ReadValue<bool>(_cachedSoldierActor + ASQSoldier.bIsCameraRecoilActive);
-                        
-                        // Save to config
-                        if (Config.TryLoadConfig(out var config))
-                        {
-                            config.OriginalCameraRecoil = _originalCameraRecoil;
-                            Config.SaveConfig(config);
-                            Logger.Debug($"[{NAME}] Saved original camera recoil state to config: {_originalCameraRecoil}");
-                        }
-                    }
+                    Memory.WriteValue(animInstance + 0xA08, vec18); //ProneAdsRecoilMean + 17 more FVector variables
+                    float value = 0f;
+                    Memory.WriteValue(animInstance + 0xAE8, value); //no sway
+                    /*
                     
-                    Memory.WriteValue(_cachedSoldierActor + ASQSoldier.bIsCameraRecoilActive, false);
-                    Logger.Debug($"[{NAME}] Disabled camera recoil");
+                    class USQAnimInstanceSoldier1P //go to this class (ASQWeapon Address + 0x438), find the 2 struct  FSQSwayData parts of the class.
+
+                    struct FSQSwayAspect                          Aspect;
+
+                    then go to it & add  0x8
+
+                    write that float to 0 (float HasSway; variable within struct FSQSwayAspect)
+                     
+                     */
                 }
 
                 Logger.Debug($"[{NAME}] Successfully {(Program.Config.NoRecoil ? "enabled" : "disabled")} no recoil");

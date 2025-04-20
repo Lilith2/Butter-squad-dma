@@ -55,6 +55,7 @@ namespace squad_dma.Source.Squad
         
         public Manager(ulong playerController, bool inGame, RegistredActors actors)
         {
+            _config = Program.Config; 
             _playerController = playerController;
             _inGame = inGame;
             _cancellationTokenSource = new CancellationTokenSource();

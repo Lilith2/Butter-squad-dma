@@ -117,11 +117,11 @@ namespace squad_dma
         {
             Logger.Info("Starting Memory worker thread...");
             Memory.StartMemoryWorker();
-            Program.HideConsole();
+            //Program.HideConsole();
             Memory._tickSw.Start();
             // if you have issues with this initlizting and are on Windows 24h2 please just disable these lines below. 
             // dont have time or knowledge to fix. :(
-            InputManager.Initialize();
+            //InputManager.Initialize();
         }
 
         private static void GenerateMMap()
