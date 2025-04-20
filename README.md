@@ -1,3 +1,10 @@
+# Updates from Lilith
+
+4/19/2025
+- Fixed null _config object on start crashing
+- Fixed null bitmap on start of match crashing
+- Fixed improper no recoil / no spread / no sway feature from butters222.
+
 ## Description
 tool for Squad that provides tracking of players/vehicles/deployables on a 2D map based on existing in game map textures / images.
 Familiar maps and intuitive to gain intel.
