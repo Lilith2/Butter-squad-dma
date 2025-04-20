@@ -1,13 +1,10 @@
-# Squad-DMA-Radar
-
 ## Description
-Squad DMA Radar is a radar tool for Squad that provides real-time tracking of players/vehicles/deployables on a 2D map.
+tool for Squad that provides tracking of players/vehicles/deployables on a 2D map based on existing in game map textures / images.
+Familiar maps and intuitive to gain intel.
 
 ## Mod Support
 - Global Escalation
 - Steel Division
-- Super mod (Soon?)
-- MEE (Soon?)
 
 ## Features
 ### Radar Features
@@ -18,6 +15,12 @@ Squad DMA Radar is a radar tool for Squad that provides real-time tracking of pl
 - Displays a distance for any vehicle
 
 ### Gameplay Features
+
+- Extended Interactions: Interact with objects from greater distances
+- No Recoil, No Spread, No Sway ALL IN ONE feature (credits Lilith2) Gun model will still look lively and correct but all shots are pin point perfect to original Point of Aim.
+
+Crossed out means I haven't verified how bugged or jank it is. Butters coded this haphazzardly and introduced many chances to crash the game client. In most cases, his features don't even work.
+~~
 - Rapid Fire: Customize fire rates for any weapon  
 - Infinite Ammo: Never run out of ammunition  
 - Quick Swap: Instantly switch between weapons  
@@ -33,15 +36,15 @@ Squad DMA Radar is a radar tool for Squad that provides real-time tracking of pl
 - No Sway: Remove weapon sway when aiming  
 - No Spread: Ensure perfect bullet accuracy  
 - No Camera Shake: Disable all screen shake effects  
-
+~~
 
 ## Usage
 1. Clone the repository.
 2. Ensure all necessary dependencies are in place.
-3. Compile the project.
+3. Compile the project in release mode unless you know what you're doing.
 4. Run the application.
 
-## Dependencies
+## Dependencies are included with this project
 - FTD3XX.dll
 - leechcore.dll, vmm.dll, dbghelp.dll, symsrv.dll and vcruntime140.dll - https://github.com/ufrisk/MemProcFS/releases
 - libSkiaSharp.dll - SkiaSharp library
@@ -53,4 +56,4 @@ Ensure all necessary files are properly included and referenced for the applicat
 This project builds upon the original work created by [UC Forum Thread](https://www.unknowncheats.me/forum/escape-from-tarkov/482418-2d-map-dma-radar-wip.html) and its continuation [EFT-DMA-Radar-v2](https://www.unknowncheats.me/forum/escape-from-tarkov/639021-dma-radar-v2.html) by x0m, Keegi and MasterKeef. It is basically a fork of a EFT-DMA-Radar-v2 adapted to UE4 Squad base. It has a lot of perfomance issues, as well as some bugs.
 
 ## Preview
-![image](https://github.com/Butter2222/squad-dma/blob/main/preview/radar-preview.png)
+![image](https://github.com/Lilith2/Lone-Squad-Source/blob/main/preview/radar-preview.png)
