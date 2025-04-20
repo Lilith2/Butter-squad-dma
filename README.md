@@ -19,20 +19,7 @@ Familiar maps and intuitive to gain intel.
 - Extended Interactions: Interact with objects from greater distances
 - No Recoil, No Spread, No Sway ALL IN ONE feature (credits Lilith2) Gun model will still look lively and correct but all shots are pin point perfect to original Point of Aim.
 
-Crossed out means I haven't verified how bugged or jank it is. Butters coded this haphazzardly and introduced many chances to crash the game client. In most cases, his features don't even work.
-
-~- Rapid Fire: Customize fire rates for any weapon~  
-~- Infinite Ammo: Never run out of ammunition ~ 
-~- Quick Swap: Instantly switch between weapons ~ 
-~- Extended Interactions: Interact with objects from greater distances ~ 
-~- Speed Hack: Control and boost player movement speed ~ 
-~- Suppression Control: Tweak or disable suppression effects  ~
-~- Base Shooting: Enable weapon use within the main base  ~
-~- Quick Zoom: Instantly zoom in on targets  ~
-~- Air Stuck: Hover mid-air while remaining invincible and able to deal damage  ~
-~- Collision Toggle: Modify or disable player collision  ~
-~- Full Auto Override: Force any weapon into full-auto mode ~ 
-~- No Camera Shake: Disable all screen shake effects~
+Features from the original Butters222 source no listed here means I haven't verified how bugged or jank it is. Butters coded this haphazzardly and introduced many chances to crash the game client. In most cases, his features don't even work such as his own no recoil / no spread / no sway.
 
 
 ## Usage
