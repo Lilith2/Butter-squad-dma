@@ -295,10 +295,11 @@ namespace squad_dma.Source.Squad.Features
                 {
                     Memory.WriteValue(animInstance + 0xA08, vec18); //ProneAdsRecoilMean + 17 more FVector variables
                     float value = 0f;
-                    Memory.WriteValue(animInstance + 0xAE8, value); //no sway
+                    Memory.WriteValue(animInstance + 0xAE8, value);
+                    Memory.WriteValue(animInstance + 0xB7C, value);
                     /*
                     
-                    class USQAnimInstanceSoldier1P //go to this class (ASQWeapon Address + 0x438), find the 2 struct  FSQSwayData parts of the class.
+                    class USQAnimInstanceSoldier1P //go to this class (ASQWeapon Address + 0x438), find the 2 struct FSQSwayData parts of the class.
 
                     struct FSQSwayAspect                          Aspect;
 
